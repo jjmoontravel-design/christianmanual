@@ -1783,8 +1783,11 @@ function gcalUrl(ev){
     +"&text="+encodeURIComponent(ev.emoji+" "+ev.title)
     +"&dates="+fmt(start)+"/"+fmt(end)
     +"&details="+encodeURIComponent("Added from Life Manual 🏮");
-  if(ev.repeat==="weekly")url+="&recur="+encodeURIComponent("RRULE:FREQ=WEEKLY");
-  else if(ev.repeat==="daily")url+="&recur="+encodeURIComponent("RRULE:FREQ=DAILY");
+  if(ev.repeat==="daily")url+="&recur="+encodeURIComponent("RRULE:FREQ=DAILY");
+  else if(ev.repeat==="weekly")url+="&recur="+encodeURIComponent("RRULE:FREQ=WEEKLY");
+  else if(ev.repeat==="monthly")url+="&recur="+encodeURIComponent("RRULE:FREQ=MONTHLY");
+  else if(ev.repeat==="yearly")url+="&recur="+encodeURIComponent("RRULE:FREQ=YEARLY");
+  else if(ev.repeat==="custom"&&ev.customDays)url+="&recur="+encodeURIComponent("RRULE:FREQ=DAILY;INTERVAL="+ev.customDays);
   return url;
 }
 
@@ -1796,8 +1799,12 @@ function evListHTML(){
     return ad===bd?a.time.localeCompare(b.time):ad.localeCompare(bd);
   });
   return sorted.map(ev=>{
-    const isToday=ev.date===today||(ev.repeat==="daily")||(ev.repeat==="weekly"&&new Date(ev.date+"T12:00").getDay()===dow);
-    const rLabel=ev.repeat==="daily"?"· Every day":ev.repeat==="weekly"?"· Every week":"";
+    const isToday=ev.date===today||(ev.repeat==="daily")
+      ||(ev.repeat==="weekly"&&new Date(ev.date+"T12:00").getDay()===dow)
+      ||(ev.repeat==="monthly"&&new Date(ev.date+"T12:00").getDate()===new Date().getDate())
+      ||(ev.repeat==="yearly"&&ev.date.slice(5)===today.slice(5))
+      ||(ev.repeat==="custom"&&ev.customDays&&(()=>{const diff=Math.round((new Date(today+"T12:00")-new Date(ev.date+"T12:00"))/86400000);return diff>=0&&diff%ev.customDays===0;})());
+    const rLabel=ev.repeat==="daily"?"· Every day":ev.repeat==="weekly"?"· Every week":ev.repeat==="monthly"?"· Every month":ev.repeat==="yearly"?"· Every year":ev.repeat==="custom"?`· Every ${ev.customDays} days`:"";
     const dLabel=ev.repeat==="none"?new Date(ev.date+"T12:00").toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}):"";
     return`<div class="ev-item">
       <div class="ev-icon">${ev.emoji}</div>
@@ -1828,9 +1835,16 @@ function evFormHTML(){
     <label>Repeat</label>
     <select id="ev-repeat">
       <option value="none">Just once</option>
-      <option value="weekly">Every week</option>
       <option value="daily">Every day</option>
+      <option value="weekly">Every week</option>
+      <option value="monthly">Every month</option>
+      <option value="yearly">Every year</option>
+      <option value="custom">Custom interval…</option>
     </select>
+    <div id="ev-custom-wrap" style="display:none;margin-top:10px;display:none">
+      <label style="margin-top:0">Every how many days?</label>
+      <input type="number" id="ev-custom-days" min="2" max="365" placeholder="e.g. 14 for every two weeks" style="font-size:16px;width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:12px;background:var(--card2);color:var(--ink);font-family:inherit">
+    </div>
     <div style="display:flex;gap:10px;margin-top:14px">
       <button class="btn btn-got" id="ev-save" style="flex:1;justify-content:center;margin-top:0">💾 Save event</button>
       <button class="btn btn-ghost" id="ev-done" style="margin-top:0">Done</button>
@@ -1946,7 +1960,11 @@ function playChime(){
 function scheduleEventReminders(){
   const now=new Date(), today=todayKey(), dow=now.getDay();
   state.events.forEach(ev=>{
-    const fires=ev.date===today||(ev.repeat==="daily")||(ev.repeat==="weekly"&&new Date(ev.date+"T12:00").getDay()===dow);
+    const fires=ev.date===today||(ev.repeat==="daily")
+      ||(ev.repeat==="weekly"&&new Date(ev.date+"T12:00").getDay()===dow)
+      ||(ev.repeat==="monthly"&&new Date(ev.date+"T12:00").getDate()===now.getDate())
+      ||(ev.repeat==="yearly"&&ev.date.slice(5)===today.slice(5))
+      ||(ev.repeat==="custom"&&ev.customDays&&(()=>{const diff=Math.round((now-new Date(ev.date+"T12:00"))/86400000);return diff>=0&&diff%ev.customDays===0;})());
     if(!fires)return;
     const[h,m]=ev.time.split(":").map(Number);
     const evTime=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,m,0);
@@ -2122,14 +2140,21 @@ function renderSchedule(v){
       else {toast("Try a date like 2026-06-20"); syncTxt();}
     });
     const wheel=fw.querySelector("#ev-timewheel"); twWire(wheel);
+    const repeatSel=fw.querySelector("#ev-repeat");
+    const customWrap=fw.querySelector("#ev-custom-wrap");
+    repeatSel.addEventListener("change",()=>{customWrap.style.display=repeatSel.value==="custom"?"block":"none";});
     fw.querySelector("#ev-done").onclick=()=>{fw.innerHTML="";};
     fw.querySelector("#ev-save").onclick=()=>{
       const title=(fw.querySelector("#ev-title").value||"").trim();
       if(!title){toast("Give the event a name.");return;}
       if(!selDate){toast("Pick a date.");return;}
       const time=getTimeValue(wheel);
-      const repeat=fw.querySelector("#ev-repeat").value;
-      state.events.push({id:Date.now(),emoji:selEmoji,title,date:selDate,time,repeat});
+      const repeat=repeatSel.value;
+      const customDays=repeat==="custom"?Math.max(2,parseInt(fw.querySelector("#ev-custom-days").value)||7):null;
+      if(repeat==="custom"&&!customDays){toast("Enter how many days between repeats.");return;}
+      const ev={id:Date.now(),emoji:selEmoji,title,date:selDate,time,repeat};
+      if(customDays)ev.customDays=customDays;
+      state.events.push(ev);
       saveAll(); scheduleEventReminders(); syncEventsToWorker();
       // Ask for notification permission if not yet granted — needed for event alerts
       if("Notification"in window&&Notification.permission==="default"){
