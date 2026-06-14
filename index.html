@@ -806,11 +806,17 @@ function ensureDaily(){
 }
 function skillById(id){for(const b of BANDS){const s=b.skills.find(x=>x.id===id);if(s)return{skill:s,band:b};}return null;}
 function pick(pool,mult,off){const n=dayNum();return pool[((n*mult+off)%pool.length+pool.length)%pool.length];}
+function pickMoney(){
+  const age=state.age||99;
+  const pool=DAILY.money.filter(m=>!(m.a18&&age<18)&&!(m.teen&&age>=18));
+  const n=dayNum();
+  return pool[((n*13+1)%pool.length+pool.length)%pool.length];
+}
 function dailyContent(){
   const found=state.daily.skillId?skillById(state.daily.skillId):null;
   return{
     skill:found,
-    vocab:pick(DAILY.vocab,7,0), body:pick(DAILY.body,11,3), money:pick(DAILY.money,13,1),
+    vocab:pick(DAILY.vocab,7,0), body:pick(DAILY.body,11,3), money:pickMoney(),
     mind:pick(DAILY.mind,17,2), world:pick(DAILY.world,19,4), challenge:pick(DAILY.challenge,23,5)
   };
 }
