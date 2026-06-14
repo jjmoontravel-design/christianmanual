@@ -1,4 +1,4 @@
-const CACHE = "lifemanual-v38";
+const CACHE = "lifemanual-v39";
 const ASSETS = ["./", "index.html", "data-journey.js", "data-daily.js", "data-guides.js", "data-characters.js", "data-replies.js", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {
@@ -40,7 +40,7 @@ self.addEventListener("message", e => {
     if (_alarms.has(d.id)) clearTimeout(_alarms.get(d.id));
     const tid = setTimeout(() => {
       self.registration.showNotification("📅 Life Manual", {
-        body: `${d.emoji} ${d.title} starts in 10 minutes!`,
+        body: `${d.emoji} ${d.title} starts in 5 minutes!`,
         icon: "icon-192.png",
         badge: "icon-192.png",
         tag: "ev-" + d.id,
