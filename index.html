@@ -18,15 +18,33 @@
     --grad:linear-gradient(120deg,#6366f1,#22d3ee);
     --radius:20px;
   }
+  /* Dark theme: starry night background */
+  html{
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,0.22) 1px, transparent 1px),
+      radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px),
+      radial-gradient(circle, rgba(99,102,241,0.18) 1px, transparent 1px);
+    background-size: 120px 120px, 60px 60px, 200px 200px;
+    background-position: 0 0, 30px 40px, 70px 90px;
+  }
   html.light{
     --bg:#f0f3fc; --card:#ffffff; --card2:#eaeefc; --ink:#1a2236; --muted:#5a6a94; --line:#d8dff5;
     --grad:linear-gradient(120deg,#6366f1,#22d3ee);
+    /* Bright theme: soft pastel clouds */
+    background-image:
+      radial-gradient(ellipse 180px 120px at 15% 25%, rgba(99,102,241,0.09) 0%, transparent 100%),
+      radial-gradient(ellipse 220px 140px at 80% 60%, rgba(34,211,238,0.08) 0%, transparent 100%),
+      radial-gradient(ellipse 160px 100px at 50% 85%, rgba(167,139,250,0.07) 0%, transparent 100%);
+    background-size: 100% 100%;
   }
   html.kawaii{
     --bg:#fff0f8; --card:#ffffff; --card2:#fde8f4; --ink:#3d1a2e; --muted:#b07090;
     --line:#f5c6e0; --glow:#f472b6; --cyan:#fb7185; --good:#34d399; --good-deep:#052016;
     --grad:linear-gradient(120deg,#f472b6,#fb923c);
     --radius:26px;
+    /* Kawaii theme: floating hearts & stars pattern */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Ctext x='8' y='32' font-size='18' fill='%23f472b622'%3E%E2%99%A1%3C/text%3E%3Ctext x='60' y='20' font-size='11' fill='%23fb923c28'%3E%E2%9C%A6%3C/text%3E%3Ctext x='75' y='65' font-size='16' fill='%23f472b618'%3E%E2%99%A1%3C/text%3E%3Ctext x='20' y='80' font-size='9' fill='%23fb923c22'%3E%E2%9C%A6%3C/text%3E%3Ctext x='45' y='95' font-size='13' fill='%23f472b620'%3E%E2%9C%BF%3C/text%3E%3C/svg%3E");
+    background-size: 100px 100px;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{font-size:16px}
@@ -166,7 +184,7 @@
   .co-input-wrap{padding:10px 12px;background:var(--card);border-top:1px solid var(--line);padding-bottom:max(10px,env(safe-area-inset-bottom));flex:none}
 
   /* ── NOTIFICATION PERMISSION BANNER ── */
-  .notif-banner{position:fixed;bottom:82px;left:12px;right:12px;z-index:70;background:var(--card);border:1px solid rgba(99,102,241,.4);border-radius:20px;padding:14px;display:flex;align-items:center;gap:11px;box-shadow:0 8px 32px rgba(0,0,0,.45);transform:translateY(140%);transition:transform .42s cubic-bezier(.32,0,.15,1)}
+  .notif-banner{position:fixed;bottom:calc(82px + env(safe-area-inset-bottom));left:12px;right:12px;z-index:70;background:var(--card);border:1px solid rgba(99,102,241,.4);border-radius:20px;padding:14px;display:flex;align-items:center;gap:11px;box-shadow:0 8px 32px rgba(0,0,0,.45);transform:translateY(140%);transition:transform .42s cubic-bezier(.32,0,.15,1)}
   .notif-banner.show{transform:translateY(0)}
   .notif-banner-face{width:44px;height:44px;border-radius:50%;flex:none;overflow:hidden;background:#fff;border:2px solid rgba(167,139,250,.5)}
   .notif-banner-body{flex:1;min-width:0}
@@ -528,7 +546,7 @@
   .ev-cal-toggle:active{transform:scale(.92)}
   /* time scroll wheel */
   .timewheel{position:relative;display:flex;justify-content:center;align-items:stretch;gap:4px;height:132px;margin-bottom:12px;perspective:520px;-webkit-mask-image:linear-gradient(transparent,#000 26%,#000 74%,transparent);mask-image:linear-gradient(transparent,#000 26%,#000 74%,transparent)}
-  .tw-col{height:132px;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;transform-style:preserve-3d}
+  .tw-col{height:132px;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;transform-style:preserve-3d;overscroll-behavior:contain;touch-action:pan-y}
   .tw-col::-webkit-scrollbar{display:none}
   .tw-pad{height:44px}
   .tw-item{display:block;height:44px;line-height:44px;min-width:54px;border:none;background:none;color:var(--muted);font-family:inherit;font-size:1.25rem;font-weight:700;scroll-snap-align:center;cursor:pointer;transform-origin:center center;backface-visibility:hidden;transition:color .15s;will-change:transform,opacity}
@@ -1745,6 +1763,7 @@ function evTimeWheelHTML(dh,dm,dap){
 }
 function twWire(wheel){
   const H=44;
+  wheel.addEventListener("touchmove",e=>e.stopPropagation(),{passive:true});
   wheel.querySelectorAll(".tw-col").forEach(col=>{
     const items=[...col.querySelectorAll(".tw-item")];
     // cylinder: tilt each item back as it moves away from center, fade the far ones
@@ -1950,11 +1969,6 @@ function renderSchedule(v){
       else {toast("Try a date like 2026-06-20"); syncTxt();}
     });
     const wheel=fw.querySelector("#ev-timewheel"); twWire(wheel);
-    fw.querySelector(".emoji-grid").addEventListener("click",e=>{
-      const b=e.target.closest("[data-emoji]");if(!b)return;
-      fw.querySelectorAll(".emoji-opt").forEach(x=>x.classList.remove("sel"));
-      b.classList.add("sel"); selEmoji=b.dataset.emoji;
-    });
     fw.querySelector("#ev-done").onclick=()=>{fw.innerHTML="";};
     fw.querySelector("#ev-save").onclick=()=>{
       const title=(fw.querySelector("#ev-title").value||"").trim();

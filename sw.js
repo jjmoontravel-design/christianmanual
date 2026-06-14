@@ -1,4 +1,4 @@
-const CACHE = "lifemanual-v32";
+const CACHE = "lifemanual-v33";
 const ASSETS = ["./", "index.html", "data-journey.js", "data-daily.js", "data-guides.js", "data-characters.js", "data-replies.js", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
 // Note: character art (characters/*.jpg) and idle videos (characters/*-idle.mp4) are
 // cached on-demand by the network-first fetch handler, not preloaded here.
