@@ -219,6 +219,23 @@
   .char-stat-strip{text-align:center;font-size:.74rem;color:var(--muted);margin:-2px 0 14px;letter-spacing:.03em}
   /* Guide speech uses Georgia for warmth — matches the LifeBibleChat spec */
   .msg.guide .bubble .bodytext,.msg.guide .bubble p{font-family:Georgia,serif}
+  /* ===== BARNEY VIRTUAL PET ===== */
+  .barney-card{background:linear-gradient(135deg,var(--card) 0%,rgba(167,139,250,.08) 100%);border:1px solid rgba(167,139,250,.18)}
+  .barney-img{width:140px;height:140px;object-fit:contain;display:block;margin:0 auto;filter:drop-shadow(0 4px 12px rgba(0,0,0,.25))}
+  .barney-img.barney-sleep{animation:bn-sleep 3s ease-in-out infinite}
+  .barney-img.barney-hungry{animation:bn-hungry .5s ease-in-out infinite}
+  .barney-img.barney-idle{animation:bn-idle 2.5s ease-in-out infinite}
+  .barney-img.barney-happy{animation:bn-happy 1.2s ease-in-out infinite}
+  .barney-img.barney-excited{animation:bn-excited .7s cubic-bezier(.34,1.56,.64,1) infinite}
+  @keyframes bn-sleep{0%,100%{transform:rotate(-4deg) translateY(0)}50%{transform:rotate(4deg) translateY(3px)}}
+  @keyframes bn-hungry{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  @keyframes bn-idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  @keyframes bn-happy{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-10px) scale(1.06)}}
+  @keyframes bn-excited{0%,100%{transform:translateY(0) scale(1) rotate(0)}30%{transform:translateY(-16px) scale(1.1) rotate(-4deg)}70%{transform:translateY(-16px) scale(1.1) rotate(4deg)}}
+  .barney-bubble{background:var(--card2,rgba(255,255,255,.06));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:10px 14px;font-size:.88rem;line-height:1.4;margin:10px auto 0;max-width:280px;position:relative}
+  .barney-bubble::before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);border:8px solid transparent;border-top:none;border-bottom-color:rgba(255,255,255,.1)}
+  .barney-feed-bar{margin:12px auto 0;max-width:220px}
+  .barney-feed-label{font-size:.78rem;color:var(--muted);margin-bottom:5px;display:flex;justify-content:space-between}
   /* ===== GUIDE EMOTIONS + LIVELY IDLE (animate the whole avatar, no new art needed) ===== */
   .chat-face img,.lumi-face img{animation:guideIdle 2.8s ease-in-out infinite;transform-origin:center bottom}
   .msg-face img{animation:guideIdle 3.5s ease-in-out infinite;transform-origin:center bottom}
@@ -2180,7 +2197,18 @@ function renderYou(v){
   const themeName=THEME_LABELS[getTheme()]||"🌙 Dark";
   const lcfg=getLumiCfg();
   const LEVEL_ICONS=["🌱","📖","🔍","🏗️","🌟","📜","💎","👑"];
+  const _mood=barneyMood();
+  const _count=gotCount();
+  const _barneyMsg=_mood==="happy"?`So close! Just ${7-_count} more — let's finish strong! 🌟`:BARNEY_MSGS[_mood];
   v.innerHTML=`
+    <div class="card barney-card" style="text-align:center;padding:20px 16px 18px">
+      <img src="barney-${_mood}.jpg" class="barney-img barney-${_mood}" alt="Barney">
+      <div class="barney-bubble">${_barneyMsg}</div>
+      <div class="barney-feed-bar">
+        <div class="barney-feed-label"><span>Daily feed</span><span>${_count}/7</span></div>
+        <div class="bar" style="margin:0"><i style="width:${Math.round(_count/7*100)}%"></i></div>
+      </div>
+    </div>
     <div class="card hero" style="text-align:center;padding:28px 20px 22px">
       <div class="watermark" style="bottom:-22px;font-size:5.5rem;opacity:.07">${lvl.name}</div>
       <div style="font-size:3rem;margin-bottom:6px;filter:drop-shadow(0 0 16px #a78bfa88)">${LEVEL_ICONS[lvl.lv]||"🌱"}</div>
@@ -2490,6 +2518,28 @@ function showNotifBanner(){
     banner.classList.remove("show");
   };
 }
+
+// ── Barney virtual pet ──────────────────────────────────────────────────────
+const _barneyPrevOpen=parseInt(localStorage.getItem("lm.lastOpen")||"0");
+localStorage.setItem("lm.lastOpen",Date.now());
+
+function barneyMood(){
+  const hoursSince=_barneyPrevOpen?(Date.now()-_barneyPrevOpen)/3600000:0;
+  const count=gotCount();
+  if(_barneyPrevOpen&&hoursSince>24)return"sleep";
+  if(count===0)return"hungry";
+  if(count<=3)return"idle";
+  if(count<=6)return"happy";
+  return"excited";
+}
+
+const BARNEY_MSGS={
+  sleep:`Zzz... *yawn* You were gone so long! My lantern went dim... 😴`,
+  hungry:`Good ${new Date().getHours()<12?"morning":new Date().getHours()<17?"afternoon":"evening"}! I'm starving — go tap some cards! 🍪`,
+  idle:`Keep going, we're on a roll! Tap more cards! 🤔`,
+  happy:`So close! Just ${7-gotCount()} more — let's finish strong! 🌟`,
+  excited:`YES!! You fed me all 7 today!! I'm SO happy!! 🎉`
+};
 
 applyPrefs();
 if(!state.age)startOnboard(0);
