@@ -816,8 +816,14 @@ window.charFallback=function(img,id,emoji){
 // if there's no video it quietly swaps to the still image (png→jpg→emoji). Used only
 // on the big avatars (chat header + Lumi bubble) so we don't decode many videos at once.
 function charVideoHTML(c){
-  return `<video autoplay loop muted playsinline preload="auto" style="width:100%;height:100%;object-fit:contain;display:block;background:#fff"><source src="characters/${c.id}-idle.mp4" type="video/mp4" onerror="charNoVid(this,'${c.id}','${c.emoji}')"></video>`;
+  // Animated transparent WebP idle clip; falls back to still image (jpg→png→emoji).
+  return `<img src="characters/${c.id}-idle.webp" alt="${c.name}" style="width:100%;height:100%;object-fit:contain;display:block" onerror="charNoWebp(this,'${c.id}','${c.emoji}')">`;
 }
+window.charNoWebp=function(img,id,emoji){
+  img.onerror=function(){charFallback(this,id,emoji);};
+  img.removeAttribute("data-tried-png");
+  img.src="characters/"+id+".jpg";
+};
 window.charNoVid=function(srcEl,id,emoji){
   const v=srcEl.parentNode; if(!v)return;
   const img=document.createElement("img");
