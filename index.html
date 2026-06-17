@@ -193,6 +193,19 @@
   .notif-modal-btns{display:flex;flex-direction:column;gap:10px}
   .notif-yes{background:var(--grad);color:#06121f;border:none;border-radius:999px;padding:14px 20px;font-size:.95rem;font-weight:800;cursor:pointer;font-family:inherit;width:100%}
   .notif-no{background:none;border:1px solid var(--line);border-radius:999px;padding:12px 20px;font-size:.85rem;color:var(--muted);cursor:pointer;font-family:inherit;width:100%}
+
+  /* ── ALARM POPUP ── */
+  .alarm-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s}
+  .alarm-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
+  .alarm-card{background:var(--card);border:1px solid var(--line);border-radius:28px;max-width:360px;width:100%;text-align:center;overflow:hidden;box-shadow:0 40px 90px rgba(0,0,0,.8);transform:scale(.88) translateY(30px);transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
+  .alarm-overlay.show .alarm-card{transform:scale(1) translateY(0)}
+  .alarm-card video{width:100%;display:block;max-height:300px;object-fit:cover}
+  .alarm-body{padding:18px 24px 26px}
+  .alarm-emoji{font-size:2.6rem;line-height:1;margin-bottom:6px}
+  .alarm-title{font-size:1.3rem;font-weight:800;margin:0 0 5px}
+  .alarm-msg{color:var(--muted);font-size:.92rem;margin-bottom:20px;line-height:1.45}
+  .alarm-btn{display:block;width:100%;border:none;border-radius:999px;padding:15px;font-size:1rem;font-weight:800;cursor:pointer;background:var(--grad);color:#06121f;font-family:inherit;box-shadow:0 6px 24px rgba(34,211,238,.3);transition:transform .15s,box-shadow .2s}
+  .alarm-btn:active{transform:scale(.96)}
   /* CHAR BANNER — full-width guide card at top of Today chat */
   /* TODAY COMPACT HEADER */
   .today-header{display:flex;align-items:center;gap:12px;padding:14px 4px 8px}
@@ -658,13 +671,15 @@
   .ev-cal-toggle:active{transform:scale(.92)}
   /* time scroll wheel */
   .timewheel{position:relative;display:flex;justify-content:center;align-items:stretch;gap:4px;height:132px;margin-bottom:12px;perspective:520px;-webkit-mask-image:linear-gradient(transparent,#000 26%,#000 74%,transparent);mask-image:linear-gradient(transparent,#000 26%,#000 74%,transparent)}
-  .tw-col{height:132px;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;transform-style:preserve-3d;overscroll-behavior:contain;touch-action:pan-y}
-  .tw-col::-webkit-scrollbar{display:none}
+  .tw-col{height:132px;overflow:hidden;position:relative;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;transform-style:preserve-3d}
+  .tw-col:active{cursor:grabbing}
+  .tw-inner{position:absolute;left:0;right:0;top:0;transform-style:preserve-3d}
   .tw-pad{height:44px}
-  .tw-item{display:block;height:44px;line-height:44px;min-width:54px;border:none;background:none;color:var(--muted);font-family:inherit;font-size:1.25rem;font-weight:700;scroll-snap-align:center;cursor:pointer;transform-origin:center center;backface-visibility:hidden;transition:color .15s;will-change:transform,opacity}
-  .tw-item.sel{color:var(--ink)}
+  .tw-item{display:block;height:44px;line-height:44px;min-width:54px;border:none;background:none;color:var(--muted);font-family:inherit;font-size:1.25rem;font-weight:700;cursor:pointer;transform-origin:center center;backface-visibility:hidden;transition:color .15s;will-change:transform,opacity}
+  .tw-item.sel{color:#fff;text-shadow:0 0 14px rgba(99,102,241,.9),0 0 28px rgba(34,211,238,.5)}
   .tw-sep{align-self:center;font-size:1.3rem;font-weight:800;color:var(--muted);padding-bottom:2px}
-  .tw-band{position:absolute;top:44px;left:0;right:0;height:44px;border-top:1px solid var(--glow);border-bottom:1px solid var(--glow);background:rgba(99,102,241,.07);pointer-events:none;border-radius:8px}
+  .tw-band{position:absolute;top:44px;left:0;right:0;height:44px;background:linear-gradient(160deg,rgba(255,255,255,.13) 0%,rgba(99,102,241,.18) 50%,rgba(255,255,255,.07) 100%);border:1px solid rgba(255,255,255,.22);border-radius:10px;pointer-events:none;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);box-shadow:0 0 18px rgba(99,102,241,.35),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(99,102,241,.25)}
+  .tw-band::after{content:"";position:absolute;top:0;left:12px;right:12px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.7) 40%,rgba(34,211,238,.5) 60%,transparent);border-radius:50%}
 </style>
 </head>
 <body>
@@ -2082,8 +2097,8 @@ function evFormHTML(){
       <button type="button" class="ev-cal-toggle" id="ev-cal-toggle" aria-label="Open calendar">📅</button>
     </div>
     <div class="ev-cal hidden" id="ev-cal"></div>
-    <label>Time — scroll up & down</label>
-    ${evTimeWheelHTML(9,0,"AM")}
+    <label>Time</label>
+    <input type="time" id="ev-time-input" value="09:00" style="width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card2);color:var(--ink);font-family:inherit;font-size:1.1rem;font-weight:700;-webkit-appearance:none;appearance:none">
     <label>Repeat</label>
     <select id="ev-repeat">
       <option value="none">Just once</option>
@@ -2125,41 +2140,92 @@ function evCalHTML(y,m,sel){
 }
 // Scrollable time wheel (hour / minute / AM-PM). Scroll up & down, or tap a number.
 function evTimeWheelHTML(dh,dm,dap){
-  const col=(id,arr,sel,fmt)=>`<div class="tw-col" id="${id}"><div class="tw-pad"></div>${arr.map(v=>`<button type="button" class="tw-item${String(v)===String(sel)?" sel":""}" data-v="${v}">${fmt(v)}</button>`).join("")}<div class="tw-pad"></div></div>`;
+  const COPIES=5;
+  const mkCol=(id,arr,sel,fmt)=>{
+    const si=Math.max(0,arr.findIndex(v=>String(v)===String(sel)));
+    const startIdx=arr.length*2+si;
+    const repeated=[...Array(COPIES)].flatMap(()=>arr);
+    const isWrap=arr.length>2;
+    return `<div class="tw-col" id="${id}" data-start="${startIdx}" data-count="${arr.length}" data-wrap="${isWrap}"><div class="tw-inner"><div class="tw-pad"></div>${repeated.map((v,i)=>`<button type="button" class="tw-item${i===startIdx?" sel":""}" data-v="${v}">${fmt(v)}</button>`).join("")}<div class="tw-pad"></div></div></div>`;
+  };
   const hrs=Array.from({length:12},(_,i)=>i+1), mins=Array.from({length:60},(_,i)=>i);
   return `<div class="timewheel" id="ev-timewheel">
-    ${col("tw-h",hrs,dh,v=>v)}<span class="tw-sep">:</span>${col("tw-m",mins,dm,v=>String(v).padStart(2,"0"))}${col("tw-ap",["AM","PM"],dap,v=>v)}
+    ${mkCol("tw-h",hrs,dh,v=>v)}<span class="tw-sep">:</span>${mkCol("tw-m",mins,dm,v=>String(v).padStart(2,"0"))}${mkCol("tw-ap",["AM","PM"],dap,v=>v)}
     <div class="tw-band"></div>
   </div>`;
 }
 function twWire(wheel){
   const H=44;
-  wheel.addEventListener("touchmove",e=>e.stopPropagation(),{passive:true});
   wheel.querySelectorAll(".tw-col").forEach(col=>{
+    const inner=col.querySelector(".tw-inner");
     const items=[...col.querySelectorAll(".tw-item")];
-    // cylinder: tilt each item back as it moves away from center, fade the far ones
-    const tw3D=()=>{items.forEach((it,i)=>{
-      const k=(i*H-col.scrollTop)/H;            // distance from center in item-units
-      const deg=Math.max(-78,Math.min(78,k*22));
-      it.style.transform=`rotateX(${(-deg).toFixed(1)}deg) scale(${Math.max(.7,1-Math.abs(k)*.12).toFixed(3)})`;
-      it.style.opacity=Math.max(.16,1-Math.abs(k)*.42).toFixed(2);
-    });};
+    const startIdx=parseInt(col.dataset.start)||0;
+    let curY=-startIdx*H; // translateY that centers item startIdx
+
+    const tw3D=()=>{
+      inner.style.transform=`translateY(${curY}px)`;
+      items.forEach((it,i)=>{
+        const d=(curY+i*H)/H; // distance from center in item-units
+        const deg=Math.max(-78,Math.min(78,d*22));
+        it.style.transform=`rotateX(${(-deg).toFixed(1)}deg) scale(${Math.max(.7,1-Math.abs(d)*.12).toFixed(3)})`;
+        it.style.opacity=Math.max(.16,1-Math.abs(d)*.42).toFixed(2);
+      });
+    };
     const mark=i=>items.forEach((x,j)=>x.classList.toggle("sel",j===i));
-    let sel=items.findIndex(it=>it.classList.contains("sel")); if(sel<0)sel=0;
-    col.scrollTop=sel*H; tw3D();
-    let tmr,raf;
-    col.addEventListener("scroll",()=>{
-      if(raf)cancelAnimationFrame(raf); raf=requestAnimationFrame(tw3D);
-      clearTimeout(tmr); tmr=setTimeout(()=>mark(Math.max(0,Math.min(items.length-1,Math.round(col.scrollTop/H)))),90);
+
+    const snapTo=(y,animate)=>{
+      const i=Math.max(0,Math.min(items.length-1,Math.round(-y/H)));
+      if(animate){inner.style.transition="transform .22s cubic-bezier(.33,1,.68,1)";}
+      curY=-i*H; tw3D(); mark(i);
+      if(animate)setTimeout(()=>{inner.style.transition="";},240);
+    };
+
+    // Init immediately — no scrollTop, just set transform
+    tw3D(); mark(startIdx);
+
+    // Pointer events — work for touch + mouse on all platforms including iOS 13+
+    let drag=false,startClientY=0,startY=0,lastClientY=0,lastT=0,vel=0;
+
+    col.addEventListener("pointerdown",e=>{
+      col.setPointerCapture(e.pointerId);
+      drag=true; startClientY=e.clientY; startY=curY;
+      lastClientY=e.clientY; lastT=Date.now(); vel=0;
+      inner.style.transition="none";
     });
-    col.addEventListener("click",e=>{const it=e.target.closest(".tw-item");if(!it)return;const i=items.indexOf(it);col.scrollTo({top:i*H,behavior:"smooth"});mark(i);setTimeout(tw3D,260);});
+    col.addEventListener("pointermove",e=>{
+      if(!drag)return;
+      const now=Date.now(),dt=now-lastT||1;
+      vel=(e.clientY-lastClientY)/dt;
+      lastClientY=e.clientY; lastT=now;
+      curY=startY+(e.clientY-startClientY); tw3D();
+    });
+    const onEnd=()=>{
+      if(!drag)return; drag=false;
+      curY+=vel*100;
+      snapTo(curY,true);
+    };
+    col.addEventListener("pointerup",onEnd);
+    col.addEventListener("pointercancel",onEnd);
+
+    // Mouse wheel (desktop)
+    col.addEventListener("wheel",e=>{
+      e.preventDefault();
+      curY-=Math.sign(e.deltaY)*H;
+      snapTo(curY,true);
+    },{passive:false});
+
+    // Tap item directly
+    col.addEventListener("click",e=>{
+      if(Math.abs(e.clientY-startClientY)>6)return;
+      const it=e.target.closest(".tw-item");
+      if(!it)return;
+      snapTo(-(items.indexOf(it)*H),true);
+    });
   });
 }
-function getTimeValue(wheel){
-  const sv=id=>{const e=wheel.querySelector("#"+id+" .tw-item.sel");return e?e.dataset.v:null;};
-  let h=parseInt(sv("tw-h"))||12, m=parseInt(sv("tw-m"))||0; const ap=sv("tw-ap")||"AM";
-  let HH=h%12; if(ap==="PM")HH+=12;
-  return String(HH).padStart(2,"0")+":"+String(m).padStart(2,"0");
+function getTimeValue(){
+  const inp=document.getElementById("ev-time-input");
+  return inp?.value||"09:00";
 }
 function parseDateLoose(s){
   s=(s||"").trim(); if(!s)return null;
@@ -2209,6 +2275,31 @@ function playChime(){
   }catch(e){}
 }
 
+// Track which alarms have already popped up this session so we don't double-fire
+const _shownAlarms=new Set();
+
+function _checkEventsDue(){
+  const now=Date.now(), today=todayKey(), dow=new Date(now).getDay();
+  state.events.forEach(ev=>{
+    const fires=ev.date===today||(ev.repeat==="daily")
+      ||(ev.repeat==="weekly"&&new Date(ev.date+"T12:00").getDay()===dow)
+      ||(ev.repeat==="monthly"&&new Date(ev.date+"T12:00").getDate()===new Date(now).getDate())
+      ||(ev.repeat==="yearly"&&ev.date.slice(5)===today.slice(5))
+      ||(ev.repeat==="custom"&&ev.customDays&&(()=>{const diff=Math.round((now-new Date(ev.date+"T12:00"))/86400000);return diff>=0&&diff%ev.customDays===0;})());
+    if(!fires)return;
+    const[h,m]=ev.time.split(":").map(Number);
+    const d=new Date(now); const evMs=new Date(d.getFullYear(),d.getMonth(),d.getDate(),h,m,0).getTime();
+    const warnMs=evMs-5*60*1000;
+    // Show popup if within a 90-second window of either fire time and not yet shown
+    const warnKey=ev.id+"-warn", nowKey=ev.id+"-now";
+    if(!_shownAlarms.has(warnKey)&&now>=warnMs-45000&&now<=warnMs+90000){
+      _shownAlarms.add(warnKey); showAlarmPopup(ev.emoji,ev.title,"starts in 5 minutes!");
+    } else if(!_shownAlarms.has(nowKey)&&now>=evMs-45000&&now<=evMs+90000){
+      _shownAlarms.add(nowKey); showAlarmPopup(ev.emoji,ev.title,"is starting now!");
+    }
+  });
+}
+
 function scheduleEventReminders(){
   const now=new Date(), today=todayKey(), dow=now.getDay();
   state.events.forEach(ev=>{
@@ -2222,22 +2313,22 @@ function scheduleEventReminders(){
     const evTime=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,m,0);
     const warnTime=new Date(evTime.getTime()-5*60*1000);
     const diffWarn=warnTime-now, diffNow=evTime-now;
-    // Register alarm with SW (fires even if app is in background)
     if(diffWarn>0&&diffWarn<86400000){
       navigator.serviceWorker?.ready.then(sw=>{
         sw.active?.postMessage({type:"SET_ALARM",id:ev.id,fireAt:warnTime.getTime(),title:ev.title,emoji:ev.emoji});
       }).catch(()=>{});
-      // In-app fallback for when app is open
-      setTimeout(()=>{playChime();showLumi(`⏰ ${ev.emoji} ${ev.title} starts in 5 minutes!`,"schedule");},diffWarn);
+      setTimeout(()=>_checkEventsDue(),diffWarn);
     }
     if(diffNow>0&&diffNow<86400000){
       navigator.serviceWorker?.ready.then(sw=>{
         sw.active?.postMessage({type:"SET_ALARM",id:ev.id+"n",fireAt:evTime.getTime(),title:ev.title+" — starting now!",emoji:ev.emoji});
       }).catch(()=>{});
-      setTimeout(()=>{playChime();showLumi(`🎯 Time for ${ev.emoji} ${ev.title}! Good luck.`,"schedule");},diffNow);
+      setTimeout(()=>_checkEventsDue(),diffNow);
     }
   });
 }
+// Poll every 60s — catches throttled timers when app returns from background
+setInterval(_checkEventsDue, 60000);
 function clearEventAlarm(evId){
   navigator.serviceWorker?.ready.then(sw=>{
     sw.active?.postMessage({type:"CLEAR_ALARM",id:evId});
@@ -2391,7 +2482,6 @@ function renderSchedule(v){
       if(p){selDate=p; const[y,m]=p.split("-").map(Number); viewY=y; viewM=m-1; if(!cal.classList.contains("hidden"))drawCal();}
       else {toast("Try a date like 2026-06-20"); syncTxt();}
     });
-    const wheel=fw.querySelector("#ev-timewheel"); twWire(wheel);
     const repeatSel=fw.querySelector("#ev-repeat");
     const customWrap=fw.querySelector("#ev-custom-wrap");
     repeatSel.addEventListener("change",()=>{customWrap.style.display=repeatSel.value==="custom"?"block":"none";});
@@ -2400,7 +2490,7 @@ function renderSchedule(v){
       const title=(fw.querySelector("#ev-title").value||"").trim();
       if(!title){toast("Give the event a name.");return;}
       if(!selDate){toast("Pick a date.");return;}
-      const time=getTimeValue(wheel);
+      const time=getTimeValue();
       const repeat=repeatSel.value;
       const customDays=repeat==="custom"?Math.max(2,parseInt(fw.querySelector("#ev-custom-days").value)||7):null;
       if(repeat==="custom"&&!customDays){toast("Enter how many days between repeats.");return;}
@@ -2724,14 +2814,6 @@ function initFAB(){
   // wire the overlay close button
   const cls=document.getElementById("chatOverlayClose");
   if(cls)cls.onclick=closeChatOverlay;
-  // wire chat input in overlay (permanent elements)
-  const sb=document.getElementById("chatSend");
-  const cb=document.getElementById("chatBox");
-  if(sb)sb.onclick=sendChat;
-  if(cb){
-    cb.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();sendChat();}};
-    cb.addEventListener("input",()=>{if(sb)sb.classList.toggle("send-empty",!cb.value.trim());});
-  }
 }
 
 function openChatOverlay(){
@@ -2862,6 +2944,61 @@ function showNotifBanner(){
   };
 }
 
+// ── Audio unlock — browsers need a user gesture before playing audio ───────
+let _audioUnlocked=false;
+function _unlockAudio(){
+  if(_audioUnlocked)return; _audioUnlocked=true;
+  try{const ctx=new(window.AudioContext||window.webkitAudioContext)();const b=ctx.createBuffer(1,1,22050);const s=ctx.createBufferSource();s.buffer=b;s.connect(ctx.destination);s.start(0);ctx.resume().catch(()=>{});}catch(e){}
+}
+document.addEventListener("click",_unlockAudio,{passive:true});
+document.addEventListener("touchstart",_unlockAudio,{passive:true});
+
+// ── Alarm popup (bunny knock video) ────────────────────────────────────────
+let _alarmDismissTimer = null;
+function showAlarmPopup(emoji, title, msg) {
+  const overlay = document.getElementById("alarm-overlay");
+  const vid = document.getElementById("alarm-vid");
+  if (!overlay || !vid) return;
+  document.getElementById("alarm-emoji").textContent = emoji || "📅";
+  document.getElementById("alarm-title").textContent = title || "Event Reminder";
+  document.getElementById("alarm-msg").textContent = msg || "It's time!";
+  // Use the current guide's knock video if it exists, fall back to bunny
+  const charId = getChar()?.id || "bunny";
+  const knockSrc = (charId === "bear") ? "bear-knock.mp4" : "bunny-knock.mp4";
+  if (vid.dataset.src !== knockSrc) { vid.src = knockSrc; vid.dataset.src = knockSrc; }
+  const unmuteBtn = document.getElementById("alarm-unmute");
+  vid.currentTime = 0;
+  vid.muted = false;
+  vid.play().catch(() => {
+    vid.muted = true;
+    vid.play().catch(() => {});
+    if (unmuteBtn) unmuteBtn.style.display = "block";
+  });
+  if (unmuteBtn) unmuteBtn.style.display = "none";
+  overlay.classList.add("show");
+  if (_alarmDismissTimer) clearTimeout(_alarmDismissTimer);
+  vid.onended = () => { _alarmDismissTimer = setTimeout(dismissAlarmPopup, 3000); };
+  _alarmDismissTimer = setTimeout(dismissAlarmPopup, 60000);
+}
+function dismissAlarmPopup() {
+  if (_alarmDismissTimer) { clearTimeout(_alarmDismissTimer); _alarmDismissTimer = null; }
+  const overlay = document.getElementById("alarm-overlay");
+  const vid = document.getElementById("alarm-vid");
+  if (overlay) overlay.classList.remove("show");
+  if (vid) { vid.pause(); vid.currentTime = 0; }
+  playChime();
+  state.tab = "schedule"; render(); window.scrollTo(0,0);
+}
+function alarmUnmute() {
+  const vid = document.getElementById("alarm-vid");
+  const btn = document.getElementById("alarm-unmute");
+  if (!vid) return;
+  vid.muted = false;
+  vid.currentTime = 0;
+  vid.play().catch(() => {});
+  if (btn) btn.style.display = "none";
+}
+
 applyPrefs();
 if(!state.age)startOnboard(0);
 render();
@@ -2901,7 +3038,7 @@ if(window.visualViewport){
 </script>
 
 <!-- ── FLOATING CHAT BUTTON ── -->
-<button class="chat-fab" id="chatFab" aria-label="Chat with your guide">
+<button class="chat-fab" id="chatFab" aria-label="Chat with your guide" onclick="openChatOverlay()">
   <div class="chat-face" id="fabFaceWrap"></div>
   <span class="chat-fab-badge" id="chatBadge"></span>
 </button>
@@ -2921,8 +3058,24 @@ if(window.visualViewport){
   </div>
   <div class="co-input-wrap">
     <div class="chat-input">
-      <input id="chatBox" type="text" placeholder="Ask anything…" autocomplete="off" maxlength="200">
-      <button id="chatSend" aria-label="Send message" class="send-empty">➤</button>
+      <input id="chatBox" type="text" placeholder="Ask anything…" autocomplete="off" maxlength="200" oninput="document.getElementById('chatSend').classList.toggle('send-empty',!this.value.trim())" onkeydown="if(event.key==='Enter'){event.preventDefault();sendChat()}">
+      <button id="chatSend" aria-label="Send message" class="send-empty" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ALARM POPUP ── -->
+<div class="alarm-overlay" id="alarm-overlay" role="alertdialog" aria-modal="true">
+  <div class="alarm-card">
+    <div style="position:relative">
+      <video id="alarm-vid" src="bunny-knock.mp4" playsinline preload="auto"></video>
+      <button id="alarm-unmute" onclick="alarmUnmute()" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.55);border:none;color:#fff;border-radius:999px;padding:6px 13px;font-size:.82rem;font-weight:700;cursor:pointer;display:none">🔇 Tap for sound</button>
+    </div>
+    <div class="alarm-body">
+      <div id="alarm-emoji" class="alarm-emoji">📅</div>
+      <div id="alarm-title" class="alarm-title">Event Reminder</div>
+      <div id="alarm-msg" class="alarm-msg">Starting in 5 minutes!</div>
+      <button class="alarm-btn" onclick="dismissAlarmPopup()">Let's Go! 🎯</button>
     </div>
   </div>
 </div>
