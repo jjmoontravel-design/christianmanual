@@ -1216,6 +1216,18 @@ function renderToday(v){
     <div class="today-progress-pill">${n}<span>/${SLOTS.length}</span></div>
   </div>
   <div class="today-streak-row">🔥 ${state.streak.n}-day streak &nbsp;·&nbsp; ✨ ${state.xp} XP</div>
+  ${(()=>{const _m=barneyMood(),_c=gotCount(),_msg=_m==="happy"?`So close! Just ${7-_c} more — let's finish strong! 🌟`:BARNEY_MSGS[_m];
+  return`<div class="card barney-card" style="display:flex;align-items:center;gap:14px;padding:14px 16px">
+    <img src="barney-${_m}.jpg" class="barney-img barney-${_m}" alt="Barney" style="width:80px;height:80px;flex:none">
+    <div style="flex:1;min-width:0">
+      <div style="font-size:.85rem;font-weight:600;margin-bottom:4px">Barney <span style="font-size:.75rem;font-weight:400;color:var(--muted)">your life guide bear</span></div>
+      <div style="font-size:.83rem;line-height:1.4;color:var(--ink)">${_msg}</div>
+      <div style="margin-top:8px">
+        <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:3px"><span>Daily feed</span><span>${_c}/7</span></div>
+        <div class="bar" style="margin:0;height:6px"><i style="width:${Math.round(_c/7*100)}%"></i></div>
+      </div>
+    </div>
+  </div>`})()}
   <div class="chat-thread">
     <div class="msg guide"><div class="msg-face">${gFace}</div>
       <div class="bubble guide">${done
@@ -2197,18 +2209,7 @@ function renderYou(v){
   const themeName=THEME_LABELS[getTheme()]||"🌙 Dark";
   const lcfg=getLumiCfg();
   const LEVEL_ICONS=["🌱","📖","🔍","🏗️","🌟","📜","💎","👑"];
-  const _mood=barneyMood();
-  const _count=gotCount();
-  const _barneyMsg=_mood==="happy"?`So close! Just ${7-_count} more — let's finish strong! 🌟`:BARNEY_MSGS[_mood];
   v.innerHTML=`
-    <div class="card barney-card" style="text-align:center;padding:20px 16px 18px">
-      <img src="barney-${_mood}.jpg" class="barney-img barney-${_mood}" alt="Barney">
-      <div class="barney-bubble">${_barneyMsg}</div>
-      <div class="barney-feed-bar">
-        <div class="barney-feed-label"><span>Daily feed</span><span>${_count}/7</span></div>
-        <div class="bar" style="margin:0"><i style="width:${Math.round(_count/7*100)}%"></i></div>
-      </div>
-    </div>
     <div class="card hero" style="text-align:center;padding:28px 20px 22px">
       <div class="watermark" style="bottom:-22px;font-size:5.5rem;opacity:.07">${lvl.name}</div>
       <div style="font-size:3rem;margin-bottom:6px;filter:drop-shadow(0 0 16px #a78bfa88)">${LEVEL_ICONS[lvl.lv]||"🌱"}</div>
