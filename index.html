@@ -260,6 +260,8 @@
   @media(prefers-reduced-motion:reduce){.chat-face img,.lumi-face img,.msg-face img,.ct-face img{animation:none!important}}
 
   /* NAV — floating glass dock with sliding accent glider */
+  /* Bottom scrim: fades scrolling content into the background before it reaches the floating nav */
+  body::after{content:"";position:fixed;left:0;right:0;bottom:0;height:140px;z-index:25;pointer-events:none;background:linear-gradient(to top,var(--bg) 0%,var(--bg) 38%,transparent 100%)}
   nav{position:fixed;bottom:calc(12px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(600px,calc(100% - 18px));background:rgba(6,9,18,.88);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,.07);border-radius:28px;display:flex;z-index:30;padding:6px;box-shadow:0 24px 60px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.06)}
   html.light nav{background:rgba(255,255,255,.92);border-color:rgba(0,0,0,.08);box-shadow:0 12px 40px rgba(40,50,120,.2)}
   .nav-glider{position:absolute;top:6px;bottom:6px;border-radius:22px;transition:left .38s cubic-bezier(.34,1.56,.64,1),width .38s cubic-bezier(.34,1.56,.64,1),background .3s,border-color .3s;pointer-events:none;border:1px solid rgba(99,102,241,.3);background:rgba(99,102,241,.12)}
@@ -788,6 +790,26 @@ let state={
 BANDS.forEach(b=>b.skills.forEach((s,i)=>s.id=b.id+"-"+i));
 const SLOTS=["skill","vocab","body","money","mind","world","challenge"];
 const LEVELS=["Initiate","Apprentice","Explorer","Builder","Mentor","Sage","Luminary","Legend"];
+
+// ── Barney virtual pet (defined early so renderToday can always use them) ──
+const _barneyPrevOpen=parseInt(localStorage.getItem("lm.lastOpen")||"0");
+localStorage.setItem("lm.lastOpen",Date.now());
+function barneyMood(){
+  const hoursSince=_barneyPrevOpen?(Date.now()-_barneyPrevOpen)/3600000:0;
+  const count=gotCount();
+  if(_barneyPrevOpen&&hoursSince>24)return"sleep";
+  if(count===0)return"hungry";
+  if(count<=3)return"idle";
+  if(count<=6)return"happy";
+  return"excited";
+}
+const BARNEY_MSGS={
+  sleep:`Zzz... *yawn* You were gone so long! My lantern went dim... 😴`,
+  hungry:`Good ${new Date().getHours()<12?"morning":new Date().getHours()<17?"afternoon":"evening"}! I'm starving — go tap some cards! 🍪`,
+  idle:`Keep going, we're on a roll! Tap more cards! 🤔`,
+  happy:`So close! Just a few more — let's finish strong! 🌟`,
+  excited:`YES!! You fed me all 7 today!! I'm SO happy!! 🎉`
+};
 const CAT={
   skill:{label:"Skill of the day",icon:"🛠️",color:"#818cf8"},
   vocab:{label:"Word of the day",icon:"📖",color:"#a78bfa"},
@@ -2523,28 +2545,6 @@ function showNotifBanner(){
     banner.classList.remove("show");
   };
 }
-
-// ── Barney virtual pet ──────────────────────────────────────────────────────
-const _barneyPrevOpen=parseInt(localStorage.getItem("lm.lastOpen")||"0");
-localStorage.setItem("lm.lastOpen",Date.now());
-
-function barneyMood(){
-  const hoursSince=_barneyPrevOpen?(Date.now()-_barneyPrevOpen)/3600000:0;
-  const count=gotCount();
-  if(_barneyPrevOpen&&hoursSince>24)return"sleep";
-  if(count===0)return"hungry";
-  if(count<=3)return"idle";
-  if(count<=6)return"happy";
-  return"excited";
-}
-
-const BARNEY_MSGS={
-  sleep:`Zzz... *yawn* You were gone so long! My lantern went dim... 😴`,
-  hungry:`Good ${new Date().getHours()<12?"morning":new Date().getHours()<17?"afternoon":"evening"}! I'm starving — go tap some cards! 🍪`,
-  idle:`Keep going, we're on a roll! Tap more cards! 🤔`,
-  happy:`So close! Just ${7-gotCount()} more — let's finish strong! 🌟`,
-  excited:`YES!! You fed me all 7 today!! I'm SO happy!! 🎉`
-};
 
 applyPrefs();
 if(!state.age)startOnboard(0);
