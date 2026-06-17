@@ -119,7 +119,7 @@ async function sendPush(subscription, payload, privJwkStr) {
   return res.status; // 201 = delivered, 410 = subscription expired
 }
 
-// ─── Cron: fire every minute, check for events due in ~10 min ──────────────
+// ─── Cron: fire every minute, check for events due in ~5 min ───────────────
 async function checkAlarms(env) {
   const index = JSON.parse(await env.LM_KV.get('users') || '[]');
   const now = Date.now();
@@ -153,7 +153,7 @@ async function checkAlarms(env) {
   }
 }
 
-// Returns up to 2 fire times for an event: 10-min warning + at-start
+// Returns up to 2 fire times for an event: 5-min warning + at-start
 function nextEventTimes(ev, now) {
   const today = new Date(now);
   const pad = n => String(n).padStart(2, '0');
@@ -166,6 +166,14 @@ function nextEventTimes(ev, now) {
   else if (ev.repeat === 'weekly') {
     const evDow = new Date(ev.date + 'T12:00').getDay();
     if (evDow === dow) targetDate = todayKey;
+  } else if (ev.repeat === 'monthly') {
+    const evDay = new Date(ev.date + 'T12:00').getDate();
+    if (evDay === today.getDate()) targetDate = todayKey;
+  } else if (ev.repeat === 'yearly') {
+    if (ev.date.slice(5) === todayKey.slice(5)) targetDate = todayKey;
+  } else if (ev.repeat === 'custom' && ev.customDays) {
+    const diff = Math.round((now - new Date(ev.date + 'T12:00').getTime()) / 86400000);
+    if (diff >= 0 && diff % ev.customDays === 0) targetDate = todayKey;
   } else {
     if (ev.date === todayKey) targetDate = todayKey;
   }
@@ -173,7 +181,7 @@ function nextEventTimes(ev, now) {
   if (!targetDate) return results;
   const [h, m] = ev.time.split(':').map(Number);
   const evMs = new Date(targetDate + 'T' + pad(h) + ':' + pad(m) + ':00').getTime();
-  if (evMs - 10*60*1000 > now - 90000) results.push({ fireAt: evMs - 10*60*1000, label: 'in 10 minutes!' });
+  if (evMs - 5*60*1000 > now - 90000) results.push({ fireAt: evMs - 5*60*1000, label: 'in 5 minutes!' });
   if (evMs > now - 90000) results.push({ fireAt: evMs, label: 'is starting now!' });
   return results;
 }
@@ -214,12 +222,19 @@ export default {
       try { body = await request.json(); } catch { return json({ error: 'bad request' }, 400); }
       const { message, name = 'friend', character = 'Barney' } = body;
       if (!message) return json({ error: 'missing message' }, 400);
+      // Guard the AI binding so a missing binding never throws a 1101 (which breaks CORS).
+      if (!env.AI) return json({ reply: null, error: 'AI binding not configured' });
       const system = `You are ${character}, a warm and practical life coach inside the Life Manual app. The user's name is ${name}. Keep replies to 2–4 sentences. Use 1 relevant emoji at the end. Be encouraging and specific. No filler phrases like "Great question!" — just answer directly and helpfully.`;
-      const aiRes = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
-        messages: [{ role:'system', content:system }, { role:'user', content:message }],
-        max_tokens: 200,
-      });
-      return json({ reply: aiRes?.response ?? "I'm here for you! 💜" });
+      try {
+        const aiRes = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+          messages: [{ role:'system', content:system }, { role:'user', content:message }],
+          max_tokens: 256,
+        });
+        return json({ reply: aiRes?.response ?? null });
+      } catch (e) {
+        // Return 200 with reply:null so the app uses its graceful fallback instead of failing.
+        return json({ reply: null, error: String(e && e.message || e) });
+      }
     }
 
     return new Response('Not found', { status: 404, headers: CORS });

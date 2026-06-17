@@ -361,6 +361,25 @@
   .opt-tile .oe{font-size:1.3rem;flex:none}
   .opt-tile.sel{border-color:#a78bfa;box-shadow:0 0 0 2px #a78bfa inset,0 6px 16px rgba(124,58,237,.3)}
   .opt-rank{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;background:#a78bfa;color:#fff;font-size:.78rem;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+  /* CHARACTER STORE */
+  .store-ov{position:fixed;inset:0;z-index:90;background:var(--bg);display:flex;flex-direction:column;animation:lumiIn .3s ease both}
+  .store-head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);flex:none}
+  .store-close{background:var(--card2);border:1px solid var(--line);color:var(--ink);width:38px;height:38px;border-radius:11px;font-size:1.2rem;cursor:pointer;font-family:inherit;flex:none}
+  .store-title{font-size:1.15rem;font-weight:800;flex:1}
+  .store-coins{background:#fbbf2418;color:#fbbf24;border:1px solid #fbbf2440;border-radius:20px;padding:6px 14px;font-weight:800;font-size:.95rem}
+  .store-body{flex:1;overflow-y:auto;padding:16px;padding-bottom:40px}
+  .store-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+  .store-tile{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px 12px;border-radius:16px;border:1.5px solid var(--line);background:var(--card2);position:relative}
+  .store-tile.locked .ct-face{filter:grayscale(.6) brightness(.8)}
+  .store-tile.locked .ct-face::after{content:"🔒";position:absolute;font-size:1.3rem;filter:none}
+  .store-tile .ct-face{position:relative;display:flex;align-items:center;justify-content:center}
+  .store-btn{margin-top:6px;border:none;border-radius:10px;padding:7px 16px;font-family:inherit;font-weight:800;font-size:.85rem;cursor:pointer}
+  .store-btn.buy{background:#fbbf24;color:#3a2c00}
+  .store-btn.use{background:var(--cc);color:#fff}
+  .store-badge{margin-top:6px;font-size:.78rem;font-weight:800;padding:6px 12px;border-radius:10px}
+  .store-badge.cur{background:#34d39922;color:#34d399;border:1px solid #34d39944}
+  .store-sub{width:100%;margin:18px 0 10px;padding:14px;border-radius:14px;border:1px dashed #c084fc66;background:#c084fc14;color:#c084fc;font-family:inherit;font-weight:800;font-size:.95rem;cursor:pointer}
+  .store-note{font-size:.8rem;color:var(--muted);text-align:center;line-height:1.5}
   .hidden{display:none !important}
   .lib-entry .h{font-weight:700;margin-bottom:4px}
   .lib-entry .d{color:var(--muted);font-size:.9rem;line-height:1.45}
@@ -781,7 +800,10 @@ async function syncEventsToWorker(){
     body:JSON.stringify({userId:getPushUserId(),events:state.events})}).catch(()=>{});
 }
 
-const K={age:"lifemanual.age",done:"lifemanual.done",daily:"lifemanual.daily",streak:"lifemanual.streak",xp:"lifemanual.xp",theme:"lifemanual.theme",fs:"lifemanual.fontsize",history:"lifemanual.history",name:"lifemanual.name",goal:"lifemanual.goal",events:"lifemanual.events",character:"lifemanual.character",interests:"lifemanual.interests",lifeStage:"lifemanual.lifestage"};
+const K={age:"lifemanual.age",done:"lifemanual.done",daily:"lifemanual.daily",streak:"lifemanual.streak",xp:"lifemanual.xp",theme:"lifemanual.theme",fs:"lifemanual.fontsize",history:"lifemanual.history",name:"lifemanual.name",goal:"lifemanual.goal",events:"lifemanual.events",character:"lifemanual.character",interests:"lifemanual.interests",lifeStage:"lifemanual.lifestage",coins:"lifemanual.coins",unlocked:"lifemanual.unlocked"};
+// Coin cost to unlock each guide. Barney (bear) is free — everyone starts with him.
+const CHAR_COST={bear:0, beaver:150, wolf:150, lion:150, elephant:150, panda:100, capybara:100, cat:100, bunny:100, dolphin:100, fox:100, eagle:100, tiger:100, raccoon:100, penguin:75, owl:75, ant:75, deer:75, turtle:75};
+function charCost(id){return CHAR_COST[id]==null?100:CHAR_COST[id];}
 let state={
   age:parseInt(localStorage.getItem(K.age))||null,
   name:localStorage.getItem(K.name)||"",
@@ -790,6 +812,8 @@ let state={
   daily:JSON.parse(localStorage.getItem(K.daily)||"{}"),
   streak:JSON.parse(localStorage.getItem(K.streak)||'{"n":0,"last":null}'),
   xp:parseInt(localStorage.getItem(K.xp))||0,
+  coins:parseInt(localStorage.getItem(K.coins))||0,
+  unlocked:JSON.parse(localStorage.getItem(K.unlocked)||'["bear"]'),
   history:JSON.parse(localStorage.getItem(K.history)||"{}"),
   events:JSON.parse(localStorage.getItem("lifemanual.events")||"[]"),
   character:localStorage.getItem("lifemanual.character")||"",
@@ -936,6 +960,8 @@ function saveAll(){
   localStorage.setItem(K.daily,JSON.stringify(state.daily));
   localStorage.setItem(K.streak,JSON.stringify(state.streak));
   localStorage.setItem(K.xp,state.xp);
+  localStorage.setItem(K.coins,state.coins);
+  localStorage.setItem(K.unlocked,JSON.stringify(state.unlocked||["bear"]));
   localStorage.setItem(K.history,JSON.stringify(state.history));
   localStorage.setItem(K.events,JSON.stringify(state.events));
   if(state.character)localStorage.setItem(K.character,state.character);
@@ -943,7 +969,7 @@ function saveAll(){
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove("show"),2000);}
 function bandFor(age){if(age==null)return null;const a=Math.min(Math.max(age,6),80);return BANDS.find(b=>a>=b.min&&a<=b.max)||BANDS[BANDS.length-1];}
 function bandProgress(b){const d=b.skills.filter(s=>state.done[s.id]).length;return{done:d,total:b.skills.length,pct:Math.round(d/b.skills.length*100)};}
-function level(){const lv=Math.min(Math.floor(state.xp/300),LEVELS.length-1);return{lv,name:LEVELS[lv],into:state.xp-lv*300,next:lv<LEVELS.length-1?300:null};}
+function level(){const STEP=50;const lv=Math.min(Math.floor(state.xp/STEP),LEVELS.length-1);return{lv,name:LEVELS[lv],into:state.xp-lv*STEP,next:lv<LEVELS.length-1?STEP:null};}
 
 // ============ DAILY ENGINE ============
 function todayKey(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
@@ -994,12 +1020,12 @@ function markGot(slot){
   const rect=card?card.getBoundingClientRect():null;
   if(card){card.classList.add("sweeping");setTimeout(()=>card.classList.remove("sweeping"),550);}
   state.daily.got[slot]=true;
-  state.xp+=10;
+  // 1 coin per card. xp tracks lifetime coins earned (drives the operator level; never spent).
+  state.coins+=1; state.xp+=1;
   if(slot==="skill"&&state.daily.skillId)state.done[state.daily.skillId]=true;
   const complete=gotCount()===SLOTS.length;
   state.history[todayKey()]=gotCount();
   if(complete){
-    state.xp+=30;
     const y=yesterdayKey(),t=todayKey();
     if(state.streak.last!==t){state.streak.n=(state.streak.last===y)?state.streak.n+1:1;state.streak.last=t;}
     toast("⚡ Daily Upload complete! 🔥 "+state.streak.n+"-day streak");
@@ -1008,7 +1034,7 @@ function markGot(slot){
     celebrate(28,90);          // big finish: lots of bubbles + stars rushing in
     setMood("dance");          // guide dances when the day is complete
   }else{
-    toast("+10 XP — "+(SLOTS.length-gotCount())+" to go");
+    toast("🪙 +1 coin — "+(SLOTS.length-gotCount())+" to go");
     celebrate(12,30);          // each task: bubbles drifting + a few pops
     setMood("happy",1300);     // a happy bounce for each finished task
     // Offer notifications after first lesson tap
@@ -1309,7 +1335,7 @@ function renderToday(v){
     </div>
     <div class="today-progress-pill">${n}<span>/${SLOTS.length}</span></div>
   </div>
-  <div class="today-streak-row">🔥 ${state.streak.n}-day streak &nbsp;·&nbsp; ✨ ${state.xp} XP</div>
+  <div class="today-streak-row">🔥 ${state.streak.n}-day streak &nbsp;·&nbsp; 🪙 ${state.coins} coins</div>
   ${(()=>{const _m=barneyMood(),_c=gotCount(),_msg=companionMsg(_m),_img=companionImg(_m);
   return`<div style="text-align:center;padding:8px 16px 4px">
     <img src="${_img.webp}" class="barney-img barney-${_m}" alt="${getChar().name}" style="width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 6px 16px rgba(0,0,0,.4))" onerror="this.onerror=null;this.src='${_img.fallback}'">
@@ -1352,7 +1378,7 @@ function renderToday(v){
   cards.challenge=moduleBubble("challenge",`<div class="title">${d.challenge.c}</div><div class="hint">${d.challenge.y}</div>`);
   feedOrder().forEach(slot=>{if(cards[slot])html+=cards[slot];});
   if(done)html+=`<div class="msg guide"><div class="msg-face">${gFace}</div>
-    <div class="bubble guide celebrate"><div class="title">🎉 All 7 done!</div>+30 bonus XP banked. A fresh upload lands at midnight. See you tomorrow ✨</div></div>`;
+    <div class="bubble guide celebrate"><div class="title">🎉 All 7 done!</div>🪙 7 coins earned today. A fresh upload lands at midnight. See you tomorrow ✨</div></div>`;
   html+=`</div>`;
   v.innerHTML=html;
   applyMood();
@@ -1456,8 +1482,8 @@ function renderProgress(v){
     <div class="card hero"><div class="kicker">Operator status</div>
       <div class="big">✨ Level ${lvl.lv+1}: ${lvl.name}</div>
       ${lvl.next?`<div class="bar"><i style="width:${Math.round(lvl.into/lvl.next*100)}%"></i></div>
-      <div class="sub">${lvl.into} / ${lvl.next} XP to ${LEVELS[lvl.lv+1]}</div>`:`<div class="sub">Maximum rank achieved. The manual bows to you.</div>`}
-      <div class="statline"><span>🔥 <b>${state.streak.n}</b>-day streak</span><span>✨ <b>${state.xp}</b> total XP</span></div></div>
+      <div class="sub">${lvl.into} / ${lvl.next} to ${LEVELS[lvl.lv+1]}</div>`:`<div class="sub">Maximum rank achieved. The manual bows to you.</div>`}
+      <div class="statline"><span>🔥 <b>${state.streak.n}</b>-day streak</span><span>🪙 <b>${state.coins}</b> coins</span></div></div>
     <div class="card"><div class="stat-row"><b>🗺️ Life Journey</b><span>${done}/${total} skills (${pct}%)</span></div>
       <div class="bar"><i style="width:${pct}%"></i></div></div>
     ${BANDS.map(b=>{const p=bandProgress(b);return`<div class="card"><div class="stat-row"><b>${b.range} · ${b.name}</b><span>${p.done}/${p.total}</span></div><div class="bar"><i style="width:${p.pct}%"></i></div></div>`;}).join("")}
@@ -1534,7 +1560,7 @@ function renderMore(v){
   };
   $("#resetBtn").onclick=()=>{if(confirm("Erase ALL progress, XP, streaks, and your age? This can't be undone.")){
     Object.values(K).forEach(k=>localStorage.removeItem(k));
-    state={...state,age:null,done:{},daily:{},streak:{n:0,last:null},xp:0,interests:[],lifeStage:"",tab:"today"};
+    state={...state,age:null,done:{},daily:{},streak:{n:0,last:null},xp:0,coins:0,unlocked:["bear"],interests:[],lifeStage:"",tab:"today"};
     applyPrefs();toast("Memory wiped. Fresh start.");render();
   }};
   const lumiOnCk=document.getElementById("lumiOn");
@@ -1646,18 +1672,14 @@ function renderOnboard(){
       <div class="ob-nav">${back}<button class="btn btn-got" id="ob-next">Next →</button></div>
       <button class="ob-skip" id="ob-skip">Skip for now</button>`;
   }else if(ob.step===4){
-    const suggested=(()=>{const f=d.interests[0]?INTERESTS.find(x=>x.id===d.interests[0]):null;return f?f.guide:"elephant";})();
-    if(!d._guideTouched)d.character=suggested;
-    const sel=d.character||suggested;
-    const sg=CHARACTERS.find(x=>x.id===sel);
-    b.innerHTML=`<div class="ob-emoji">🤝</div>
-      <h2>Meet your guide</h2>
-      <p>${d.interests[0]?`Based on your picks, I think <b>${sg?sg.name:"this one"}</b> is a great match`:"Pick the friend who'll walk with you"}${d.name?", "+d.name:""}. Tap any to switch.</p>
-      <div class="char-grid" id="ob-chars">${CHARACTERS.map(ch=>`<button class="char-tile ${sel===ch.id?"sel":""}" data-char="${ch.id}" style="--cc:${ch.color}">
-        <span class="ct-face">${charFaceHTML(ch)}</span>
-        <span class="ct-name">${ch.name}</span>
-        <span class="ct-pillar">${ch.pillar}</span>
-      </button>`).join("")}</div>
+    // Everyone starts with Barney the bear (he has the full mood set). Others unlock with coins.
+    d.character="bear";
+    const bear=CHARACTERS.find(x=>x.id==="bear")||CHARACTERS[0];
+    const rec=(()=>{const f=d.interests[0]?INTERESTS.find(x=>x.id===d.interests[0]):null;if(!f)return null;return CHARACTERS.find(x=>x.id===f.guide);})();
+    b.innerHTML=`<div class="ob-emoji">🐻</div>
+      <h2>Meet Barney</h2>
+      <div style="width:120px;height:120px;margin:4px auto 8px">${charVideoHTML(bear)}</div>
+      <p>Barney is your starter guide${d.name?", "+d.name:""} — he'll bring your daily lessons and cheer you on. As you complete lessons you'll earn <b>🪙 coins</b> to unlock more guides${rec?`, like <b>${rec.name}</b> for ${rec.pillar.toLowerCase()}`:""}.</p>
       <div class="ob-nav">${back}<button class="btn btn-got" id="ob-next">Next →</button></div>`;
   }else if(ob.step===5){
     b.innerHTML=`<div class="ob-emoji">🔔</div>
@@ -1717,7 +1739,8 @@ function obNext(){
 function obFinish(){
   const d=ob.draft;
   state.name=d.name||""; localStorage.setItem(K.name,state.name);
-  state.character=d.character||"elephant"; localStorage.setItem(K.character,state.character);
+  state.character="bear"; localStorage.setItem(K.character,"bear"); // everyone starts with Barney
+  if(!Array.isArray(state.unlocked)||!state.unlocked.includes("bear"))state.unlocked=["bear"];
   state.interests=(d.interests||[]).slice(); localStorage.setItem(K.interests,JSON.stringify(state.interests));
   state.lifeStage=d.lifeStage||""; localStorage.setItem(K.lifeStage,state.lifeStage);
   const ch=getChar();
@@ -2345,11 +2368,11 @@ function renderYou(v){
       <div style="font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:#a5b4fc;margin-bottom:4px">OPERATOR LEVEL ${lvl.lv+1}</div>
       <div style="font-size:2rem;font-weight:800;background:linear-gradient(120deg,#a78bfa,#22d3ee);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.1">${lvl.name}</div>
       ${lvl.next?`<div class="bar" style="margin:14px 0 4px"><i style="width:${lvlPct}%"></i></div>
-      <div style="font-size:.82rem;opacity:.7">${lvl.into} / ${lvl.next} XP → ${LEVELS[lvl.lv+1]}</div>`
+      <div style="font-size:.82rem;opacity:.7">${lvl.into} / ${lvl.next} → ${LEVELS[lvl.lv+1]}</div>`
       :`<div style="font-size:.9rem;color:#34d399;margin-top:10px">✦ Maximum rank achieved</div>`}
       <div class="statline" style="justify-content:center;margin-top:14px">
         <span>🔥 <b>${state.streak.n}</b>-day streak</span>
-        <span>✨ <b>${state.xp}</b> total XP</span>
+        <span>🪙 <b>${state.coins}</b> coins</span>
         <span>🗺️ <b>${done}/${total}</b> skills</span>
       </div>
     </div>
@@ -2365,7 +2388,7 @@ function renderYou(v){
     </div>
 
     <div class="band-head" style="margin-top:20px"><h2>⚙️ Settings</h2></div>
-    <button class="more-btn" id="changeGuide">🤝 My guide: <b>${getChar().name}</b> <span style="color:var(--muted);font-weight:400">the ${getChar().animal.toLowerCase()} · tap to switch</span></button>
+    <button class="more-btn" id="changeGuide">🤝 Guides & store <span style="color:var(--muted);font-weight:400">· using <b>${getChar().name}</b> · ${(state.unlocked||["bear"]).length}/${CHARACTERS.length} unlocked</span></button>
     <button class="more-btn" id="changeInterests">✨ My interests <span style="color:var(--muted);font-weight:400">${(state.interests&&state.interests.length)?"("+state.interests.map(id=>{const it=INTERESTS.find(x=>x.id===id);return it?it.label:id;}).join(", ")+")":"· tap to set"}</span></button>
     <button class="more-btn" id="changeAge">🎂 My age <span style="color:var(--muted);font-weight:400">(${state.age??"not set"})</span></button>
     <button class="more-btn" id="themeBtn">🎨 Theme: <b>${themeName}</b></button>
@@ -2384,7 +2407,7 @@ function renderYou(v){
       <span style="font-size:.78rem">General life guidance only — not medical, legal, or financial advice.</span>
     </div>`;
 
-  $("#changeGuide").onclick=()=>startOnboard(4);
+  $("#changeGuide").onclick=()=>openStore();
   $("#changeInterests").onclick=()=>startOnboard(3);
   $("#changeAge").onclick=()=>startOnboard(1);
   $("#themeBtn").onclick=()=>{applyTheme(nextTheme());renderYou(v);};
@@ -2409,7 +2432,7 @@ function renderYou(v){
   };
   $("#resetBtn").onclick=()=>{if(confirm("Erase ALL progress, XP, streaks, and your age? This can't be undone.")){
     Object.values(K).forEach(k=>localStorage.removeItem(k));
-    state={...state,age:null,done:{},daily:{},streak:{n:0,last:null},xp:0,events:[],character:"",interests:[],lifeStage:"",tab:"today"};
+    state={...state,age:null,done:{},daily:{},streak:{n:0,last:null},xp:0,coins:0,unlocked:["bear"],events:[],character:"",interests:[],lifeStage:"",tab:"today"};
     applyPrefs();toast("Memory wiped. Fresh start.");render();
   }};
 }
@@ -2502,6 +2525,58 @@ function lumiOnOpen(){
 
 // ============ FLOATING CHAT + OVERLAY ============
 let proactiveTimer=null;
+
+// ============ CHARACTER STORE ============
+function charUnlocked(id){return (state.unlocked||["bear"]).includes(id);}
+function openStore(){
+  let ov=document.getElementById("storeOverlay");
+  if(ov)ov.remove();
+  ov=document.createElement("div");
+  ov.id="storeOverlay"; ov.className="store-ov";
+  document.body.appendChild(ov);
+  document.body.style.overflow="hidden";
+  renderStore();
+}
+function closeStore(){const ov=document.getElementById("storeOverlay");if(ov)ov.remove();document.body.style.overflow="";}
+function renderStore(){
+  const ov=document.getElementById("storeOverlay"); if(!ov)return;
+  const cur=state.character||"bear";
+  ov.innerHTML=`
+    <div class="store-head">
+      <button class="store-close" id="storeClose">←</button>
+      <div class="store-title">Guides</div>
+      <div class="store-coins">🪙 ${state.coins}</div>
+    </div>
+    <div class="store-body">
+      <div class="store-grid">
+        ${CHARACTERS.map(ch=>{
+          const owned=charUnlocked(ch.id), cost=charCost(ch.id), isCur=ch.id===cur;
+          let action;
+          if(isCur) action=`<span class="store-badge cur">✓ In use</span>`;
+          else if(owned) action=`<button class="store-btn use" data-use="${ch.id}">Use</button>`;
+          else action=`<button class="store-btn buy" data-buy="${ch.id}">🪙 ${cost}</button>`;
+          return `<div class="store-tile ${owned?"":"locked"}" style="--cc:${ch.color}">
+            <span class="ct-face">${charFaceHTML(ch)}</span>
+            <span class="ct-name">${ch.name}</span>
+            <span class="ct-pillar">${ch.pillar}</span>
+            ${action}
+          </div>`;
+        }).join("")}
+      </div>
+      <button class="store-sub" id="storeSub">✨ Unlock everything — coming soon</button>
+      <div class="store-note">Earn 🪙 coins by completing daily lessons, watching videos, and the weekly quiz.</div>
+    </div>`;
+  ov.querySelector("#storeClose").onclick=closeStore;
+  ov.querySelector("#storeSub").onclick=()=>toast("Subscription coming soon — earn coins to unlock for now! ✨");
+  ov.querySelectorAll("[data-use]").forEach(b=>b.onclick=()=>{state.character=b.dataset.use;saveAll();closeStore();render();toast("Guide switched! 🤝");});
+  ov.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{
+    const id=b.dataset.buy, cost=charCost(id), ch=CHARACTERS.find(c=>c.id===id);
+    if(state.coins<cost){toast("Not enough coins — "+(cost-state.coins)+" more to go! 🪙");return;}
+    if(!confirm("Unlock "+(ch?ch.name:"this guide")+" for "+cost+" coins?"))return;
+    state.coins-=cost; state.unlocked=(state.unlocked||["bear"]).concat(id); saveAll();
+    renderStore(); toast("Unlocked "+(ch?ch.name:"")+"! 🎉 Tap Use to switch.");
+  });
+}
 
 function initFAB(){
   const fab=document.getElementById("chatFab");
