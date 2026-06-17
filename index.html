@@ -737,6 +737,7 @@
 <script src="data-journey.js"></script>
 <script src="data-daily.js"></script>
 <script src="data-guides.js"></script>
+<script src="data-interests.js"></script>
 <script src="data-characters.js"></script>
 <script src="data-replies.js"></script>
 <script>
@@ -826,6 +827,7 @@ const INTERESTS=[
 function feedOrder(){
   const picks=state.interests||[];
   const order=[];
+  if(picks[0]&&typeof INTEREST_PACKS!=="undefined"&&INTEREST_PACKS[picks[0]])order.push("foryou");
   picks.forEach(id=>{
     const it=INTERESTS.find(x=>x.id===id);
     if(it)it.slots.forEach(s=>{if(!order.includes(s))order.push(s);});
@@ -866,6 +868,7 @@ function companionImg(mood){
   return {webp:`characters/${c.id}-idle.webp`, fallback:`characters/${c.id}.jpg`};
 }
 const CAT={
+  foryou:{label:"For you",icon:"✨",color:"#c084fc"},
   skill:{label:"Skill of the day",icon:"🛠️",color:"#818cf8"},
   vocab:{label:"Word of the day",icon:"📖",color:"#a78bfa"},
   body:{label:"Body intel",icon:"🫀",color:"#f87171"},
@@ -968,10 +971,17 @@ function pickMoney(){
   const n=dayNum();
   return pool[((n*13+1)%pool.length+pool.length)%pool.length];
 }
+function pickForYou(){
+  const id=(state.interests||[])[0];
+  const pack=(id&&typeof INTEREST_PACKS!=="undefined")?INTEREST_PACKS[id]:null;
+  if(!pack||!pack.items||!pack.items.length)return null;
+  const n=dayNum(), it=pack.items[((n*29+7)%pack.items.length+pack.items.length)%pack.items.length];
+  return {item:it, pack:pack};
+}
 function dailyContent(){
   const found=state.daily.skillId?skillById(state.daily.skillId):null;
   return{
-    skill:found,
+    skill:found, foryou:pickForYou(),
     vocab:pick(DAILY.vocab,7,0), body:pick(DAILY.body,11,3), money:pickMoney(),
     mind:pick(DAILY.mind,17,2), world:pick(DAILY.world,19,4), challenge:pick(DAILY.challenge,23,5)
   };
@@ -1316,6 +1326,13 @@ function renderToday(v){
         :`${state.name?state.name+", ":""}${left} lesson${left>1?"s":""} left today. Tap <b>Got it</b> as you go! 💜`}</div></div>`;
   // Build each card once, keyed by slot, then emit in the user's interest-led order.
   const cards={};
+  if(d.foryou){
+    const it=d.foryou.item, pk=d.foryou.pack;
+    cards.foryou=moduleBubble("foryou",`<div class="title">${pk.emoji} ${it.h}</div>
+      <div class="bodytext">${it.d}</div>
+      ${it.steps?`<ol>${it.steps.map(x=>`<li>${x}</li>`).join("")}</ol>`:""}
+      <div class="hint">Picked for you because you're into ${pk.label.toLowerCase()}.</div>`);
+  }
   if(d.skill){
     const s=d.skill.skill;
     cards.skill=moduleBubble("skill",`<div class="title">${s.e} ${s.t}</div>
