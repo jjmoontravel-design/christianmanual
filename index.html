@@ -1219,7 +1219,7 @@ function renderToday(v){
   <div class="today-streak-row">🔥 ${state.streak.n}-day streak &nbsp;·&nbsp; ✨ ${state.xp} XP</div>
   ${(()=>{const _m=barneyMood(),_c=gotCount(),_msg=_m==="happy"?`So close! Just ${7-_c} more — let's finish strong! 🌟`:BARNEY_MSGS[_m];
   return`<div style="text-align:center;padding:8px 16px 4px">
-    <video autoplay loop muted playsinline preload="auto" class="barney-img barney-${_m}" style="width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 6px 16px rgba(0,0,0,.4))"><source src="barney-${_m}.mp4" type="video/mp4" onerror="barneyNoVid(this,'${_m}')"></video>
+    <img src="barney-${_m}.webp" class="barney-img barney-${_m}" alt="Barney" style="width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 6px 16px rgba(0,0,0,.4))" onerror="this.onerror=null;this.src='barney-${_m}.png'">
     <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:9px 14px;font-size:.84rem;line-height:1.45;margin:6px auto 10px;max-width:260px">${_msg}</div>
     <div style="max-width:200px;margin:0 auto">
       <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:4px"><span>🍪 Daily feed</span><span>${_c}/7</span></div>
