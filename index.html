@@ -885,10 +885,12 @@ function companionMsg(mood){
   }
   return "";
 }
-// Companion clip: the bear mascot has full mood clips; other guides use their idle clip.
+// Companion clip: the two starter guides (Barney/bear, Penny/bunny) have full mood clips;
+// every other guide uses its single idle clip.
 function companionImg(mood){
   const c=getChar();
   if(c.id==="bear") return {webp:`barney-${mood}.webp`, fallback:`barney-${mood}.png`};
+  if(c.id==="bunny") return {webp:`bunny-${mood}.webp`, fallback:`characters/bunny.jpg`};
   return {webp:`characters/${c.id}-idle.webp`, fallback:`characters/${c.id}.jpg`};
 }
 const CAT={
