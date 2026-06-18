@@ -829,6 +829,18 @@ async function subscribePush(){
     return sub;
   }catch(e){return null;}
 }
+async function testPush(){
+  const sub=await getPushSubscription();
+  if(!sub){toast("No push subscription found — try allowing notifications again.");return;}
+  toast("Sending test notification…");
+  try{
+    const r=await fetch(AI_WORKER_URL+"/push/test",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({userId:getPushUserId()})});
+    const d=await r.json();
+    if(d.ok)toast("Sent! Lock your screen and watch for it 🔔");
+    else toast("Error: "+(d.error||"unknown"));
+  }catch(e){toast("Network error sending test.");}
+}
 async function syncEventsToWorker(){
   const sub=await getPushSubscription();
   if(!sub)return;
@@ -2419,7 +2431,9 @@ function renderSchedule(v){
     </div>
     <div id="ev-form-wrap"></div>
     <div class="card" id="ev-list-card">${evListHTML()}</div>
-    <div class="section-note" style="text-align:center">Tap 📅 on any event to add it to Google Calendar — works with Apple & Outlook too. ${getChar().name} will still remind you inside the app.</div>`;
+    <div class="section-note" style="text-align:center">Tap 📅 on any event to add it to Google Calendar — works with Apple & Outlook too. ${getChar().name} will still remind you inside the app.</div>
+    ${"Notification" in window && Notification.permission === "granted" ? `<div style="text-align:center;margin-top:10px"><button onclick="testPush()" style="background:none;border:1px solid #a78bfa55;color:#a78bfa;border-radius:999px;padding:6px 18px;font-size:.82rem;cursor:pointer">Test notification 🔔</button></div>` : ""}
+    `;
 
   // Handlers
   $("#schLumiOn").onchange=e=>{
