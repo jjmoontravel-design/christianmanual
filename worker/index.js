@@ -5,7 +5,7 @@
 // AI binding name : AI
 // Cron schedule   : * * * * *  (every 1 minute)
 
-const VAPID_PUBLIC_KEY = 'BMvjBh3udeYq2FstcB8Ru2njHwrMKmR4OKeYCH94inrO2RvuTWQc29l2iBQJasiBrAVq-BgRzY9IAbm9fWyUaZw';
+const VAPID_PUBLIC_KEY = 'BOonl0SFTb0Wy2YWBuqznpmhQloG-u2ovo_uNDZPPXGpjPga1pP_Dm9LUeLJ3jJpz6xTyM_UWcnWtx-9A0BqjcI';
 // VAPID_PRIVATE_JWK is stored as a Cloudflare Secret (env.VAPID_PRIVATE_JWK) — not hardcoded here.
 const VAPID_SUBJECT = 'mailto:jjmoontravel@gmail.com';
 
@@ -130,11 +130,12 @@ async function checkAlarms(env) {
     const data = JSON.parse(raw);
     if (!data.subscription || !data.events?.length) continue;
 
+    // tzOffset: minutes returned by JS getTimezoneOffset() — positive = west of UTC (e.g. EST=300)
+    const tzOffset = data.tzOffset ?? 0;
+
     for (const ev of data.events) {
-      // Compute next fire time based on repeat
-      const times = nextEventTimes(ev, now);
+      const times = nextEventTimes(ev, now, tzOffset);
       for (const { fireAt, label } of times) {
-        // Fire if this alarm falls within the current 1-minute cron window (with 30s buffer)
         if (fireAt >= now - 30000 && fireAt < now + 90000) {
           const status = await sendPush(data.subscription, {
             title: '📅 Life Manual',
@@ -142,7 +143,6 @@ async function checkAlarms(env) {
             icon: '/icon-192.png',
             data: { tab: 'schedule' },
           }, env.VAPID_PRIVATE_JWK);
-          // 410 = expired subscription, remove it
           if (status === 410) {
             data.subscription = null;
             await env.LM_KV.put('user:' + userId, JSON.stringify(data));
@@ -154,33 +154,44 @@ async function checkAlarms(env) {
 }
 
 // Returns up to 2 fire times for an event: 5-min warning + at-start
-function nextEventTimes(ev, now) {
-  const today = new Date(now);
+// tzOffset = getTimezoneOffset() value from the user's browser (minutes, positive = west of UTC)
+function nextEventTimes(ev, now, tzOffset = 0) {
   const pad = n => String(n).padStart(2, '0');
-  const todayKey = today.getFullYear()+'-'+pad(today.getMonth()+1)+'-'+pad(today.getDate());
-  const dow = today.getDay();
+
+  // Shift now to user's local time so UTC date methods give the correct local date
+  const localNow = now - tzOffset * 60 * 1000;
+  const today = new Date(localNow);
+  const todayKey = today.getUTCFullYear()+'-'+pad(today.getUTCMonth()+1)+'-'+pad(today.getUTCDate());
+  const dow = today.getUTCDay();
   const results = [];
 
   let targetDate = null;
-  if (ev.repeat === 'daily') targetDate = todayKey;
-  else if (ev.repeat === 'weekly') {
-    const evDow = new Date(ev.date + 'T12:00').getDay();
+  if (ev.repeat === 'daily') {
+    targetDate = todayKey;
+  } else if (ev.repeat === 'weekly') {
+    // ev.date is the user's local date string — use UTC noon to get stable day-of-week
+    const evDow = new Date(ev.date + 'T12:00:00Z').getUTCDay();
     if (evDow === dow) targetDate = todayKey;
   } else if (ev.repeat === 'monthly') {
-    const evDay = new Date(ev.date + 'T12:00').getDate();
-    if (evDay === today.getDate()) targetDate = todayKey;
+    const evDay = new Date(ev.date + 'T12:00:00Z').getUTCDate();
+    if (evDay === today.getUTCDate()) targetDate = todayKey;
   } else if (ev.repeat === 'yearly') {
     if (ev.date.slice(5) === todayKey.slice(5)) targetDate = todayKey;
   } else if (ev.repeat === 'custom' && ev.customDays) {
-    const diff = Math.round((now - new Date(ev.date + 'T12:00').getTime()) / 86400000);
+    const startMs = new Date(ev.date + 'T12:00:00Z').getTime();
+    const diff = Math.round((localNow - startMs) / 86400000);
     if (diff >= 0 && diff % ev.customDays === 0) targetDate = todayKey;
   } else {
     if (ev.date === todayKey) targetDate = todayKey;
   }
 
   if (!targetDate) return results;
+
+  // Parse event time as local, then convert to UTC by adding tzOffset
+  // e.g. 8:13 AM Eastern (tzOffset=300) → 8:13 UTC + 300min = 1:13 PM UTC
   const [h, m] = ev.time.split(':').map(Number);
-  const evMs = new Date(targetDate + 'T' + pad(h) + ':' + pad(m) + ':00').getTime();
+  const evMs = new Date(targetDate + 'T' + pad(h) + ':' + pad(m) + ':00Z').getTime() + tzOffset * 60 * 1000;
+
   if (evMs - 5*60*1000 > now - 90000) results.push({ fireAt: evMs - 5*60*1000, label: 'in 5 minutes!' });
   if (evMs > now - 90000) results.push({ fireAt: evMs, label: 'is starting now!' });
   return results;
@@ -208,10 +219,11 @@ export default {
 
     // ── POST /push/events — sync events list ──
     if (url.pathname === '/push/events' && request.method === 'POST') {
-      const { userId, events } = await request.json();
+      const { userId, events, tzOffset } = await request.json();
       if (!userId) return json({ error: 'missing userId' }, 400);
       const existing = JSON.parse(await env.LM_KV.get('user:' + userId) || '{}');
       existing.events = events || [];
+      if (tzOffset !== undefined) existing.tzOffset = tzOffset;
       await env.LM_KV.put('user:' + userId, JSON.stringify(existing));
       return json({ ok: true });
     }
@@ -235,6 +247,38 @@ export default {
         // Return 200 with reply:null so the app uses its graceful fallback instead of failing.
         return json({ reply: null, error: String(e && e.message || e) });
       }
+    }
+
+    // ── GET /push/debug?userId=… — inspect stored user data ──
+    if (url.pathname === '/push/debug' && request.method === 'GET') {
+      const userId = url.searchParams.get('userId');
+      if (!userId) return json({ error: 'missing userId' }, 400);
+      const raw = await env.LM_KV.get('user:' + userId);
+      if (!raw) return json({ error: 'user not found in KV' }, 404);
+      const data = JSON.parse(raw);
+      return json({
+        hasSubscription: !!data.subscription,
+        tzOffset: data.tzOffset,
+        eventCount: (data.events || []).length,
+        events: (data.events || []).map(e => ({ title: e.title, date: e.date, time: e.time, repeat: e.repeat })),
+      });
+    }
+
+    // ── POST /push/test — send an immediate test push to verify the pipeline ──
+    if (url.pathname === '/push/test' && request.method === 'POST') {
+      const { userId } = await request.json();
+      if (!userId) return json({ error: 'missing userId' }, 400);
+      const raw = await env.LM_KV.get('user:' + userId);
+      if (!raw) return json({ error: 'user not found' }, 404);
+      const data = JSON.parse(raw);
+      if (!data.subscription) return json({ error: 'no subscription on file' }, 400);
+      const status = await sendPush(data.subscription, {
+        title: '✅ Life Manual',
+        body: 'Push notifications are working!',
+        icon: '/icon-192.png',
+        data: { tab: 'schedule' },
+      }, env.VAPID_PRIVATE_JWK);
+      return json({ ok: true, status });
     }
 
     return new Response('Not found', { status: 404, headers: CORS });
