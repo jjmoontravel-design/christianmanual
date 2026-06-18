@@ -1003,6 +1003,11 @@ function companionImg(mood){
   if(c.id==="bunny") return {webp:`bunny-${mood}.webp?v=2`, fallback:`characters/bunny.jpg`};
   return {webp:`characters/${c.id}-idle.webp`, fallback:`characters/${c.id}.jpg`};
 }
+function companionWave(){
+  const c=getChar();
+  if(c.id==="bunny") return {webp:`bunny-wave.webp?v=2`, fallback:`characters/bunny.jpg`, ms:6100};
+  return null; // no wave clip for this character yet
+}
 const CAT={
   foryou:{label:"For you",icon:"✨",color:"#c084fc"},
   skill:{label:"Skill of the day",icon:"🛠️",color:"#818cf8"},
@@ -1519,13 +1524,26 @@ function renderToday(v){
   // Wake-up sequence if away 3+ hours
   if(_stage&&_petImg&&_stage.dataset.wasAsleep==="1"){
     const _aw=_stage.dataset.actualWebp,_af=_stage.dataset.actualFb,_am=_stage.dataset.actualMood,_nm=_stage.dataset.charName;
+    const _wave=companionWave();
     setTimeout(()=>{
-      _petImg.src=_aw; _petImg.onerror=()=>{_petImg.onerror=null;_petImg.src=_af;};
-      _petImg.classList.remove("char-wake"); void _petImg.offsetWidth;
-      _petImg.classList.add("char-wake");
-      _petImg.addEventListener("animationend",()=>_petImg.classList.remove("char-wake"),{once:true});
-      const lbl=document.querySelector("[data-mood-lbl]"); if(lbl)lbl.textContent={idle:"Just chillin' today",happy:"Feeling happy! 😊",excited:"Super excited! 🤩",hungry:"Getting hungry… 🍎",sleep:"Feeling sleepy 😴"}[_am]||"";
-      toast(`${_nm} wakes up! 👋`);
+      const MOOD_LABELS={idle:"Just chillin' today",happy:"Feeling happy! 😊",excited:"Super excited! 🤩",hungry:"Getting hungry… 🍎",sleep:"Feeling sleepy 😴"};
+      if(_wave){
+        // Play wave clip, then settle on actual mood after it finishes
+        _petImg.src=_wave.webp; _petImg.onerror=()=>{_petImg.onerror=null;_petImg.src=_wave.fallback;};
+        toast(`${_nm} wakes up! 👋`);
+        setTimeout(()=>{
+          _petImg.src=_aw; _petImg.onerror=()=>{_petImg.onerror=null;_petImg.src=_af;};
+          const lbl=document.querySelector("[data-mood-lbl]"); if(lbl)lbl.textContent=MOOD_LABELS[_am]||"";
+        },_wave.ms);
+      } else {
+        // No wave clip — fall back to CSS pop-in
+        _petImg.src=_aw; _petImg.onerror=()=>{_petImg.onerror=null;_petImg.src=_af;};
+        _petImg.classList.remove("char-wake"); void _petImg.offsetWidth;
+        _petImg.classList.add("char-wake");
+        _petImg.addEventListener("animationend",()=>_petImg.classList.remove("char-wake"),{once:true});
+        const lbl=document.querySelector("[data-mood-lbl]"); if(lbl)lbl.textContent=MOOD_LABELS[_am]||"";
+        toast(`${_nm} wakes up! 👋`);
+      }
     },1200);
   }
 }
