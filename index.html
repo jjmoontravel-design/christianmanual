@@ -830,22 +830,37 @@ async function subscribePush(){
   }catch(e){return null;}
 }
 async function testPush(){
-  // Must be called from a button tap — iOS requires a user gesture to create a push subscription
+  // Step 1: check support
+  if(!("serviceWorker" in navigator&&"PushManager" in window)){
+    toast("Push not supported: missing SW or PushManager");return;
+  }
+  const perm=("Notification" in window)?Notification.permission:"unknown";
+  if(perm==="denied"){toast("Notifications blocked — go to iPhone Settings → Life Manual → Notifications → Allow");return;}
+
+  // Step 2: get or create subscription (user gesture required on iOS — button tap counts)
   let sub=await getPushSubscription();
   if(!sub){
-    const perm=("Notification" in window)?Notification.permission:"denied";
-    if(perm==="denied"){toast("Notifications are blocked. Go to iPhone Settings → Life Manual → Allow Notifications.");return;}
-    toast("Setting up push subscription…");
-    sub=await subscribePush();
+    toast("No sub yet, creating… (perm="+perm+")");
+    try{
+      const reg=await navigator.serviceWorker.ready;
+      sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidKey()});
+      await fetch(AI_WORKER_URL+"/push/register",{method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({userId:getPushUserId(),subscription:sub.toJSON()})}).catch(()=>{});
+      await syncEventsToWorker();
+    }catch(e){
+      toast("Subscribe error: "+String(e&&e.message||e));return;
+    }
   }
-  if(!sub){toast("Push setup failed — make sure you're on iOS 16.4+ and opened the app from your home screen icon.");return;}
-  toast("Sending test…");
+  if(!sub){toast("Still no subscription after attempt");return;}
+
+  // Step 3: send test push via Cloudflare
+  toast("Sub OK — sending test push…");
   try{
     const r=await fetch(AI_WORKER_URL+"/push/test",{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({userId:getPushUserId()})});
     const d=await r.json();
-    if(d.ok)toast("Sent! Lock your screen now and watch for it 🔔");
-    else toast("Server said: "+(d.error||"status "+r.status));
+    if(d.ok)toast("Sent! (status "+d.status+") Lock screen now 🔔");
+    else toast("Server error: "+(d.error||"status "+r.status));
   }catch(e){toast("Network error: "+String(e));}
 }
 async function syncEventsToWorker(){
