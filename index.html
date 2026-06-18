@@ -831,30 +831,30 @@ async function subscribePush(){
 }
 async function testPush(){
   if(!("serviceWorker" in navigator&&"PushManager" in window)){
-    toast("Push notifications are not supported in this browser.");return;
+    toast("Push not supported in this browser.");return;
   }
   if(("Notification" in window)&&Notification.permission==="denied"){
-    toast("Notifications are blocked — go to iPhone Settings → Life Manual → Notifications → Allow.");return;
+    toast("Notifications blocked — go to iPhone Settings → Life Manual → Notifications → Allow.");return;
   }
-  let sub=await getPushSubscription();
-  if(!sub){
-    toast("Activating notifications…");
-    try{
-      const reg=await navigator.serviceWorker.ready;
-      sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidKey()});
-      await fetch(AI_WORKER_URL+"/push/register",{method:"POST",headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({userId:getPushUserId(),subscription:sub.toJSON()})}).catch(()=>{});
-      await syncEventsToWorker();
-    }catch(e){
-      toast("Could not activate notifications. Make sure you're on iOS 16.4+ and opened from your home screen.");return;
-    }
+  toast("Refreshing subscription…");
+  try{
+    // Always unsubscribe first so the VAPID key is always current
+    const reg=await navigator.serviceWorker.ready;
+    const old=await reg.pushManager.getSubscription();
+    if(old) await old.unsubscribe();
+    const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:vapidKey()});
+    await fetch(AI_WORKER_URL+"/push/register",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({userId:getPushUserId(),subscription:sub.toJSON()})}).catch(()=>{});
+    await syncEventsToWorker();
+  }catch(e){
+    toast("Setup error: "+String(e&&e.message||e));return;
   }
   try{
     const r=await fetch(AI_WORKER_URL+"/push/test",{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({userId:getPushUserId()})});
     const d=await r.json();
-    if(d.ok)toast("Test sent! Lock your screen and watch for it 🔔");
-    else toast("Could not send: "+(d.error||"unknown error"));
+    if(d.ok)toast("Test sent! Lock your screen now 🔔");
+    else toast("Server: "+(d.error||"status "+r.status));
   }catch(e){toast("Err: "+String(e&&e.message||e));}
 }
 async function syncEventsToWorker(){
