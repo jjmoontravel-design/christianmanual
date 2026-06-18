@@ -3026,7 +3026,15 @@ window.addEventListener("resize",()=>{
 });
 scheduleReminders();
 scheduleEventReminders();
-syncEventsToWorker();
+// On startup: if notification permission was already granted, make sure we have
+// an active push subscription. Clearing the cache wipes the subscription from the
+// browser but leaves the OS permission intact — this silently restores it.
+if ("Notification" in window && Notification.permission === "granted") {
+  getPushSubscription().then(sub => {
+    if (sub) syncEventsToWorker();   // subscription fine, just re-sync events
+    else subscribePush();            // subscription lost (cache clear etc) — restore it
+  });
+}
 // Listen for SW messages (e.g. tapping a notification opens a tab)
 navigator.serviceWorker?.addEventListener("message",e=>{
   if(e.data?.type==="OPEN_TAB"){state.tab=e.data.tab||"today";render();window.scrollTo(0,0);}
