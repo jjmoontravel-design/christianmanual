@@ -710,8 +710,8 @@
 
   /* ═══ THEMED CREATURES — living background per theme & tab ════════════════ */
   .crit{position:absolute;display:none;line-height:1;user-select:none;pointer-events:none;z-index:3;will-change:transform;filter:drop-shadow(0 3px 6px rgba(0,0,0,.35))}
-  .bubble{position:absolute;display:none;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.8),rgba(180,235,255,.12));box-shadow:0 0 6px rgba(180,235,255,.45);pointer-events:none;z-index:3}
-  html.ocean  .crit.oc,html.ocean .bubble{display:block}
+  .sea-bub{position:absolute;display:none;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.8),rgba(180,235,255,.12));box-shadow:0 0 6px rgba(180,235,255,.45);pointer-events:none;z-index:3}
+  html.ocean  .crit.oc,html.ocean .sea-bub{display:block}
   html.forest .crit.fo{display:block}
   html.galaxy .crit.ga{display:block}
   html.kawaii .crit.kw{display:block}
@@ -724,7 +724,7 @@
   @keyframes swimX{0%{transform:translate(-16vw,0)}25%{transform:translate(28vw,-12px)}50%{transform:translate(58vw,9px)}75%{transform:translate(88vw,-9px)}100%{transform:translate(118vw,0)}}
   @keyframes swimXr{0%{transform:translate(118vw,0) scaleX(-1)}25%{transform:translate(80vw,-10px) scaleX(-1)}50%{transform:translate(50vw,9px) scaleX(-1)}75%{transform:translate(20vw,-8px) scaleX(-1)}100%{transform:translate(-16vw,0) scaleX(-1)}}
   /* bubbles rising from the seabed */
-  .bubble{animation:bubUp linear infinite}
+  .sea-bub{animation:bubUp linear infinite}
   @keyframes bubUp{0%{transform:translateY(0) scale(.5);opacity:0}12%{opacity:.85}88%{opacity:.5}100%{transform:translateY(-95vh) scale(1.05);opacity:0}}
   /* leaves / petals drifting down */
   .crit.leaf{animation:leafFall linear infinite}
@@ -749,14 +749,14 @@
   /* UFO hover-glide */
   .crit.ufo{animation:ufo ease-in-out infinite}
   @keyframes ufo{0%{transform:translate(-12vw,0)}50%{transform:translate(55vw,-6vh)}100%{transform:translate(116vw,2vh)}}
-  @media(prefers-reduced-motion:reduce){.crit,.bubble{animation:none!important}}
+  @media(prefers-reduced-motion:reduce){.crit,.sea-bub{animation:none!important}}
   /* battery saver: only animate creatures on the visible tab */
-  .crit,.bubble{animation-play-state:paused}
-  body[data-tab="today"] .scene-today .crit,body[data-tab="today"] .scene-today .bubble,
+  .crit,.sea-bub{animation-play-state:paused}
+  body[data-tab="today"] .scene-today .crit,body[data-tab="today"] .scene-today .sea-bub,
   body[data-tab="journey"] .scene-forest .crit,
   body[data-tab="guides"] .scene-road .crit,
   body[data-tab="schedule"] .scene-sched .crit,
-  body[data-tab="you"] .scene-you .crit,body[data-tab="you"] .scene-you .bubble{animation-play-state:running}
+  body[data-tab="you"] .scene-you .crit,body[data-tab="you"] .scene-you .sea-bub{animation-play-state:running}
 
   /* TODAY tab gets its own per-theme scene (dark/light keep aurora only) */
   body[data-tab="today"] .scene-today{opacity:1}
@@ -903,11 +903,11 @@
     <span class="crit oc swim" style="top:64%;font-size:1.3rem;animation-duration:31s;animation-delay:-15s">🐟</span>
     <span class="crit oc swim rev" style="top:40%;font-size:1.1rem;animation-duration:22s;animation-delay:-4s">🐡</span>
     <span class="crit oc swim" style="top:80%;font-size:2rem;animation-duration:48s;animation-delay:-20s">🐢</span>
-    <div class="bubble" style="left:14%;bottom:-12px;width:9px;height:9px;animation-duration:10s"></div>
-    <div class="bubble" style="left:34%;bottom:-12px;width:6px;height:6px;animation-duration:8s;animation-delay:-3s"></div>
-    <div class="bubble" style="left:58%;bottom:-12px;width:12px;height:12px;animation-duration:12s;animation-delay:-6s"></div>
-    <div class="bubble" style="left:78%;bottom:-12px;width:7px;height:7px;animation-duration:9s;animation-delay:-2s"></div>
-    <div class="bubble" style="left:90%;bottom:-12px;width:10px;height:10px;animation-duration:11s;animation-delay:-7s"></div>
+    <div class="sea-bub" style="left:14%;bottom:-12px;width:9px;height:9px;animation-duration:10s"></div>
+    <div class="sea-bub" style="left:34%;bottom:-12px;width:6px;height:6px;animation-duration:8s;animation-delay:-3s"></div>
+    <div class="sea-bub" style="left:58%;bottom:-12px;width:12px;height:12px;animation-duration:12s;animation-delay:-6s"></div>
+    <div class="sea-bub" style="left:78%;bottom:-12px;width:7px;height:7px;animation-duration:9s;animation-delay:-2s"></div>
+    <div class="sea-bub" style="left:90%;bottom:-12px;width:10px;height:10px;animation-duration:11s;animation-delay:-7s"></div>
     <!-- 🌲 forest -->
     <span class="crit fo bird" style="top:16%;font-size:1.5rem;animation-duration:32s">🐦</span>
     <span class="crit fo bird rev" style="top:25%;font-size:1.1rem;animation-duration:40s;animation-delay:-12s">🐦</span>
@@ -1007,9 +1007,9 @@
     <!-- themed life over the you scene -->
     <span class="crit oc swim rev" style="top:50%;font-size:1.5rem;animation-duration:28s">🐟</span>
     <span class="crit oc swim" style="top:68%;font-size:1.2rem;animation-duration:24s;animation-delay:-9s">🐠</span>
-    <div class="bubble" style="left:24%;bottom:-12px;width:8px;height:8px;animation-duration:10s"></div>
-    <div class="bubble" style="left:62%;bottom:-12px;width:11px;height:11px;animation-duration:12s;animation-delay:-5s"></div>
-    <div class="bubble" style="left:84%;bottom:-12px;width:7px;height:7px;animation-duration:9s;animation-delay:-3s"></div>
+    <div class="sea-bub" style="left:24%;bottom:-12px;width:8px;height:8px;animation-duration:10s"></div>
+    <div class="sea-bub" style="left:62%;bottom:-12px;width:11px;height:11px;animation-duration:12s;animation-delay:-5s"></div>
+    <div class="sea-bub" style="left:84%;bottom:-12px;width:7px;height:7px;animation-duration:9s;animation-delay:-3s"></div>
     <span class="crit fo leaf" style="left:30%;font-size:1.3rem;animation-duration:13s">🍃</span>
     <span class="crit fo leaf" style="left:66%;font-size:1.4rem;animation-duration:15s;animation-delay:-6s">🍂</span>
     <span class="crit ga floaty" style="top:30%;left:18%;font-size:1.7rem;animation-duration:7s">🌟</span>
