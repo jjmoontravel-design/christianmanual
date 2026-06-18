@@ -830,16 +830,23 @@ async function subscribePush(){
   }catch(e){return null;}
 }
 async function testPush(){
-  const sub=await getPushSubscription();
-  if(!sub){toast("No push subscription found — try allowing notifications again.");return;}
-  toast("Sending test notification…");
+  // Must be called from a button tap — iOS requires a user gesture to create a push subscription
+  let sub=await getPushSubscription();
+  if(!sub){
+    const perm=("Notification" in window)?Notification.permission:"denied";
+    if(perm==="denied"){toast("Notifications are blocked. Go to iPhone Settings → Life Manual → Allow Notifications.");return;}
+    toast("Setting up push subscription…");
+    sub=await subscribePush();
+  }
+  if(!sub){toast("Push setup failed — make sure you're on iOS 16.4+ and opened the app from your home screen icon.");return;}
+  toast("Sending test…");
   try{
     const r=await fetch(AI_WORKER_URL+"/push/test",{method:"POST",headers:{"Content-Type":"application/json"},
       body:JSON.stringify({userId:getPushUserId()})});
     const d=await r.json();
-    if(d.ok)toast("Sent! Lock your screen and watch for it 🔔");
-    else toast("Error: "+(d.error||"unknown"));
-  }catch(e){toast("Network error sending test.");}
+    if(d.ok)toast("Sent! Lock your screen now and watch for it 🔔");
+    else toast("Server said: "+(d.error||"status "+r.status));
+  }catch(e){toast("Network error: "+String(e));}
 }
 async function syncEventsToWorker(){
   const sub=await getPushSubscription();
