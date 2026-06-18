@@ -243,6 +243,8 @@
   @keyframes charFloat{0%,100%{transform:translateY(0) rotate(-1deg) scale(1)}40%{transform:translateY(-16px) rotate(.7deg) scale(1.03)}72%{transform:translateY(-6px) rotate(1.2deg) scale(1.01)}}
   .char-pet-img.char-tap{animation:charTap .65s cubic-bezier(.34,1.56,.64,1)!important}
   @keyframes charTap{0%{transform:scale(1) translateY(0) rotate(0)}28%{transform:scale(1.25) translateY(-22px) rotate(-7deg)}55%{transform:scale(.9) translateY(5px) rotate(5deg)}78%{transform:scale(1.1) translateY(-9px) rotate(-2deg)}100%{transform:scale(1) translateY(0) rotate(0)}}
+  .char-pet-img.char-wake{animation:charWake 1.8s cubic-bezier(.34,1.56,.64,1)!important}
+  @keyframes charWake{0%{transform:scale(.7) translateY(12px) rotate(0);opacity:.4}18%{transform:scale(1.15) translateY(-20px) rotate(-10deg);opacity:1}34%{transform:scale(1.05) translateY(-14px) rotate(10deg)}48%{transform:scale(1.08) translateY(-10px) rotate(-6deg)}60%{transform:scale(1.03) translateY(-7px) rotate(5deg)}74%{transform:scale(1.05) translateY(-4px) rotate(-3deg)}88%{transform:scale(1.01) translateY(-2px) rotate(1deg)}100%{transform:scale(1) translateY(0) rotate(0)}}
   /* legacy */
   .barney-bubble{background:var(--card2,rgba(255,255,255,.06));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:10px 14px;font-size:.88rem;line-height:1.4;margin:10px auto 0;max-width:280px;position:relative}
   /* ===== GUIDE EMOTIONS + LIVELY IDLE (animate the whole avatar, no new art needed) ===== */
@@ -897,6 +899,7 @@ let state={
   lifeStage:localStorage.getItem("lifemanual.lifestage")||"",
   gender:localStorage.getItem("lifemanual.gender")||"",
   pet:JSON.parse(localStorage.getItem("lifemanual.pet")||"null"),
+  lastSeen:parseInt(localStorage.getItem("lifemanual.lastSeen")||"0")||0,
   tab:"today", search:"", bandFilter:null, libFilter:"vocab", journeyMode:"path"
 };
 BANDS.forEach(b=>b.skills.forEach((s,i)=>s.id=b.id+"-"+i));
@@ -1447,12 +1450,17 @@ function renderToday(v){
   ${(()=>{decayPet();const _m=barneyMood(),_c=gotCount(),_msg=companionMsg(),_img=companionImg(_m),nm=getChar().name;
   const stats=[["hunger","🍎","#fbbf24"],["clean","🧼","#38bdf8"],["happy","🎮","#f472b6"],["energy","😴","#a78bfa"]];
   const MOODS=[["idle","💜 Chill"],["happy","😊 Happy"],["excited","🤩 Excited"],["hungry","🍎 Hungry"],["sleep","😴 Sleepy"]];
+  const MOOD_LABEL={idle:"Chillin'",happy:"Happy",excited:"Excited!",hungry:"Hungry",sleep:"Sleeping"};
+  const awayMs=state.lastSeen?Date.now()-state.lastSeen:0;
+  const wasAsleep=awayMs>3*60*60*1000;
+  const startImg=wasAsleep?companionImg("sleep"):_img;
   return`<div style="text-align:center;padding:4px 16px 4px">
-    <div class="char-stage" id="charStage" data-actual-mood="${_m}" data-actual-webp="${_img.webp}" data-actual-fb="${_img.fallback}">
+    <div class="char-stage" id="charStage" data-actual-mood="${_m}" data-actual-webp="${_img.webp}" data-actual-fb="${_img.fallback}" data-was-asleep="${wasAsleep?1:0}" data-char-name="${nm}">
       <div class="char-aura char-aura-${_m}"></div>
-      <img src="${_img.webp}" id="charPetImg" class="char-pet-img" alt="${nm}" onerror="this.onerror=null;this.src='${_img.fallback}'">
+      <img src="${startImg.webp}" id="charPetImg" class="char-pet-img" alt="${nm}" onerror="this.onerror=null;this.src='${startImg.fallback}'">
     </div>
-    <div class="mood-row" id="moodRow">${MOODS.map(([m,lbl])=>{const mi=companionImg(m);return`<button class="mood-btn${m===_m?" sel":""}" data-mood="${m}" data-webp="${mi.webp}" data-fb="${mi.fallback}">${lbl}</button>`;}).join("")}</div>
+    <div style="font-size:.7rem;color:var(--muted);margin:8px 0 5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase">${wasAsleep?"😴 Waking up…":`Currently — ${MOOD_LABEL[_m]}`} &nbsp;·&nbsp; <span style="color:#a78bfa;font-weight:600;text-transform:none">tap to preview</span></div>
+    <div class="mood-row" id="moodRow">${MOODS.map(([m,lbl])=>{const mi=companionImg(m);return`<button class="mood-btn${m===_m&&!wasAsleep?" sel":""}" data-mood="${m}" data-webp="${mi.webp}" data-fb="${mi.fallback}">${lbl}</button>`;}).join("")}</div>
     <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:9px 14px;font-size:.84rem;line-height:1.45;margin:10px auto 10px;max-width:260px">${_msg}</div>
     <div class="pet-stats">${stats.map(s=>`<div class="pet-stat"><span>${s[1]}</span><div class="pet-bar"><i style="width:${Math.round(state.pet[s[0]])}%;background:${s[2]}"></i></div></div>`).join("")}</div>
     <button class="pet-care-btn" data-care="1">🛒 Care for ${nm}</button>
@@ -1499,16 +1507,28 @@ function renderToday(v){
   v.innerHTML=html;
   applyMood();
   startProactiveTimer();
-  // Tap character for a bounce reaction
+  // Character interactions
   const _stage=$("#charStage"),_petImg=$("#charPetImg"),_moodRow=$("#moodRow");
-  if(_stage&&_petImg){
-    _stage.addEventListener("click",()=>{
-      _petImg.classList.remove("char-tap");
-      void _petImg.offsetWidth;
-      _petImg.classList.add("char-tap");
-      _petImg.addEventListener("animationend",()=>_petImg.classList.remove("char-tap"),{once:true});
-    });
+  function _bounce(){
+    _petImg.classList.remove("char-tap"); void _petImg.offsetWidth;
+    _petImg.classList.add("char-tap");
+    _petImg.addEventListener("animationend",()=>_petImg.classList.remove("char-tap"),{once:true});
   }
+  if(_stage&&_petImg) _stage.addEventListener("click",_bounce);
+  // Wake-up sequence if away 3+ hours
+  if(_stage&&_petImg&&_stage.dataset.wasAsleep==="1"){
+    const _aw=_stage.dataset.actualWebp,_af=_stage.dataset.actualFb,_am=_stage.dataset.actualMood,_nm=_stage.dataset.charName;
+    setTimeout(()=>{
+      _petImg.src=_aw; _petImg.onerror=()=>{_petImg.onerror=null;_petImg.src=_af;};
+      _petImg.classList.remove("char-wake"); void _petImg.offsetWidth;
+      _petImg.classList.add("char-wake");
+      _petImg.addEventListener("animationend",()=>_petImg.classList.remove("char-wake"),{once:true});
+      if(_moodRow) _moodRow.querySelectorAll(".mood-btn").forEach(b=>b.classList.toggle("sel",b.dataset.mood===_am));
+      const lbl=document.querySelector("[data-mood-lbl]"); if(lbl)lbl.textContent="Currently — "+{idle:"Chillin'",happy:"Happy",excited:"Excited!",hungry:"Hungry",sleep:"Sleeping"}[_am];
+      toast(`${_nm} wakes up! 👋`);
+    },1200);
+  }
+  // Mood preview buttons
   if(_moodRow&&_petImg&&_stage){
     let _revert=null;
     _moodRow.addEventListener("click",e=>{
@@ -1516,10 +1536,8 @@ function renderToday(v){
       e.stopPropagation();
       _moodRow.querySelectorAll(".mood-btn").forEach(b=>b.classList.remove("sel"));
       btn.classList.add("sel");
-      _petImg.src=btn.dataset.webp;
-      _petImg.onerror=()=>{_petImg.onerror=null;_petImg.src=btn.dataset.fb;};
-      _petImg.classList.remove("char-tap"); void _petImg.offsetWidth; _petImg.classList.add("char-tap");
-      _petImg.addEventListener("animationend",()=>_petImg.classList.remove("char-tap"),{once:true});
+      _petImg.src=btn.dataset.webp; _petImg.onerror=()=>{_petImg.onerror=null;_petImg.src=btn.dataset.fb;};
+      _bounce();
       clearTimeout(_revert);
       _revert=setTimeout(()=>{
         const aw=_stage.dataset.actualWebp,af=_stage.dataset.actualFb,am=_stage.dataset.actualMood;
@@ -3147,6 +3165,13 @@ avatarPing();
 lumiOnOpen();
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 setTimeout(initFAB, 0);
+// Record when user leaves so we know how long they were away
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){
+    state.lastSeen=Date.now();
+    localStorage.setItem("lifemanual.lastSeen",state.lastSeen);
+  }
+});
 // iOS keyboard fix — keep chat overlay pinned above keyboard
 if(window.visualViewport){
   window.visualViewport.addEventListener("resize",()=>{
