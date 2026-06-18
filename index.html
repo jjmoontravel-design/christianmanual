@@ -234,13 +234,7 @@
   .msg.guide .bubble .bodytext,.msg.guide .bubble p{font-family:Georgia,serif}
   /* ===== CHARACTER STAGE — Today screen ===== */
   .char-stage{position:relative;width:200px;height:200px;margin:16px auto 0;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
-  .char-aura{position:absolute;inset:-12px;border-radius:50%;filter:blur(34px);pointer-events:none}
-  .char-aura-idle{background:radial-gradient(circle,#a78bfa,transparent 70%);animation:auraPulse 3.2s ease-in-out infinite}
-  .char-aura-happy{background:radial-gradient(circle,#fbbf24,#f97316 60%,transparent 75%);animation:auraPulse 2.6s ease-in-out infinite}
-  .char-aura-excited{background:radial-gradient(circle,#f472b6 0%,#a78bfa 55%,transparent 75%);animation:auraPulse 2s ease-in-out infinite}
-  .char-aura-hungry{background:radial-gradient(circle,#fb923c,transparent 70%);animation:auraPulse 3.8s ease-in-out infinite}
-  .char-aura-sleep{background:radial-gradient(circle,#60a5fa,transparent 70%);animation:auraPulse 4.5s ease-in-out infinite}
-  @keyframes auraPulse{0%,100%{opacity:.28;transform:scale(.85)}50%{opacity:.55;transform:scale(1.12)}}
+  .char-aura{display:none}
   .char-pet-img{position:absolute;inset:0;width:200px;height:200px;object-fit:contain;animation:charFloat 2.8s ease-in-out infinite;filter:drop-shadow(0 10px 26px rgba(0,0,0,.55));z-index:1;transform-origin:center bottom}
   @keyframes charFloat{0%,100%{transform:translateY(0) rotate(-1deg) scale(1)}40%{transform:translateY(-16px) rotate(.7deg) scale(1.03)}72%{transform:translateY(-6px) rotate(1.2deg) scale(1.01)}}
   .char-pet-img.char-tap{animation:charTap .65s cubic-bezier(.34,1.56,.64,1)!important}
