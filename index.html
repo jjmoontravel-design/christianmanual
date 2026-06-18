@@ -1003,7 +1003,7 @@ function careItem(stat,amount,cost){
 // Both starter guides (Barney/bear, Penny/bunny) have full, clean mood clips including excited.
 function companionImg(mood){
   const c=getChar();
-  if(c.id==="bear") return {webp:`barney-${mood}.webp`, fallback:`barney-${mood}.png`};
+  if(c.id==="bear") return {webp:`barney-${mood}.webp?v=2`, fallback:`barney-${mood}.png`};
   if(c.id==="bunny") return {webp:`bunny-${mood}.webp?v=2`, fallback:`characters/bunny.jpg`};
   return {webp:`characters/${c.id}-idle.webp`, fallback:`characters/${c.id}.jpg`};
 }
