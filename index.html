@@ -627,19 +627,25 @@
   .ev-section-head{display:flex;align-items:center;justify-content:space-between;margin:22px 0 10px}
   .ev-add-btn{background:var(--grad);border:none;border-radius:999px;padding:8px 16px;font-size:.82rem;font-weight:800;color:#06121f;cursor:pointer;font-family:inherit;transition:transform .15s,box-shadow .2s}
   .ev-add-btn:active{transform:scale(.94)}
-  .ev-list{}
-  .ev-item{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--line)}
-  .ev-item:last-child{border-bottom:none}
-  .ev-icon{width:40px;height:40px;border-radius:13px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:1.35rem;flex:none}
-  .ev-body{flex:1;min-width:0}
-  .ev-title{font-weight:700;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .ev-meta{font-size:.78rem;color:var(--muted);margin-top:2px}
-  .ev-del{background:none;border:none;color:var(--muted);font-size:1.05rem;cursor:pointer;padding:6px;border-radius:8px;flex:none;transition:color .18s;font-family:inherit}
-  .ev-del:hover{color:#f87171}
+  /* Event bank cards */
+  .ev-bank-head{display:flex;align-items:center;gap:8px;font-size:.72rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;padding:0 2px}
+  .ev-bank-count{background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:1px 8px;font-size:.68rem;font-weight:700;color:var(--muted)}
+  .ev-card{background:var(--card);border:1.5px solid var(--line);border-radius:16px;display:flex;align-items:center;gap:12px;padding:13px 13px 13px 0;margin-bottom:8px;position:relative;overflow:hidden;transition:box-shadow .18s}
+  .ev-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ev-color,var(--muted));border-radius:4px 0 0 4px}
+  .ev-card-icon{width:44px;height:44px;border-radius:12px;background:color-mix(in srgb,var(--ev-color,#888) 16%,transparent);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex:none;margin-left:14px}
+  .ev-card-body{flex:1;min-width:0}
+  .ev-card-title{font-weight:700;font-size:.96rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:6px}
+  .ev-card-meta{font-size:.78rem;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .ev-freq-pill{display:inline-flex;align-items:center;background:color-mix(in srgb,var(--ev-color,#888) 16%,transparent);color:var(--ev-color,var(--muted));border-radius:999px;padding:1px 9px;font-size:.68rem;font-weight:800;white-space:nowrap}
+  .ev-date-label{color:var(--muted);font-weight:600}
+  .ev-card-actions{display:flex;align-items:center;gap:2px;flex:none}
+  .ev-card-del{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:6px 8px;border-radius:8px;transition:color .18s;font-family:inherit;line-height:1}
+  .ev-card-del:hover{color:#f87171}
+  .ev-today-tag{font-size:.62rem;font-weight:800;background:rgba(52,211,153,.15);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:999px;padding:2px 7px;flex-shrink:0}
+  .ev-empty{text-align:center;padding:24px 0;color:var(--muted);font-size:.9rem}
+  /* legacy — keep for any refs */
   .ev-cal{text-decoration:none;font-size:1rem;padding:6px;border-radius:8px;flex:none;line-height:1;opacity:.65;transition:opacity .18s}
   .ev-cal:hover{opacity:1}
-  .ev-actions{display:flex;align-items:center;gap:2px;flex:none}
-  .ev-today-tag{font-size:.66rem;font-weight:800;background:rgba(52,211,153,.15);color:#34d399;border:1px solid rgba(52,211,153,.3);border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:middle}
   /* Add-event form */
   .ev-form{background:var(--card2);border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:10px;animation:obIn .3s cubic-bezier(.2,.8,.2,1)}
   .ev-form-row{display:flex;gap:10px;margin-bottom:10px}
@@ -2088,32 +2094,48 @@ function gcalUrl(ev){
 }
 
 function evListHTML(){
-  if(!state.events.length)return`<div style="text-align:center;padding:20px 0;color:var(--muted);font-size:.9rem">No events yet.<br>Add soccer practice, meetings, anything.</div>`;
+  if(!state.events.length)return`<div class="ev-empty">No events yet.<br>Tap <b>+ Add event</b> to get started.</div>`;
   const today=todayKey(), dow=new Date().getDay();
-  const sorted=[...state.events].sort((a,b)=>{
-    const ad=a.repeat!=="none"?"0000-00-00":a.date, bd=b.repeat!=="none"?"0000-00-00":b.date;
-    return ad===bd?a.time.localeCompare(b.time):ad.localeCompare(bd);
-  });
-  return sorted.map(ev=>{
-    const isToday=ev.date===today||(ev.repeat==="daily")
-      ||(ev.repeat==="weekly"&&new Date(ev.date+"T12:00").getDay()===dow)
-      ||(ev.repeat==="monthly"&&new Date(ev.date+"T12:00").getDate()===new Date().getDate())
-      ||(ev.repeat==="yearly"&&ev.date.slice(5)===today.slice(5))
-      ||(ev.repeat==="custom"&&ev.customDays&&(()=>{const diff=Math.round((new Date(today+"T12:00")-new Date(ev.date+"T12:00"))/86400000);return diff>=0&&diff%ev.customDays===0;})());
-    const rLabel=ev.repeat==="daily"?"· Every day":ev.repeat==="weekly"?"· Every week":ev.repeat==="monthly"?"· Every month":ev.repeat==="yearly"?"· Every year":ev.repeat==="custom"?`· Every ${ev.customDays} days`:"";
-    const dLabel=ev.repeat==="none"?new Date(ev.date+"T12:00").toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}):"";
-    return`<div class="ev-item">
-      <div class="ev-icon">${ev.emoji}</div>
-      <div class="ev-body">
-        <div class="ev-title">${ev.title}${isToday?`<span class="ev-today-tag">TODAY</span>`:""}</div>
-        <div class="ev-meta">${fmtTime(ev.time)}${dLabel?" · "+dLabel:""}${rLabel?" "+rLabel:""}</div>
+  const todayCheck=ev=>ev.date===today||(ev.repeat==="daily")
+    ||(ev.repeat==="weekly"&&new Date(ev.date+"T12:00").getDay()===dow)
+    ||(ev.repeat==="monthly"&&new Date(ev.date+"T12:00").getDate()===new Date().getDate())
+    ||(ev.repeat==="yearly"&&ev.date.slice(5)===today.slice(5))
+    ||(ev.repeat==="custom"&&ev.customDays&&(()=>{const diff=Math.round((new Date(today+"T12:00")-new Date(ev.date+"T12:00"))/86400000);return diff>=0&&diff%ev.customDays===0;})());
+  const FREQ_COLOR={daily:"#34d399",weekly:"#60a5fa",monthly:"#a78bfa",yearly:"#fbbf24",custom:"#fb923c"};
+  const FREQ_LABEL={daily:"Every day",weekly:"Every week",monthly:"Every month",yearly:"Every year"};
+  const recurring=[...state.events].filter(e=>e.repeat!=="none").sort((a,b)=>a.time.localeCompare(b.time));
+  const oneTime=[...state.events].filter(e=>e.repeat==="none").sort((a,b)=>a.date===b.date?a.time.localeCompare(b.time):a.date.localeCompare(b.date));
+  function evCard(ev,showDate){
+    const color=FREQ_COLOR[ev.repeat]||"var(--muted)";
+    const freqLabel=ev.repeat==="custom"?`Every ${ev.customDays} days`:(FREQ_LABEL[ev.repeat]||"");
+    const dateLabel=showDate?new Date(ev.date+"T12:00").toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}):"";
+    const todayBadge=todayCheck(ev)?`<span class="ev-today-tag">TODAY</span>`:"";
+    return`<div class="ev-card" style="--ev-color:${color}">
+      <div class="ev-card-icon">${ev.emoji}</div>
+      <div class="ev-card-body">
+        <div class="ev-card-title">${ev.title}${todayBadge}</div>
+        <div class="ev-card-meta">
+          <span>${fmtTime(ev.time)}</span>
+          ${freqLabel?`<span class="ev-freq-pill">${freqLabel}</span>`:""}
+          ${dateLabel?`<span class="ev-date-label">${dateLabel}</span>`:""}
+        </div>
       </div>
-      <div class="ev-actions">
+      <div class="ev-card-actions">
         <a class="ev-cal" href="${gcalUrl(ev)}" target="_blank" rel="noopener" title="Add to Google Calendar">📅</a>
-        <button class="ev-del" data-ev-del="${ev.id}">×</button>
+        <button class="ev-card-del" data-ev-del="${ev.id}" title="Remove">×</button>
       </div>
     </div>`;
-  }).join("");
+  }
+  let html="";
+  if(recurring.length){
+    html+=`<div class="ev-bank-head"><span>📌 Standing Events</span><span class="ev-bank-count">${recurring.length}</span></div>`;
+    html+=recurring.map(ev=>evCard(ev,false)).join("");
+  }
+  if(oneTime.length){
+    html+=`<div class="ev-bank-head" style="${recurring.length?"margin-top:20px":""}"><span>📍 One-Time</span><span class="ev-bank-count">${oneTime.length}</span></div>`;
+    html+=oneTime.map(ev=>evCard(ev,true)).join("");
+  }
+  return html;
 }
 
 function evFormHTML(){
@@ -2446,8 +2468,8 @@ function renderSchedule(v){
       <button class="ev-add-btn" id="evAddBtn">+ Add event</button>
     </div>
     <div id="ev-form-wrap"></div>
-    <div class="card" id="ev-list-card">${evListHTML()}</div>
-    <div class="section-note" style="text-align:center">Tap 📅 on any event to add it to Google Calendar — works with Apple & Outlook too. ${getChar().name} will still remind you inside the app.</div>
+    <div id="ev-list-card">${evListHTML()}</div>
+    <div class="section-note" style="text-align:center;margin-top:4px">Tap 📅 on any event to add it to Google Calendar — works with Apple & Outlook too.</div>
     <div style="text-align:center;margin-top:10px"><button onclick="testPush()" style="background:none;border:1px solid #a78bfa55;color:#a78bfa;border-radius:999px;padding:6px 18px;font-size:.82rem;cursor:pointer">Test notification 🔔</button></div>
     `;
 
