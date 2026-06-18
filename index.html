@@ -232,14 +232,21 @@
   .char-stat-strip{text-align:center;font-size:.74rem;color:var(--muted);margin:-2px 0 14px;letter-spacing:.03em}
   /* Guide speech uses Georgia for warmth — matches the LifeBibleChat spec */
   .msg.guide .bubble .bodytext,.msg.guide .bubble p{font-family:Georgia,serif}
-  /* ===== BARNEY VIRTUAL PET ===== */
-  .barney-card{background:linear-gradient(135deg,var(--card) 0%,rgba(167,139,250,.08) 100%);border:1px solid rgba(167,139,250,.18)}
-  .barney-img{width:140px;height:140px;object-fit:contain;display:block;margin:0 auto;filter:drop-shadow(0 4px 12px rgba(0,0,0,.25))}
-  .barney-img{will-change:transform}
+  /* ===== CHARACTER STAGE — Today screen ===== */
+  .char-stage{position:relative;width:200px;height:200px;margin:16px auto 0;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+  .char-aura{position:absolute;inset:-12px;border-radius:50%;filter:blur(34px);pointer-events:none}
+  .char-aura-idle{background:radial-gradient(circle,#a78bfa,transparent 70%);animation:auraPulse 3.2s ease-in-out infinite}
+  .char-aura-happy{background:radial-gradient(circle,#fbbf24,#f97316 60%,transparent 75%);animation:auraPulse 2.6s ease-in-out infinite}
+  .char-aura-excited{background:radial-gradient(circle,#f472b6 0%,#a78bfa 55%,transparent 75%);animation:auraPulse 2s ease-in-out infinite}
+  .char-aura-hungry{background:radial-gradient(circle,#fb923c,transparent 70%);animation:auraPulse 3.8s ease-in-out infinite}
+  .char-aura-sleep{background:radial-gradient(circle,#60a5fa,transparent 70%);animation:auraPulse 4.5s ease-in-out infinite}
+  @keyframes auraPulse{0%,100%{opacity:.28;transform:scale(.85)}50%{opacity:.55;transform:scale(1.12)}}
+  .char-pet-img{position:absolute;inset:0;width:200px;height:200px;object-fit:contain;animation:charFloat 2.8s ease-in-out infinite;filter:drop-shadow(0 10px 26px rgba(0,0,0,.55));z-index:1;transform-origin:center bottom}
+  @keyframes charFloat{0%,100%{transform:translateY(0) rotate(-1deg) scale(1)}40%{transform:translateY(-16px) rotate(.7deg) scale(1.03)}72%{transform:translateY(-6px) rotate(1.2deg) scale(1.01)}}
+  .char-pet-img.char-tap{animation:charTap .65s cubic-bezier(.34,1.56,.64,1)!important}
+  @keyframes charTap{0%{transform:scale(1) translateY(0) rotate(0)}28%{transform:scale(1.25) translateY(-22px) rotate(-7deg)}55%{transform:scale(.9) translateY(5px) rotate(5deg)}78%{transform:scale(1.1) translateY(-9px) rotate(-2deg)}100%{transform:scale(1) translateY(0) rotate(0)}}
+  /* legacy */
   .barney-bubble{background:var(--card2,rgba(255,255,255,.06));border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:10px 14px;font-size:.88rem;line-height:1.4;margin:10px auto 0;max-width:280px;position:relative}
-  .barney-bubble::before{content:"";position:absolute;top:-8px;left:50%;transform:translateX(-50%);border:8px solid transparent;border-top:none;border-bottom-color:rgba(255,255,255,.1)}
-  .barney-feed-bar{margin:12px auto 0;max-width:220px}
-  .barney-feed-label{font-size:.78rem;color:var(--muted);margin-bottom:5px;display:flex;justify-content:space-between}
   /* ===== GUIDE EMOTIONS + LIVELY IDLE (animate the whole avatar, no new art needed) ===== */
   .chat-face img,.lumi-face img{animation:guideIdle 2.8s ease-in-out infinite;transform-origin:center bottom}
   .msg-face img{animation:guideIdle 3.5s ease-in-out infinite;transform-origin:center bottom}
@@ -1441,9 +1448,12 @@ function renderToday(v){
   <div class="today-streak-row">🔥 ${state.streak.n}-day streak &nbsp;·&nbsp; 🪙 ${state.coins} coins</div>
   ${(()=>{decayPet();const _m=barneyMood(),_c=gotCount(),_msg=companionMsg(),_img=companionImg(_m),nm=getChar().name;
   const stats=[["hunger","🍎","#fbbf24"],["clean","🧼","#38bdf8"],["happy","🎮","#f472b6"],["energy","😴","#a78bfa"]];
-  return`<div style="text-align:center;padding:8px 16px 4px">
-    <img src="${_img.webp}" class="barney-img barney-${_m}" alt="${nm}" style="width:120px;height:120px;object-fit:contain;filter:drop-shadow(0 6px 16px rgba(0,0,0,.4))" onerror="this.onerror=null;this.src='${_img.fallback}'">
-    <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:9px 14px;font-size:.84rem;line-height:1.45;margin:6px auto 10px;max-width:260px">${_msg}</div>
+  return`<div style="text-align:center;padding:4px 16px 4px">
+    <div class="char-stage" id="charStage">
+      <div class="char-aura char-aura-${_m}"></div>
+      <img src="${_img.webp}" id="charPetImg" class="char-pet-img" alt="${nm}" onerror="this.onerror=null;this.src='${_img.fallback}'">
+    </div>
+    <div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:9px 14px;font-size:.84rem;line-height:1.45;margin:10px auto 10px;max-width:260px">${_msg}</div>
     <div class="pet-stats">${stats.map(s=>`<div class="pet-stat"><span>${s[1]}</span><div class="pet-bar"><i style="width:${Math.round(state.pet[s[0]])}%;background:${s[2]}"></i></div></div>`).join("")}</div>
     <button class="pet-care-btn" data-care="1">🛒 Care for ${nm}</button>
     <div style="max-width:220px;margin:12px auto 0">
@@ -1489,6 +1499,16 @@ function renderToday(v){
   v.innerHTML=html;
   applyMood();
   startProactiveTimer();
+  // Tap character for a bounce reaction
+  const _stage=$("#charStage"),_petImg=$("#charPetImg");
+  if(_stage&&_petImg){
+    _stage.addEventListener("click",()=>{
+      _petImg.classList.remove("char-tap");
+      void _petImg.offsetWidth;
+      _petImg.classList.add("char-tap");
+      _petImg.addEventListener("animationend",()=>_petImg.classList.remove("char-tap"),{once:true});
+    });
+  }
 }
 
 function skillCard(s){
