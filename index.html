@@ -2966,25 +2966,36 @@ function showAlarmPopup(emoji, title, msg) {
   document.getElementById("alarm-emoji").textContent = emoji || "📅";
   document.getElementById("alarm-title").textContent = title || "Event Reminder";
   document.getElementById("alarm-msg").textContent = msg || "It's time!";
-  // Use the current guide's knock video if it exists, fall back to bunny
   const charId = getChar()?.id || "bunny";
   const knockSrc = (charId === "bear") ? "bear-knock.mp4" : "bunny-knock.mp4";
-  if (vid.dataset.src !== knockSrc) { vid.src = knockSrc; vid.dataset.src = knockSrc; }
   const sticker = document.getElementById("alarm-sticker");
   if (sticker) sticker.textContent = charId === "bear" ? "🍯" : "🌸";
   const unmuteBtn = document.getElementById("alarm-unmute");
-  vid.currentTime = 0;
-  vid.muted = false;
-  vid.play().catch(() => {
-    vid.muted = true;
-    vid.play().catch(() => {});
-    if (unmuteBtn) unmuteBtn.style.display = "block";
-  });
   if (unmuteBtn) unmuteBtn.style.display = "none";
   overlay.classList.add("show");
   if (_alarmDismissTimer) clearTimeout(_alarmDismissTimer);
-  vid.onended = () => { _alarmDismissTimer = setTimeout(dismissAlarmPopup, 3000); };
   _alarmDismissTimer = setTimeout(dismissAlarmPopup, 60000);
+
+  // If src changed, reload first then play once ready — avoids silent rejection
+  // when the app wakes from background before the video has buffered.
+  const doPlay = () => {
+    vid.currentTime = 0;
+    vid.muted = false;
+    vid.play().catch(() => {
+      vid.muted = true;
+      vid.play().catch(() => {});
+      if (unmuteBtn) unmuteBtn.style.display = "block";
+    });
+    vid.onended = () => { _alarmDismissTimer = setTimeout(dismissAlarmPopup, 3000); };
+  };
+  if (vid.dataset.src !== knockSrc) {
+    vid.src = knockSrc;
+    vid.dataset.src = knockSrc;
+    vid.load();
+    vid.addEventListener("canplay", doPlay, { once: true });
+  } else {
+    doPlay();
+  }
 }
 function dismissAlarmPopup() {
   if (_alarmDismissTimer) { clearTimeout(_alarmDismissTimer); _alarmDismissTimer = null; }
