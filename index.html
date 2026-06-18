@@ -239,8 +239,7 @@
   .mood-btn{background:var(--card2);border:1.5px solid var(--line);border-radius:999px;padding:5px 13px;font-size:.78rem;font-weight:700;cursor:pointer;transition:all .18s;font-family:inherit;color:var(--muted)}
   .mood-btn.sel{border-color:#a78bfa;background:rgba(167,139,250,.15);color:#a78bfa}
   .mood-btn:active{transform:scale(.9)}
-  .char-pet-img{position:absolute;inset:0;width:200px;height:200px;object-fit:contain;animation:charFloat 2.8s ease-in-out infinite;filter:drop-shadow(0 10px 26px rgba(0,0,0,.55));z-index:1;transform-origin:center bottom}
-  @keyframes charFloat{0%,100%{transform:translateY(0) rotate(-1deg) scale(1)}40%{transform:translateY(-16px) rotate(.7deg) scale(1.03)}72%{transform:translateY(-6px) rotate(1.2deg) scale(1.01)}}
+  .char-pet-img{position:absolute;inset:0;width:200px;height:200px;object-fit:contain;filter:drop-shadow(0 10px 26px rgba(0,0,0,.55));z-index:1;transform-origin:center bottom}
   .char-pet-img.char-tap{animation:charTap .65s cubic-bezier(.34,1.56,.64,1)!important}
   @keyframes charTap{0%{transform:scale(1) translateY(0) rotate(0)}28%{transform:scale(1.25) translateY(-22px) rotate(-7deg)}55%{transform:scale(.9) translateY(5px) rotate(5deg)}78%{transform:scale(1.1) translateY(-9px) rotate(-2deg)}100%{transform:scale(1) translateY(0) rotate(0)}}
   .char-pet-img.char-wake{animation:charWake 1.8s cubic-bezier(.34,1.56,.64,1)!important}
