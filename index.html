@@ -411,10 +411,6 @@
   .char-mini-bar i{display:block;height:100%;border-radius:3px;transition:width .6s ease}
   .char-care-ghost{background:none;border:1.5px solid var(--line);border-radius:999px;padding:7px 22px;font-size:.8rem;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .18s;margin-bottom:16px;display:inline-block}
   .char-care-ghost:active{transform:scale(.94);border-color:#a78bfa;color:#a78bfa}
-  .mood-dots{display:flex;justify-content:center;gap:9px}
-  .mood-dot{width:38px;height:38px;border-radius:50%;background:var(--card2);border:1.5px solid var(--line);font-size:1.1rem;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;font-family:inherit}
-  .mood-dot.sel{border-color:#a78bfa;background:rgba(167,139,250,.18);box-shadow:0 0 0 3px rgba(167,139,250,.2)}
-  .mood-dot:active{transform:scale(.86)}
   /* legacy pet bars still used in care modal */
   .pet-bar{height:11px;border-radius:6px;background:var(--card2);overflow:hidden;border:1px solid var(--line);flex:1}
   .pet-bar i{display:block;height:100%;border-radius:6px;transition:width .5s ease}
@@ -1461,7 +1457,6 @@ function renderToday(v){
   <div class="today-streak-row">🔥 ${state.streak.n}-day streak &nbsp;·&nbsp; 🪙 ${state.coins} coins</div>
   ${(()=>{decayPet();const _m=barneyMood(),_c=gotCount(),_img=companionImg(_m),nm=getChar().name;
   const MOOD_STATUS={idle:"Just chillin' today",happy:"Feeling happy! 😊",excited:"Super excited! 🤩",hungry:"Getting hungry… 🍎",sleep:"Feeling sleepy 😴"};
-  const MOOD_DOTS=[["idle","💜"],["happy","😊"],["excited","🤩"],["hungry","🍎"],["sleep","😴"]];
   const awayMs=state.lastSeen?Date.now()-state.lastSeen:0;
   const wasAsleep=awayMs>3*60*60*1000;
   const startImg=wasAsleep?companionImg("sleep"):_img;
@@ -1474,7 +1469,6 @@ function renderToday(v){
     <div class="char-mood-status" data-mood-lbl>${wasAsleep?"Waking up…":MOOD_STATUS[_m]}</div>
     <div class="char-mini-stats">${stats.map(s=>`<div class="char-mini-stat"><span>${s[1]}</span><div class="char-mini-bar"><i style="width:${Math.round(state.pet[s[0]])}%;background:${s[2]}"></i></div></div>`).join("")}</div>
     <button class="char-care-ghost" data-care="1">Care for ${nm}</button>
-    <div class="mood-dots" id="moodRow">${MOOD_DOTS.map(([m,e])=>{const mi=companionImg(m);return`<button class="mood-dot${m===_m&&!wasAsleep?" sel":""}" data-mood="${m}" data-webp="${mi.webp}" data-fb="${mi.fallback}">${e}</button>`;}).join("")}</div>
   </div>`})()}
   <div class="chat-thread">
     <div class="msg guide"><div class="msg-face">${gFace}</div>
@@ -1515,7 +1509,7 @@ function renderToday(v){
   applyMood();
   startProactiveTimer();
   // Character interactions
-  const _stage=$("#charStage"),_petImg=$("#charPetImg"),_moodRow=$("#moodRow");
+  const _stage=$("#charStage"),_petImg=$("#charPetImg");
   function _bounce(){
     _petImg.classList.remove("char-tap"); void _petImg.offsetWidth;
     _petImg.classList.add("char-tap");
@@ -1530,28 +1524,9 @@ function renderToday(v){
       _petImg.classList.remove("char-wake"); void _petImg.offsetWidth;
       _petImg.classList.add("char-wake");
       _petImg.addEventListener("animationend",()=>_petImg.classList.remove("char-wake"),{once:true});
-      if(_moodRow) _moodRow.querySelectorAll(".mood-btn").forEach(b=>b.classList.toggle("sel",b.dataset.mood===_am));
       const lbl=document.querySelector("[data-mood-lbl]"); if(lbl)lbl.textContent={idle:"Just chillin' today",happy:"Feeling happy! 😊",excited:"Super excited! 🤩",hungry:"Getting hungry… 🍎",sleep:"Feeling sleepy 😴"}[_am]||"";
       toast(`${_nm} wakes up! 👋`);
     },1200);
-  }
-  // Mood preview buttons
-  if(_moodRow&&_petImg&&_stage){
-    let _revert=null;
-    _moodRow.addEventListener("click",e=>{
-      const btn=e.target.closest("[data-mood]"); if(!btn)return;
-      e.stopPropagation();
-      _moodRow.querySelectorAll(".mood-btn").forEach(b=>b.classList.remove("sel"));
-      btn.classList.add("sel");
-      _petImg.src=btn.dataset.webp; _petImg.onerror=()=>{_petImg.onerror=null;_petImg.src=btn.dataset.fb;};
-      _bounce();
-      clearTimeout(_revert);
-      _revert=setTimeout(()=>{
-        const aw=_stage.dataset.actualWebp,af=_stage.dataset.actualFb,am=_stage.dataset.actualMood;
-        _petImg.src=aw; _petImg.onerror=()=>{_petImg.onerror=null;_petImg.src=af;};
-        _moodRow.querySelectorAll(".mood-btn").forEach(b=>b.classList.toggle("sel",b.dataset.mood===am));
-      },5000);
-    });
   }
 }
 
