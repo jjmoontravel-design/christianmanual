@@ -507,6 +507,7 @@
     78%{transform:scale(1) translateY(0);opacity:1}
     100%{opacity:0;transform:scale(.7) translateY(-20px)}
   }
+  @keyframes themeParticle{0%{opacity:1;transform:translate(0,0) scale(1) rotate(0deg)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.4) rotate(var(--dr,20deg))}}
 
   /* SCHEDULE — week calendar + day pickers */
   .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:4px}
@@ -1588,7 +1589,7 @@ function markGot(slot){
     if(gotCount()===1)setTimeout(showNotifBanner,1500);
   }
   saveAll();
-  if(rect)showMiniLumi(rect,complete);
+  if(rect){showMiniLumi(rect,complete);themeParticles(rect);}
   setTimeout(()=>render(),420);
 }
 
@@ -1605,6 +1606,31 @@ function showMiniLumi(rect,isFinal){
   el.style.cssText=`position:fixed;top:${y}px;left:${x}px;z-index:200;animation:miniLumiPop 1.65s cubic-bezier(.2,.8,.2,1) both`;
   document.body.appendChild(el);
   setTimeout(()=>el.remove(),1750);
+}
+
+function themeParticles(rect){
+  const theme=getTheme();
+  const sets={
+    dark:  ['✨','💫','⭐','🌟','💜'],
+    light: ['🌟','✨','💛','⚡','🎊'],
+    kawaii:['🍦','🎈','🎉','🍭','💕','🌸','🧁'],
+    ocean: ['🫧','🐠','🐡','🌊','💧','🐚'],
+    forest:['🦋','🍃','🌿','🐝','🍀','🌱'],
+    galaxy:['⭐','🌟','💫','✨','🪐','☄️'],
+  };
+  const emojis=sets[theme]||sets.dark;
+  const cx=rect.left+rect.width/2;
+  const cy=rect.top;
+  for(let i=0;i<10;i++){
+    const el=document.createElement('span');
+    el.textContent=emojis[(Math.random()*emojis.length)|0];
+    const dx=(Math.random()-.5)*160;
+    const dy=-(70+Math.random()*130);
+    const dr=(Math.random()-.5)*40;
+    el.style.cssText=`position:fixed;left:${cx+(Math.random()-.5)*40}px;top:${cy}px;font-size:${1.1+Math.random()*.9}rem;z-index:202;pointer-events:none;animation:themeParticle ${.7+Math.random()*.6}s ease-out ${i*.055}s both;--dx:${dx}px;--dy:${dy}px;--dr:${dr}deg`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),1500);
+  }
 }
 
 // ============ NAV GLIDER ============
