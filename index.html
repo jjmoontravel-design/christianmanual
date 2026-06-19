@@ -600,7 +600,7 @@
   /* ── KAWAII: pastel scene overrides ─────────────────────────────────────── */
   /* Journey → cherry blossom garden at golden hour */
   html.kawaii .scene-forest .scene-stars{opacity:0}
-  html.kawaii .f-sky{background:linear-gradient(180deg,#b3e0f9 0%,#f9c8e0 42%,#fde4ee 72%,#fdecd0 100%)}
+  html.kawaii .f-sky{background:url('kawaii-journey.jpg') center/cover no-repeat;filter:brightness(.88)}
   html.kawaii .f-moon{background:radial-gradient(circle at 40% 38%,#fffde7,#ffecb3);box-shadow:0 0 44px 14px rgba(255,225,130,.55)}
   html.kawaii .f-ray{background:linear-gradient(180deg,rgba(255,210,230,.28),transparent 60%)}
   html.kawaii .f-l1{fill:#f8bbd9;opacity:.55}
@@ -610,7 +610,7 @@
   html.kawaii .f-ground{background:linear-gradient(transparent,#a5d6a7)}
   html.kawaii .fly{background:#f48fb1;box-shadow:0 0 10px 3px rgba(244,143,177,.80)}
   /* Guides → magical pastel road under soft blue skies */
-  html.kawaii .r-sky{background:linear-gradient(180deg,#b3e5fc 0%,#ddf2ff 28%,#fce4ec 58%,#ffe0b2 76%,#fff8e1 100%)}
+  html.kawaii .r-sky{background:url('kawaii-guides.jpg') center/cover no-repeat;filter:brightness(.88)}
   html.kawaii .scene-road .scene-stars{opacity:0}
   html.kawaii .r-sun{background:radial-gradient(circle,#fffde7,#fff59d 40%,rgba(255,245,157,.55) 62%,transparent 76%);box-shadow:0 0 60px 22px rgba(255,240,100,.28);opacity:.96}
   html.kawaii .r-mtn{background:#ce93d8}
@@ -618,11 +618,11 @@
   html.kawaii .r-road::before{background:repeating-linear-gradient(to bottom,#fffde7 0 26px,transparent 26px 60px)}
   html.kawaii .r-post{background:linear-gradient(#ffe4f5,#f06292);box-shadow:0 0 8px 2px rgba(240,98,146,.65)}
   /* Schedule → dreamy lavender-pink sky with fluffy clouds */
-  html.kawaii .sc-sky{background:linear-gradient(180deg,#ede0ff 0%,#fce4ec 36%,#ffd6e8 66%,#fff0f7 100%)}
+  html.kawaii .sc-sky{background:url('kawaii-sched.jpg') center/cover no-repeat;filter:brightness(.88)}
   html.kawaii .sc-cloud{background:radial-gradient(closest-side,rgba(255,255,255,.92),transparent);filter:blur(6px);width:300px;height:72px}
   html.kawaii .orb{background:radial-gradient(circle at 35% 35%,rgba(240,98,146,.38),transparent 70%)}
   /* You → soft sparkly dream in rose & lavender */
-  html.kawaii .y-sky{background:radial-gradient(120% 95% at 50% 28%,#fce4ec,#ede0ff 52%,#ffd6e8)}
+  html.kawaii .y-sky{background:url('kawaii-you.jpg') center/cover no-repeat;filter:brightness(.88)}
   html.kawaii .y-neb1{background:radial-gradient(circle,rgba(255,182,193,.58),transparent 66%)}
   html.kawaii .y-neb2{background:radial-gradient(circle,rgba(206,147,216,.48),transparent 66%)}
   html.kawaii .scene-you .scene-stars{background-image:radial-gradient(1.4px 1.4px at 20% 18%,#ffc8dd,transparent),radial-gradient(1.2px 1.2px at 62% 12%,#ffe4f5,transparent),radial-gradient(1px 1px at 80% 26%,#dfc3f5,transparent),radial-gradient(1.4px 1.4px at 35% 28%,#ffd6e8,transparent),radial-gradient(1.6px 1.6px at 50% 8%,#fff,transparent),radial-gradient(1px 1px at 90% 16%,#ffc8dd,transparent),radial-gradient(1px 1px at 10% 36%,#dfc3f5,transparent),radial-gradient(1.3px 1.3px at 72% 32%,#ffe4f5,transparent);opacity:.75}
@@ -816,6 +816,7 @@
   .td-stars{opacity:0}
   html.ocean  .scene-today .td-sky{background:url('ocean-bg.jpg.jpeg') center/cover no-repeat;filter:brightness(.75)}
   html.forest .scene-today .td-sky{background:linear-gradient(180deg,#0c4524 0%,#0a3a1f 40%,#062815 72%,#04190d 100%)}
+  html.kawaii .scene-today .td-sky{background:url('kawaii-bg.jpg') center/cover no-repeat;filter:brightness(.88)}
   html.galaxy .scene-today .td-sky{background:url('galaxy-bg.jpg') center/cover no-repeat;filter:brightness(.72)}
   html.galaxy .td-stars{opacity:.6}
   html.ocean  .td-stars{opacity:.18}
