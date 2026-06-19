@@ -709,7 +709,7 @@
   html.galaxy .aurora.a1{background:radial-gradient(circle,#8b5cf6aa,transparent 65%)}
   html.galaxy .aurora.a2{background:radial-gradient(circle,#d946efaa,transparent 65%)}
   /* Journey → silhouettes against a star-blazed sky */
-  html.galaxy .f-sky{background:linear-gradient(180deg,#0a0620 0%,#1d1042 38%,#3a1466 68%,#0d0822 100%)}
+  html.galaxy .f-sky{background:url('galaxy-journey.jpg') center/cover no-repeat;filter:brightness(.68)}
   html.galaxy .f-moon{background:radial-gradient(circle at 38% 36%,#fdf4ff,#e9d5ff);box-shadow:0 0 52px 16px rgba(216,180,254,.5)}
   html.galaxy .f-ray{background:linear-gradient(180deg,rgba(216,180,254,.20),transparent 58%)}
   html.galaxy .f-l1{fill:#3b1d6e;opacity:.6}
@@ -719,18 +719,18 @@
   html.galaxy .f-ground{background:linear-gradient(transparent,#0a0418)}
   html.galaxy .fly{background:#e9d5ff;box-shadow:0 0 11px 3px rgba(216,180,254,.85)}
   /* Guides → warp drive through the stars */
-  html.galaxy .r-sky{background:linear-gradient(180deg,#1d1042 0%,#4c1d72 30%,#9d2da0 48%,#2a0f3e 57.4%,#0a0620 100%)}
+  html.galaxy .r-sky{background:url('galaxy-guides.jpg') center/cover no-repeat;filter:brightness(.68)}
   html.galaxy .r-sun{background:radial-gradient(circle,#fdf4ff,#d946ef 52%,transparent 72%)}
   html.galaxy .r-mtn{background:#160a2e}
   html.galaxy .r-road{background:linear-gradient(180deg,#5b21b6,#180a30)}
   html.galaxy .r-road::before{background:repeating-linear-gradient(to bottom,#e9d5ff 0 26px,transparent 26px 60px)}
   html.galaxy .r-post{background:linear-gradient(#fdf4ff,#d946ef);box-shadow:0 0 9px 2px rgba(217,70,239,.7)}
   /* Schedule → deep space */
-  html.galaxy .sc-sky{background:linear-gradient(180deg,#0a0620 0%,#1a0e3a 50%,#2e1456 100%)}
+  html.galaxy .sc-sky{background:url('galaxy-sched.jpg') center/cover no-repeat;filter:brightness(.68)}
   html.galaxy .sc-cloud{background:radial-gradient(closest-side,rgba(192,132,252,.20),transparent)}
   html.galaxy .orb{background:radial-gradient(circle at 35% 35%,rgba(217,70,239,.34),transparent 70%)}
   /* You → vivid nebula */
-  html.galaxy .y-sky{background:radial-gradient(120% 95% at 50% 28%,#3a1466,#1a0e3a 62%,#0a0618)}
+  html.galaxy .y-sky{background:url('galaxy-you.jpg') center/cover no-repeat;filter:brightness(.68)}
   html.galaxy .y-neb1{background:radial-gradient(circle,rgba(217,70,239,.44),transparent 66%)}
   html.galaxy .y-neb2{background:radial-gradient(circle,rgba(139,92,246,.40),transparent 66%)}
   /* Galaxy — star field on schedule */
@@ -1034,6 +1034,7 @@
     <span class="crit ga shoot" style="top:12%;left:68%;font-size:1.2rem;animation-duration:9s;animation-delay:-4s">⭐</span>
     <span class="crit ga floaty" style="top:74%;left:80%;font-size:2.1rem;animation-duration:8s;animation-delay:-3s">🚀</span>
     <span class="crit ga floaty" style="top:42%;left:4%;font-size:2rem;animation-duration:12s;animation-delay:-5s">🧑‍🚀</span>
+    <video class="crit ga" src="ufo.mp4" style="top:10%;left:50%;transform:translateX(-50%);width:280px;mix-blend-mode:screen;opacity:.9" autoplay loop muted playsinline></video>
     <i class="ga-streak" style="top:5%;right:2%;animation-duration:9s;animation-delay:0s"></i>
     <i class="ga-streak" style="top:18%;right:22%;animation-duration:13s;animation-delay:-4s;width:100px"></i>
     <i class="ga-streak" style="top:2%;right:46%;animation-duration:11s;animation-delay:-8s;width:130px"></i>
