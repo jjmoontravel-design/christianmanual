@@ -1052,14 +1052,7 @@
     <span class="kw-walker"   style="--spd:40s;--delay:-22s;bottom:74%;font-size:1.9rem">🐼</span>
     <span class="kw-walker kw-r" style="--spd:36s;--delay:-8s;bottom:69%;font-size:1.8rem">🐨</span>
     <i class="orb" style="left:70%;top:18%;width:170px;height:170px;animation-delay:2s"></i>
-    <!-- themed life over the schedule scene — real video dolphins + Nemo -->
-    <!-- Video dolphin large -->
-    <video class="crit oc swim" src="dolphin.webm.mp4" style="top:22%;width:160px;animation-duration:22s;filter:none;object-fit:contain" autoplay loop muted playsinline></video>
-    <!-- Video dolphin medium rev -->
-    <video class="crit oc swim rev" src="dolphin.webm.mp4" style="top:38%;width:120px;animation-duration:28s;animation-delay:-10s;filter:none;object-fit:contain" autoplay loop muted playsinline></video>
-    <!-- Video dolphin small -->
-    <video class="crit oc swim" src="dolphin.webm.mp4" style="top:52%;width:80px;animation-duration:18s;animation-delay:-5s;filter:none;object-fit:contain" autoplay loop muted playsinline></video>
-    <!-- Baby dolphin placeholder 1 -->
+    <!-- Nemo (clownfish) swimming by -->
         <!-- Nemo (clownfish) swimming by -->
     <svg class="crit oc swim rev" viewBox="0 0 88 42" xmlns="http://www.w3.org/2000/svg" style="top:62%;width:58px;animation-duration:19s;animation-delay:-14s;overflow:visible">
       <g class="ftail" style="transform-origin:18px 21px"><polygon points="18,21 2,9 2,33" fill="#c94010"/></g>
@@ -3526,61 +3519,6 @@ if(window.visualViewport){
   });
 }
 
-// Dolphin chroma key — removes the light gray/blue background from dolphin videos
-function initDolphinChroma() {
-  const scene = document.querySelector('.scene-sched');
-  if (!scene) return;
-  const videos = scene.querySelectorAll('video');
-  if (!videos.length) return;
-
-  videos.forEach(vid => {
-    const cvs = document.createElement('canvas');
-    cvs.className = vid.className;
-    cvs.style.cssText = vid.style.cssText;
-    cvs.style.mixBlendMode = 'normal';
-    cvs.style.position = 'absolute';
-    cvs.style.objectFit = 'contain';
-    vid.parentNode.insertBefore(cvs, vid);
-    vid.style.display = 'none';
-
-    const ctx = cvs.getContext('2d', {willReadFrequently: true});
-    let rafId;
-
-    function isBackground(r, g, b) {
-      const brightness = (r + g + b) / 3;
-      // Dolphin body has blue-green tint: B-R ≈ 30-35. Background is near-grayscale: B-R ≈ 5.
-      // Threshold at 12 cleanly separates them.
-      const blueBias = b - r;
-      return brightness > 150 && blueBias < 12;
-    }
-
-    function drawFrame() {
-      if (vid.readyState < 2) { rafId = requestAnimationFrame(drawFrame); return; }
-      cvs.width = vid.videoWidth || 320;
-      cvs.height = vid.videoHeight || 240;
-      ctx.drawImage(vid, 0, 0);
-
-      const frame = ctx.getImageData(0, 0, cvs.width, cvs.height);
-      const d = frame.data;
-      for (let i = 0; i < d.length; i += 4) {
-        if (isBackground(d[i], d[i+1], d[i+2])) {
-          d[i+3] = 0;
-        }
-      }
-      ctx.putImageData(frame, 0, 0);
-      rafId = requestAnimationFrame(drawFrame);
-    }
-
-    vid.addEventListener('play', () => { cancelAnimationFrame(rafId); drawFrame(); });
-    vid.addEventListener('pause', () => cancelAnimationFrame(rafId));
-    if (!vid.paused && vid.readyState >= 2) drawFrame();
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  // Run after a short delay to let videos initialize
-  setTimeout(initDolphinChroma, 800);
-});
 </script>
 
 <!-- ── FLOATING CHAT BUTTON ── -->
