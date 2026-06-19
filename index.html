@@ -623,6 +623,9 @@
   html.kawaii .orb{background:radial-gradient(circle at 35% 35%,rgba(240,98,146,.38),transparent 70%)}
   /* Kawaii readability: floating labels & cards need solid backgrounds over bright images */
   html.kawaii .card:not(.hero){background:rgba(255,255,255,.97)}
+  /* Forest readability: fully opaque dark cards over background image */
+  html.forest .card:not(.hero){background:rgba(12,36,25,.98)}
+  html.forest .bubble.guide{background:rgba(12,36,25,.98)}
   html.kawaii .hero{background:linear-gradient(135deg,#6b1a5e,#c2185b);border:none}
   html.kawaii .hero .kicker{color:#ffcce8}
   html.kawaii .hero .big,html.kawaii .hero .sub{color:#fff}
@@ -826,7 +829,7 @@
   .td-sky{position:absolute;inset:0;background:transparent}
   .td-stars{opacity:0}
   html.ocean  .scene-today .td-sky{background:url('ocean-bg.jpg.jpeg') center/cover no-repeat;filter:brightness(.75)}
-  html.forest .scene-today .td-sky{background:linear-gradient(180deg,#061410 0%,#0a1f14 45%,#071a10 100%)}
+  html.forest .scene-today .td-sky{background:url('forest-bg.jpg') center/cover no-repeat;filter:brightness(.38)}
   html.kawaii .scene-today .td-sky{background:url('kawaii-bg.jpg') center/cover no-repeat;filter:brightness(.88)}
   html.galaxy .scene-today .td-sky{background:url('galaxy-bg.jpg') center/cover no-repeat;filter:brightness(.72)}
   html.galaxy .td-stars{opacity:.6}
