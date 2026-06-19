@@ -622,10 +622,13 @@
   html.kawaii .sc-cloud{background:radial-gradient(closest-side,rgba(255,255,255,.92),transparent);filter:blur(6px);width:300px;height:72px}
   html.kawaii .orb{background:radial-gradient(circle at 35% 35%,rgba(240,98,146,.38),transparent 70%)}
   /* Kawaii readability: floating labels & cards need solid backgrounds over bright images */
-  html.kawaii .card{background:rgba(255,255,255,.97)}
-  html.kawaii .ev-section-head,html.kawaii .ev-bank-head{background:rgba(255,255,255,.88);border-radius:999px;padding:4px 12px;display:inline-flex;align-items:center;gap:6px}
+  html.kawaii .card:not(.hero){background:rgba(255,255,255,.97)}
+  html.kawaii .hero{background:linear-gradient(135deg,#6b1a5e,#c2185b);border:none}
+  html.kawaii .hero .kicker{color:#ffcce8}
+  html.kawaii .hero .big,html.kawaii .hero .sub{color:#fff}
+  html.kawaii .band-head{background:rgba(255,255,255,.88);border-radius:999px;padding:4px 14px;display:inline-flex;margin:16px 0 10px}
+  html.kawaii .ev-section-head{background:rgba(255,255,255,.88);border-radius:999px;padding:4px 12px}
   html.kawaii .section-note{background:rgba(255,255,255,.82);border-radius:12px;padding:6px 12px;color:#7a2650}
-  html.kawaii main > *:not(.card):not([class*="bubble"]):not([class*="char"]) > [style*="color:var(--muted)"]{color:#7a2650 !important}
   /* You → soft sparkly dream in rose & lavender */
   html.kawaii .y-sky{background:url('kawaii-you.jpg') center/cover no-repeat;filter:brightness(.88)}
   html.kawaii .y-neb1{background:radial-gradient(circle,rgba(255,182,193,.58),transparent 66%)}
