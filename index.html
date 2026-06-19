@@ -3544,8 +3544,15 @@ function initDolphinChroma() {
     vid.style.display = 'none';
 
     const ctx = cvs.getContext('2d', {willReadFrequently: true});
-    let bgR = 200, bgG = 210, bgB = 220, sampled = false;
     let rafId;
+
+    function isBackground(r, g, b) {
+      const brightness = (r + g + b) / 3;
+      const maxC = Math.max(r, g, b), minC = Math.min(r, g, b);
+      const saturation = maxC - minC;
+      // Light pixel with low saturation = background (gray/white/light-blue)
+      return brightness > 150 && saturation < 60;
+    }
 
     function drawFrame() {
       if (vid.readyState < 2) { rafId = requestAnimationFrame(drawFrame); return; }
@@ -3553,18 +3560,10 @@ function initDolphinChroma() {
       cvs.height = vid.videoHeight || 240;
       ctx.drawImage(vid, 0, 0);
 
-      // Sample background color from top-left corner on first frame
-      if (!sampled) {
-        const px = ctx.getImageData(4, 4, 1, 1).data;
-        bgR = px[0]; bgG = px[1]; bgB = px[2];
-        sampled = true;
-      }
-
       const frame = ctx.getImageData(0, 0, cvs.width, cvs.height);
       const d = frame.data;
-      const thresh = 40;
       for (let i = 0; i < d.length; i += 4) {
-        if (Math.abs(d[i]-bgR) < thresh && Math.abs(d[i+1]-bgG) < thresh && Math.abs(d[i+2]-bgB) < thresh) {
+        if (isBackground(d[i], d[i+1], d[i+2])) {
           d[i+3] = 0;
         }
       }
