@@ -369,6 +369,18 @@
   .more-btn{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;font-size:.98rem;margin-bottom:10px;cursor:pointer;font-weight:600;color:var(--ink);font-family:inherit;transition:background .2s,border-color .2s}
   .more-btn:hover{background:var(--card2)}
   .danger{color:#f87171}
+  /* ── Theme swipe row ── */
+  .theme-scroll{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:6px}
+  .theme-scroll::-webkit-scrollbar{display:none}
+  .theme-card{flex:0 0 auto;scroll-snap-align:start;width:82px;border-radius:14px;border:2px solid var(--line);padding:8px 6px;text-align:center;cursor:pointer;font-size:.75rem;font-weight:600;background:var(--card);color:var(--ink);transition:border-color .2s,transform .15s;-webkit-tap-highlight-color:transparent}
+  .theme-card.sel{border-color:#6366f1;transform:scale(1.06)}
+  .theme-swatch{width:100%;height:44px;border-radius:9px;margin-bottom:7px}
+  .theme-sw-dark{background:linear-gradient(135deg,#0a0e1a,#1e2d6b)}
+  .theme-sw-light{background:linear-gradient(135deg,#4f46e5,#0891b2)}
+  .theme-sw-kawaii{background:linear-gradient(135deg,#ffc8dd,#c8b6ff)}
+  .theme-sw-ocean{background:linear-gradient(135deg,#042d50,#0a6585)}
+  .theme-sw-forest{background:linear-gradient(135deg,#0c4524,#1a6b38)}
+  .theme-sw-galaxy{background:linear-gradient(135deg,#34176b,#0a0618)}
   summary{cursor:pointer;font-weight:700;padding:6px 0}
   textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:10px;padding:10px;font-family:monospace;font-size:.78rem;background:var(--card2);color:var(--ink)}
   .toast{position:fixed;bottom:112px;left:50%;transform:translateX(-50%);background:var(--grad);color:#06121f;padding:10px 22px;border-radius:999px;font-weight:800;z-index:60;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 28px rgba(34,211,238,.3)}
@@ -2050,6 +2062,7 @@ function applyTheme(t){
 }
 function nextTheme(){const order=["dark","light","kawaii","ocean","forest","galaxy"];const cur=getTheme();return order[(order.indexOf(cur)+1)%order.length];}
 const THEME_LABELS={"dark":"🌙 Dark","light":"☀️ Bright","kawaii":"🌸 Kawaii","ocean":"🌊 Ocean","forest":"🌲 Forest","galaxy":"🌌 Galaxy"};
+window.pickTheme=function(t){applyTheme(t);document.querySelectorAll(".theme-card").forEach(c=>c.classList.toggle("sel",c.dataset.theme===t));};
 
 function renderMore(v){
   const themeName=THEME_LABELS[getTheme()]||"🌙 Dark";
@@ -2057,7 +2070,8 @@ function renderMore(v){
   v.innerHTML=`
     <div class="band-head"><h2>⚙️ Settings & tools</h2></div>
     <button class="more-btn" id="changeAge">🎂 Change my age <span style="color:var(--muted)">(currently ${state.age??"not set"})</span></button>
-    <button class="more-btn" id="themeBtn">🎨 Theme: <b>${themeName}</b> — tap to switch</button>
+    <div class="band-head" style="margin-top:4px"><h2>🎨 Theme</h2></div>
+    <div class="theme-scroll">${["dark","light","kawaii","ocean","forest","galaxy"].map(t=>`<div class="theme-card${t===getTheme()?" sel":""}" data-theme="${t}" onclick="pickTheme('${t}')"><div class="theme-swatch theme-sw-${t}"></div>${{"dark":"🌙 Dark","light":"☀️ Bright","kawaii":"🌸 Kawaii","ocean":"🌊 Ocean","forest":"🌲 Forest","galaxy":"🌌 Galaxy"}[t]}</div>`).join("")}</div>
     <button class="more-btn" id="fontBtn">🔠 Text size: <b>${({"":"Normal","fs-lg":"Large","fs-xl":"Extra large"})[localStorage.getItem(K.fs)||""]}</b> — tap to change</button>
     <div class="band-head" style="margin-top:18px"><h2>🔔 Lumi Reminders</h2></div>
     <div class="card">
@@ -2089,7 +2103,6 @@ function renderMore(v){
       This app shares general life guidance, not medical, legal, or financial advice — for big decisions, talk to a professional (they still exist in 2150).
     </div>`;
   $("#changeAge").onclick=()=>startOnboard(1);
-  $("#themeBtn").onclick=()=>{applyTheme(nextTheme());renderMore(v);};
   $("#fontBtn").onclick=()=>{const order=["","fs-lg","fs-xl"];const cur=localStorage.getItem(K.fs)||"";const nx=order[(order.indexOf(cur)+1)%3];localStorage.setItem(K.fs,nx);applyPrefs();renderMore(v);};
   $("#exportBtn").onclick=()=>{
     const data=JSON.stringify({age:state.age,done:state.done,xp:state.xp,streak:state.streak,daily:state.daily});
@@ -3063,7 +3076,8 @@ function renderYou(v){
     <button class="more-btn" id="changeGuide">🤝 Guides & store <span style="color:var(--muted);font-weight:400">· using <b>${getChar().name}</b> · ${(state.unlocked||["bear"]).length}/${CHARACTERS.length} unlocked</span></button>
     <button class="more-btn" id="changeInterests">✨ My interests <span style="color:var(--muted);font-weight:400">${(state.interests&&state.interests.length)?"("+state.interests.map(id=>{const it=INTERESTS.find(x=>x.id===id);return it?it.label:id;}).join(", ")+")":"· tap to set"}</span></button>
     <button class="more-btn" id="changeAge">🎂 My age <span style="color:var(--muted);font-weight:400">(${state.age??"not set"})</span></button>
-    <button class="more-btn" id="themeBtn">🎨 Theme: <b>${themeName}</b></button>
+    <div class="band-head" style="margin-top:4px"><h2>🎨 Theme</h2></div>
+    <div class="theme-scroll">${["dark","light","kawaii","ocean","forest","galaxy"].map(t=>`<div class="theme-card${t===getTheme()?" sel":""}" data-theme="${t}" onclick="pickTheme('${t}')"><div class="theme-swatch theme-sw-${t}"></div>${{"dark":"🌙 Dark","light":"☀️ Bright","kawaii":"🌸 Kawaii","ocean":"🌊 Ocean","forest":"🌲 Forest","galaxy":"🌌 Galaxy"}[t]}</div>`).join("")}</div>
     <button class="more-btn" id="fontBtn">🔠 Text size: <b>${({"":"Normal","fs-lg":"Large","fs-xl":"Extra large"})[localStorage.getItem(K.fs)||""]}</b></button>
 
     <button class="more-btn" id="goSchedule">🔔 Lumi reminders & schedule <span style="color:var(--muted);font-weight:400">${lcfg.on?"· on":"· off"} →</span></button>
@@ -3082,7 +3096,6 @@ function renderYou(v){
   $("#changeGuide").onclick=()=>openStore();
   $("#changeInterests").onclick=()=>startOnboard(3);
   $("#changeAge").onclick=()=>startOnboard(1);
-  $("#themeBtn").onclick=()=>{applyTheme(nextTheme());renderYou(v);};
   $("#fontBtn").onclick=()=>{const order=["","fs-lg","fs-xl"];const cur=localStorage.getItem(K.fs)||"";const nx=order[(order.indexOf(cur)+1)%3];localStorage.setItem(K.fs,nx);applyPrefs();renderYou(v);};
   $("#goSchedule").onclick=()=>{state.tab="schedule";render();window.scrollTo(0,0);};
   $("#exportBtn").onclick=()=>{
