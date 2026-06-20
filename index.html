@@ -2007,6 +2007,9 @@ function renderToday(v){
   v.innerHTML=html;
   applyMood();
   startProactiveTimer();
+  // Preload all Barney mood WebPs so switchCharMood is instant
+  if(getChar().id==="bear"){["idle","happy","excited","hungry","sleep"].forEach(m=>{const i=new Image();i.src=`barney-${m}.webp?v=2`;});}
+  if(getChar().id==="bunny"){["idle","happy","excited","hungry","sleep"].forEach(m=>{const i=new Image();i.src=`bunny-${m}.mp4`;});}
   // Character interactions
   const _stage=$("#charStage"),_petImg=$("#charPetImg");
   function _bounce(){
@@ -2024,8 +2027,13 @@ function renderToday(v){
     if(ci.type==="video"){
       el.src=ci.src; el.load(); el.play();
     } else {
-      el.src=ci.webp;
-      el.onerror=()=>{el.onerror=null;el.src=ci.fallback;};
+      el.style.transition="opacity .18s";
+      el.style.opacity="0";
+      setTimeout(()=>{
+        el.onload=()=>{el.onload=null;el.style.opacity="1";};
+        el.onerror=()=>{el.onerror=null;el.src=ci.fallback;el.style.opacity="1";};
+        el.src=ci.webp;
+      },180);
     }
     ["idle","happy","excited","hungry","sleep"].forEach(x=>el.classList.toggle("mood-"+x,x===m));
     const lbl=document.querySelector("[data-mood-lbl]");
@@ -2056,13 +2064,23 @@ function renderToday(v){
     setTimeout(()=>{
       const MOOD_LABELS={idle:"Just chillin' today",happy:"Feeling happy! 😊",excited:"Super excited! 🤩",hungry:"Getting hungry… 🍎",sleep:"Feeling sleepy 😴"};
       if(_wave){
-        // Play wave clip, then settle on actual mood after it finishes
-        _petImg.src=_wave.webp; _petImg.onerror=()=>{_petImg.onerror=null;_petImg.src=_wave.fallback;};
-        toast(`${_nm} wakes up! 👋`);
-        setTimeout(()=>{
-          _petImg.src=_aw; _petImg.onerror=()=>{_petImg.onerror=null;_petImg.src=_af;};
-          const lbl=document.querySelector("[data-mood-lbl]"); if(lbl)lbl.textContent=MOOD_LABELS[_am]||"";
-        },_wave.ms);
+        // Play wave clip — start timer only after WebP finishes loading so full clip plays
+        _petImg.onerror=()=>{_petImg.onerror=null;_petImg.src=_wave.fallback;};
+        _petImg.onload=()=>{
+          _petImg.onload=null;
+          toast(`${_nm} wakes up! 👋`);
+          setTimeout(()=>{
+            _petImg.style.transition="opacity .25s";
+            _petImg.style.opacity="0";
+            setTimeout(()=>{
+              _petImg.onload=()=>{_petImg.onload=null;_petImg.style.opacity="1";};
+              _petImg.onerror=()=>{_petImg.onerror=null;_petImg.src=_af;_petImg.style.opacity="1";};
+              _petImg.src=_aw;
+              const lbl=document.querySelector("[data-mood-lbl]"); if(lbl)lbl.textContent=MOOD_LABELS[_am]||"";
+            },250);
+          },_wave.ms);
+        };
+        _petImg.src=_wave.webp;
       } else if(_isVidChar){
         // Video character — just switch to actual mood clip
         _petImg.src=_aw; _petImg.load(); _petImg.play();
