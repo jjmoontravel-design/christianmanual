@@ -1228,6 +1228,18 @@
 </nav>
 <div id="toast" class="toast"></div>
 
+<!-- Legal modal -->
+<div id="legal-modal" style="display:none;position:fixed;inset:0;background:rgba(2,4,14,.9);z-index:200;overflow-y:auto;padding:24px 16px 40px;backdrop-filter:blur(10px)">
+  <div style="max-width:600px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px 22px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h2 id="legal-title" style="margin:0;font-size:1.2rem"></h2>
+      <button onclick="document.getElementById('legal-modal').style.display='none'" style="background:none;border:none;color:var(--muted);font-size:1.6rem;cursor:pointer;line-height:1;padding:4px">✕</button>
+    </div>
+    <div id="legal-body" style="color:var(--ink);font-size:.92rem;line-height:1.75"></div>
+    <button onclick="document.getElementById('legal-modal').style.display='none'" style="margin-top:24px;width:100%;padding:12px;background:var(--grad);border:none;border-radius:999px;color:#fff;font-weight:800;font-size:1rem;cursor:pointer">Close</button>
+  </div>
+</div>
+
 <!-- LUMI chat bubble -->
 <div id="lumi" class="hidden">
   <div class="lumi-face">
@@ -3216,7 +3228,11 @@ function renderYou(v){
       <b style="color:var(--ink)">About Life Manual 2.0</b><br>
       Built for everyone who didn't have a parent or role model — the people who learned life by trial and error. Not anymore. No account, no tracking. Everything stays on this device.<br><br>
       <span style="font-size:.78rem">General life guidance only — not medical, legal, or financial advice.</span>
-    </div>`;
+    </div>
+
+    <div class="band-head" style="margin-top:4px"><h2>📋 Legal</h2></div>
+    <button class="more-btn" id="privacyBtn">🔒 Privacy Policy</button>
+    <button class="more-btn" id="termsBtn">📄 Terms of Service</button>`;
 
   $("#changeGuide").onclick=()=>openStore();
   $("#changeInterests").onclick=()=>startOnboard(3);
@@ -3240,11 +3256,56 @@ function renderYou(v){
       localStorage.setItem(K.age,state.age);saveAll();toast("✓ Progress restored!");render();
     }catch(e){toast("That doesn't look like a Life Manual backup.");}};
   };
+  $("#privacyBtn").onclick=()=>openLegal("privacy");
+  $("#termsBtn").onclick=()=>openLegal("terms");
   $("#resetBtn").onclick=()=>{if(confirm("Erase ALL progress, XP, streaks, and your age? This can't be undone.")){
     Object.values(K).forEach(k=>localStorage.removeItem(k));
     state={...state,age:null,done:{},daily:{},streak:{n:0,last:null},xp:0,coins:0,unlocked:["bear"],events:[],character:"",interests:[],lifeStage:"",gender:"",pet:null,tab:"today"};
     applyPrefs();toast("Memory wiped. Fresh start.");render();
   }};
+}
+
+// ============ LEGAL MODAL ============
+function openLegal(type){
+  const modal=document.getElementById("legal-modal");
+  const title=document.getElementById("legal-title");
+  const body=document.getElementById("legal-body");
+  if(type==="privacy"){
+    title.textContent="🔒 Privacy Policy";
+    body.innerHTML=`
+      <p><b>Last updated: June 20, 2026</b></p>
+      <p>Life Manual ("the app") is a free progressive web app designed to help people learn everyday life skills. We take your privacy seriously.</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">What data we collect</h3>
+      <p><b>Nothing.</b> Life Manual does not collect, store, or transmit any personal information. There are no accounts, no sign-ups, and no servers storing your data.</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">Where your data lives</h3>
+      <p>All your progress, age, streak, coins, and settings are saved <b>only on your device</b> using your browser's local storage. We cannot see it, access it, or back it up.</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">Tracking & analytics</h3>
+      <p>We do not use cookies, tracking pixels, analytics tools, or any third-party data collection. No ads. No tracking. Period.</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">Children's privacy</h3>
+      <p>Life Manual is designed to be safe for all ages, including children under 13. Because we collect zero data, there is nothing to protect — your child's information never leaves their device.</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">Third-party links</h3>
+      <p>Some skill cards may link to YouTube video lessons on external sites. Those sites have their own privacy policies. We recommend reviewing them if you have concerns.</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">Contact</h3>
+      <p>Questions? Email us at <b>jjmoontravel@gmail.com</b></p>`;
+  } else {
+    title.textContent="📄 Terms of Service";
+    body.innerHTML=`
+      <p><b>Last updated: June 20, 2026</b></p>
+      <p>By using Life Manual, you agree to these terms. If you don't agree, please don't use the app.</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">What Life Manual is</h3>
+      <p>Life Manual is a free educational app providing general life skills guidance for everyday situations — things like cooking basics, managing money, social skills, and personal care.</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">What Life Manual is not</h3>
+      <p>The content in this app is <b>general information only</b>. It is not medical advice, legal advice, financial advice, or a substitute for professional help. Always consult a qualified professional for serious matters.</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">Your use</h3>
+      <p>Life Manual is free to use for personal, non-commercial purposes. You may not copy, resell, or redistribute the app or its content without permission.</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">No warranty</h3>
+      <p>The app is provided "as is." We do our best to keep content accurate and helpful, but we make no guarantees. Use your own judgment.</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">Changes</h3>
+      <p>We may update the app and these terms at any time. Continued use of the app means you accept any updates.</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">Contact</h3>
+      <p>Questions? Email us at <b>jjmoontravel@gmail.com</b></p>`;
+  }
+  modal.style.display="block";
 }
 
 // ============ LUMI REMINDER ENGINE ============
