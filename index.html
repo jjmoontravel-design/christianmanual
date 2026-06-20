@@ -619,14 +619,14 @@
   html.kawaii .orb{background:radial-gradient(circle at 35% 35%,rgba(240,98,146,.38),transparent 70%)}
   /* Kawaii readability: floating labels & cards need solid backgrounds over bright images */
   html.kawaii .card:not(.hero){background:rgba(255,255,255,.97)}
-  /* Forest readability: fully opaque dark cards, dark overlay on main to fill gaps */
+  /* Forest readability: fully opaque dark cards, full-screen fixed tint (no main box) */
   html.forest .card:not(.hero){background:rgba(12,36,25,.98)}
   html.forest .bubble.guide{background:rgba(12,36,25,.98)}
-  html.forest main{background:rgba(4,14,9,.22)}
+  html.forest::after{content:'';position:fixed;inset:0;background:rgba(4,14,9,.18);z-index:0;pointer-events:none}
   /* Ocean readability: same treatment */
   html.ocean .card:not(.hero){background:rgba(10,39,48,.98)}
   html.ocean .bubble.guide{background:rgba(10,39,48,.98)}
-  html.ocean main{background:rgba(2,10,14,.22)}
+  html.ocean::after{content:'';position:fixed;inset:0;background:rgba(2,10,14,.18);z-index:0;pointer-events:none}
   html.kawaii .hero{background:linear-gradient(135deg,#6b1a5e,#c2185b);border:none}
   html.kawaii .hero .kicker{color:#ffcce8}
   html.kawaii .hero .big,html.kawaii .hero .sub{color:#fff}
