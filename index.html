@@ -626,11 +626,11 @@
   /* Forest readability: fully opaque dark cards, dark overlay on main to fill gaps */
   html.forest .card:not(.hero){background:rgba(12,36,25,.98)}
   html.forest .bubble.guide{background:rgba(12,36,25,.98)}
-  html.forest main{background:rgba(4,14,9,.72)}
+  html.forest main{background:rgba(4,14,9,.22)}
   /* Ocean readability: same treatment */
   html.ocean .card:not(.hero){background:rgba(10,39,48,.98)}
   html.ocean .bubble.guide{background:rgba(10,39,48,.98)}
-  html.ocean main{background:rgba(2,10,14,.72)}
+  html.ocean main{background:rgba(2,10,14,.22)}
   html.kawaii .hero{background:linear-gradient(135deg,#6b1a5e,#c2185b);border:none}
   html.kawaii .hero .kicker{color:#ffcce8}
   html.kawaii .hero .big,html.kawaii .hero .sub{color:#fff}
@@ -667,7 +667,7 @@
   html.ocean .aurora.a1{background:radial-gradient(circle,#0891b2aa,transparent 65%)}
   html.ocean .aurora.a2{background:radial-gradient(circle,#22d3eeaa,transparent 65%)}
   /* Journey → kelp forest beneath the surface */
-  html.ocean .f-sky{background:url('ocean-journey.jpg.jpeg') center/cover no-repeat;filter:brightness(.72)}
+  html.ocean .f-sky{background:url('ocean-journey.jpg.jpeg') center/cover no-repeat;filter:brightness(.88)}
   html.ocean .f-moon{background:radial-gradient(circle at 38% 36%,#e7feff,#a5f3fc);box-shadow:0 0 50px 14px rgba(165,243,252,.4)}
   html.ocean .f-ray{background:linear-gradient(180deg,rgba(165,243,252,.18),transparent 58%)}
   html.ocean .f-l1{fill:#0e5a66;opacity:.55}
@@ -677,18 +677,18 @@
   html.ocean .f-ground{background:linear-gradient(transparent,#03181f)}
   html.ocean .fly{background:#a5f3fc;box-shadow:0 0 10px 3px rgba(165,243,252,.8)}
   /* Guides → glide across a sunlit sea surface */
-  html.ocean .r-sky{background:url('ocean-guides.jpg.jpeg') center/cover no-repeat;filter:brightness(.72)}
+  html.ocean .r-sky{background:url('ocean-guides.jpg.jpeg') center/cover no-repeat;filter:brightness(.88)}
   html.ocean .r-sun{background:radial-gradient(circle,#f0feff,#7dd3fc 52%,transparent 72%)}
   html.ocean .r-mtn{background:#053040}
   html.ocean .r-road{background:linear-gradient(180deg,#0e7490,#053040)}
   html.ocean .r-road::before{background:repeating-linear-gradient(to bottom,#a5f3fc 0 26px,transparent 26px 60px)}
   html.ocean .r-post{background:linear-gradient(#e0feff,#22d3ee);box-shadow:0 0 8px 2px rgba(34,211,238,.6)}
   /* Schedule → calm aqua sky */
-  html.ocean .sc-sky{background:url('ocean-sched.jpeg') center/cover no-repeat;filter:brightness(.78)}
+  html.ocean .sc-sky{background:url('ocean-sched.jpeg') center/cover no-repeat;filter:brightness(.92)}
   html.ocean .sc-cloud{background:radial-gradient(closest-side,rgba(165,243,252,.22),transparent)}
   html.ocean .orb{background:radial-gradient(circle at 35% 35%,rgba(34,211,238,.32),transparent 70%)}
   /* You → deep ocean dream */
-  html.ocean .y-sky{background:url('ocean-you.jpg.jpeg') center/cover no-repeat;filter:brightness(.78)}
+  html.ocean .y-sky{background:url('ocean-you.jpg.jpeg') center/cover no-repeat;filter:brightness(.92)}
   html.ocean .y-neb1{background:radial-gradient(circle,rgba(34,211,238,.40),transparent 66%)}
   html.ocean .y-neb2{background:radial-gradient(circle,rgba(8,145,178,.38),transparent 66%)}
 
@@ -696,7 +696,7 @@
   html.forest .aurora.a1{background:radial-gradient(circle,#16a34aaa,transparent 65%)}
   html.forest .aurora.a2{background:radial-gradient(circle,#34d399aa,transparent 65%)}
   /* Journey → deep emerald woods */
-  html.forest .f-sky{background:url('forest-journey.jpg') center/cover no-repeat;filter:brightness(.72)}
+  html.forest .f-sky{background:url('forest-journey.jpg') center/cover no-repeat;filter:brightness(.88)}
   html.forest .f-moon{background:radial-gradient(circle at 38% 36%,#f0fff4,#bbf7d0);box-shadow:0 0 48px 14px rgba(187,247,208,.4)}
   html.forest .f-ray{background:linear-gradient(180deg,rgba(187,247,208,.18),transparent 58%)}
   html.forest .f-l1{fill:#1f7a44;opacity:.55}
@@ -706,21 +706,21 @@
   html.forest .f-ground{background:linear-gradient(transparent,#04190d)}
   html.forest .fly{background:#bbf7d0;box-shadow:0 0 10px 3px rgba(187,247,208,.8)}
   /* Guides → forest road at golden hour */
-  html.forest .r-sky{background:url('forest-guides.jpg') center/cover no-repeat;filter:brightness(.72)}
+  html.forest .r-sky{background:url('forest-guides.jpg') center/cover no-repeat;filter:brightness(.88)}
   html.forest .r-sun{background:radial-gradient(circle,#fefce8,#bef264 52%,transparent 72%)}
   html.forest .r-mtn{background:#0a2e18}
   html.forest .r-road{background:linear-gradient(180deg,#166534,#062815)}
   html.forest .r-road::before{background:repeating-linear-gradient(to bottom,#d9f99d 0 26px,transparent 26px 60px)}
   html.forest .r-post{background:linear-gradient(#f0fff4,#34d399);box-shadow:0 0 8px 2px rgba(52,211,153,.6)}
   /* Schedule → soft green canopy sky */
-  html.forest .sc-sky{background:url('forest-sched.jpg') center/cover no-repeat;filter:brightness(.38)}
+  html.forest .sc-sky{background:url('forest-sched.jpg') center/cover no-repeat;filter:brightness(.68)}
   html.forest .sc-cloud{background:radial-gradient(closest-side,rgba(187,247,208,.20),transparent)}
   html.forest .orb{background:radial-gradient(circle at 35% 35%,rgba(52,211,153,.32),transparent 70%)}
   html.forest .band-head{background:rgba(12,36,25,.82);border-radius:999px;padding:4px 14px;display:inline-flex;margin:16px 0 10px}
   html.forest .ev-section-head{background:rgba(12,36,25,.82);border-radius:999px;padding:4px 12px}
   html.forest .section-note{background:rgba(12,36,25,.75);border-radius:12px;padding:6px 12px}
   /* You → emerald dream */
-  html.forest .y-sky{background:url('forest-you.jpg') center/cover no-repeat;filter:brightness(.72)}
+  html.forest .y-sky{background:url('forest-you.jpg') center/cover no-repeat;filter:brightness(.88)}
   html.forest .y-neb1{background:radial-gradient(circle,rgba(52,211,153,.40),transparent 66%)}
   html.forest .y-neb2{background:radial-gradient(circle,rgba(22,163,74,.38),transparent 66%)}
 
@@ -833,8 +833,8 @@
   body[data-tab="today"] .scene-today{opacity:1}
   .td-sky{position:absolute;inset:0;background:transparent}
   .td-stars{opacity:0}
-  html.ocean  .scene-today .td-sky{background:url('ocean-bg.jpg.jpeg') center/cover no-repeat;filter:brightness(.75)}
-  html.forest .scene-today .td-sky{background:url('forest-bg.jpg') center/cover no-repeat;filter:brightness(.38)}
+  html.ocean  .scene-today .td-sky{background:url('ocean-bg.jpg.jpeg') center/cover no-repeat;filter:brightness(.92)}
+  html.forest .scene-today .td-sky{background:url('forest-bg.jpg') center/cover no-repeat;filter:brightness(.68)}
   html.kawaii .scene-today .td-sky{background:url('kawaii-bg.jpg') center/cover no-repeat;filter:brightness(.88)}
   html.galaxy .scene-today .td-sky{background:url('galaxy-bg.jpg') center/cover no-repeat;filter:brightness(.72)}
   html.galaxy .td-stars{opacity:.6}
