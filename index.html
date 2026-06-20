@@ -141,9 +141,6 @@
   .btn-got:hover{box-shadow:0 6px 30px rgba(34,211,238,.42)}
   .btn-learned{background:rgba(52,211,153,.1);color:var(--good);border:1px solid rgba(52,211,153,.2);cursor:default}
   html.light .btn-learned{background:#d1fae5;color:#047857}
-  .btn-video{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.2)}
-  html.light .btn-video{background:#fef3c7;color:#92400e}
-  .btn-video.soon{opacity:.5;cursor:default}
   .btn-ghost{background:var(--card2);color:var(--ink);border:1px solid var(--line)}
   .complete-banner{background:linear-gradient(120deg,#051f18,#061826);color:#fff;text-align:center;border:1px solid rgba(52,211,153,.25);box-shadow:0 0 50px rgba(52,211,153,.07)}
   .complete-banner .big{font-size:1.15rem;font-weight:800}
@@ -178,7 +175,6 @@
   .bubble ol{margin:8px 0 4px;padding-left:20px}
   .bubble li{margin-bottom:5px;font-size:.92rem;line-height:1.45}
   .bubble .ex{font-style:italic;color:var(--muted);margin-top:6px;font-size:.9rem}
-  .bubble .btn-video{margin-top:8px}
   .bubble.celebrate{border-left-color:#34d399;background:linear-gradient(135deg,rgba(5,31,24,.92),var(--card));box-shadow:0 0 40px rgba(52,211,153,.1)}
   .bubble.sweeping .sweep{animation:cardSweep .5s ease forwards}
   /* ── Theme-flavoured guide bubbles ─────────────────────────────────────── */
@@ -1993,8 +1989,7 @@ function renderToday(v){
     cards.skill=moduleBubble("skill",`<div class="title">${s.e} ${s.t}</div>
       <div class="bodytext">${s.why}</div>
       <ol>${s.steps.map(x=>`<li>${x}</li>`).join("")}</ol>
-      <div class="hint">From your life path (${d.skill.band.range}). Checking it here checks it in your Journey too.</div>
-      ${s.video?`<a class="btn btn-video" href="${s.video}" target="_blank" rel="noopener">▶ Watch the video lesson</a>`:`<span class="btn btn-video soon">🎬 Video lesson coming soon</span>`}`);
+      <div class="hint">From your life path (${d.skill.band.range}). Checking it here checks it in your Journey too.</div>`);
   }
   cards.vocab=moduleBubble("vocab",`<div class="word">${d.vocab.w}</div>
     <div class="bodytext">${d.vocab.d}</div><div class="ex">"${d.vocab.x}"</div>
@@ -2088,14 +2083,12 @@ function renderToday(v){
 
 function skillCard(s){
   const done=!!state.done[s.id];
-  const vid=s.video?`<a class="btn btn-video" href="${s.video}" target="_blank" rel="noopener" onclick="event.stopPropagation()">▶ Watch the video lesson</a>`
-                   :`<span class="btn btn-video soon">🎬 Video lesson coming soon</span>`;
   return `<div class="card skill ${done?"done":""}" data-id="${s.id}">
     <div class="top"><span class="emoji">${s.e}</span>
       <div><div class="t">${s.t}</div><div class="why">${s.why}</div></div>
       <span class="check">✓</span></div>
     <div class="detail"><div class="label">How to do it</div>
-      <ol>${s.steps.map(x=>`<li>${x}</li>`).join("")}</ol>${vid}
+      <ol>${s.steps.map(x=>`<li>${x}</li>`).join("")}</ol>
       <button class="btn ${done?"btn-ghost":"btn-got"}" data-toggle="${s.id}">${done?"Un-check":"✓ I know this"}</button></div></div>`;
 }
 function bandSection(b,skills){
@@ -3283,8 +3276,6 @@ function openLegal(type){
       <p>We do not use cookies, tracking pixels, analytics tools, or any third-party data collection. No ads. No tracking. Period.</p>
       <h3 style="margin:14px 0 6px;font-size:1rem">Children's privacy</h3>
       <p>Life Manual is designed to be safe for all ages, including children under 13. Because we collect zero data, there is nothing to protect — your child's information never leaves their device.</p>
-      <h3 style="margin:14px 0 6px;font-size:1rem">Third-party links</h3>
-      <p>Some skill cards may link to YouTube video lessons on external sites. Those sites have their own privacy policies. We recommend reviewing them if you have concerns.</p>
       <h3 style="margin:14px 0 6px;font-size:1rem">Contact</h3>
       <p>Questions? Email us at <b>jjmoontravel@gmail.com</b></p>`;
   } else {
