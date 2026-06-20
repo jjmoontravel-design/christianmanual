@@ -2035,7 +2035,8 @@ function renderToday(v){
     if(!el)return;
     const ci=companionImg(m);
     if(ci.type==="video"){
-      el.src=ci.src; el.load(); el.play();
+      el.muted=true; el.src=ci.src; el.load();
+      el.addEventListener("canplay",()=>el.play().catch(()=>{}),{once:true});
     } else {
       el.style.transition="opacity .18s";
       el.style.opacity="0";
