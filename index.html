@@ -2409,17 +2409,15 @@ function renderOnboard(){
       <div class="ob-nav">${back}<button class="btn btn-got" id="ob-next">Next →</button></div>
       <button class="ob-skip" id="ob-skip">Skip for now</button>`;
   }else if(ob.step===4){
-    // Pick a free starter guide: Barney (bear) or Penny (bunny). Pre-selected from gender. Others unlock with coins.
-    if(d.character!=="bear"&&d.character!=="bunny")d.character=(d.gender==="female")?"bunny":"bear";
-    const starters=["bear","bunny"];
+    if(!d.character)d.character=(d.gender==="female")?"bunny":"bear";
     b.innerHTML=`<div class="ob-emoji">🤝</div>
-      <h2>Pick your starter guide</h2>
-      <p>Choose the friend who'll walk with you${d.name?", "+d.name:""}. You'll unlock the others with 🪙 coins as you go.</p>
-      <div class="char-grid" id="ob-chars" style="grid-template-columns:repeat(2,1fr)">${starters.map(id=>{const ch=CHARACTERS.find(x=>x.id===id);return `<button class="char-tile ${d.character===id?"sel":""}" data-char="${id}" style="--cc:${ch.color}">
-        <span class="ct-face" style="width:84px;height:84px">${charVideoHTML(ch)}</span>
+      <h2>Pick your guide</h2>
+      <p>Choose the friend who'll walk with you${d.name?", "+d.name:""}. Each one specializes in something different.</p>
+      <div class="char-grid" id="ob-chars">${CHARACTERS.map(ch=>`<button class="char-tile ${d.character===ch.id?"sel":""}" data-char="${ch.id}" style="--cc:${ch.color}">
+        <span class="ct-face" style="width:54px;height:54px">${charVideoHTML(ch)}</span>
         <span class="ct-name">${ch.name}</span>
-        <span class="ct-pillar">${id==="bear"?"♂ Barney":"♀ Penny"} · ${ch.pillar}</span>
-      </button>`;}).join("")}</div>
+        <span class="ct-pillar">${ch.pillar}</span>
+      </button>`).join("")}</div>
       <div class="ob-nav">${back}<button class="btn btn-got" id="ob-next">Next →</button></div>`;
   }else if(ob.step===5){
     b.innerHTML=`<div class="ob-emoji">🔔</div>
@@ -2484,10 +2482,9 @@ function obFinish(){
   const d=ob.draft;
   state.name=d.name||""; localStorage.setItem(K.name,state.name);
   if(ob.initial){
-    // First-time setup: lock in the chosen free starter (Barney or Penny) as the only unlocked guide.
-    const starter=(d.character==="bunny")?"bunny":"bear";
+    const starter=d.character||((d.gender==="female")?"bunny":"bear");
     state.character=starter; localStorage.setItem(K.character,starter);
-    state.unlocked=[starter];
+    state.unlocked=CHARACTERS.map(c=>c.id);
   }
   state.interests=(d.interests||[]).slice(); localStorage.setItem(K.interests,JSON.stringify(state.interests));
   state.lifeStage=d.lifeStage||""; localStorage.setItem(K.lifeStage,state.lifeStage);
