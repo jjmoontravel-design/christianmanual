@@ -2019,6 +2019,7 @@ function renderToday(v){
       <button class="mood-btn${_m==="bored"?" sel":""}" onclick="switchCharMood('bored')">🎮 Bored</button>
       <button class="mood-btn${_m==="hungry"?" sel":""}" onclick="switchCharMood('hungry')">🍎 Hungry</button>
       <button class="mood-btn${_m==="sleep"?" sel":""}" onclick="switchCharMood('sleep')">😴 Sleep</button>
+      <button class="mood-btn" onclick="showKnockPopup()" style="background:#e879f9;color:#fff;border-color:#d946ef">🚪 Knock</button>
     </div>`:""}
     <div class="char-mini-stats">${stats.map(s=>`<div class="char-mini-stat"><span>${s[1]}</span><div class="char-mini-bar"><i style="width:${Math.round(state.pet[s[0]])}%;background:${s[2]}"></i></div></div>`).join("")}</div>
     <button class="char-care-ghost" data-care="1">Care for ${nm}</button>
