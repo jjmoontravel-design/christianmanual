@@ -1652,8 +1652,11 @@ function pickForYou(){
 }
 function dailyContent(){
   const found=state.daily.skillId?skillById(state.daily.skillId):null;
+  const cid=getChar().id;
+  const pillarPool=typeof PILLAR_SKILLS!=="undefined"&&PILLAR_SKILLS[cid];
+  const pillar=pillarPool?pick(pillarPool,13,6):null;
   return{
-    skill:found, foryou:pickForYou(),
+    skill:found, pillar, foryou:pickForYou(),
     vocab:pick(DAILY.vocab,7,0), body:pick(DAILY.body,11,3), money:pickMoney(),
     mind:pick(DAILY.mind,17,2), world:pick(DAILY.world,19,4), challenge:pick(DAILY.challenge,23,5)
   };
@@ -2051,7 +2054,13 @@ function renderToday(v){
       ${it.steps?`<ol>${it.steps.map(x=>`<li>${x}</li>`).join("")}</ol>`:""}
       <div class="hint">Picked for you because you're into ${pk.label.toLowerCase()}.</div>`);
   }
-  if(d.skill){
+  if(d.pillar){
+    const s=d.pillar,c=getChar();
+    cards.skill=moduleBubble("skill",`<div class="title">${s.e} ${s.t}</div>
+      <div class="bodytext">${s.why}</div>
+      <ol>${s.steps.map(x=>`<li>${x}</li>`).join("")}</ol>
+      <div class="hint">${c.name}'s focus: ${c.pillar}.</div>`);
+  } else if(d.skill){
     const s=d.skill.skill;
     cards.skill=moduleBubble("skill",`<div class="title">${s.e} ${s.t}</div>
       <div class="bodytext">${s.why}</div>
