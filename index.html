@@ -479,6 +479,8 @@
   .char-mini-bar i{display:block;height:100%;border-radius:3px;transition:width .6s ease}
   .char-care-ghost{background:none;border:1.5px solid var(--line);border-radius:999px;padding:7px 22px;font-size:.8rem;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .18s;margin-bottom:16px;display:inline-block}
   .char-care-ghost:active{transform:scale(.94);border-color:#a78bfa;color:#a78bfa}
+  .char-care-ghost.needs-care{border-color:#f97316;color:#f97316;animation:care-pulse 1.6s ease-in-out infinite}
+  @keyframes care-pulse{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,.4)}50%{box-shadow:0 0 0 6px rgba(249,115,22,0)}}
   /* legacy pet bars still used in care modal */
   .pet-bar{height:11px;border-radius:6px;background:var(--card2);overflow:hidden;border:1px solid var(--line);flex:1}
   .pet-bar i{display:block;height:100%;border-radius:6px;transition:width .5s ease}
@@ -1461,14 +1463,20 @@ function petAvg(){ensurePet();return Math.round(PET_STATS.reduce((s,k)=>s+(state
 // Which mood clip to play, based on care stats (reuses the existing clips — simple movement).
 function barneyMood(){
   ensurePet();
-  if(state.manualMood)return state.manualMood;
   const p=state.pet;
+  // Critical needs always win over manual choice
   if(p.hunger<25)return "hungry";
   if(p.energy<25)return "sleep";
+  // Manual mood lasts 4 hours then expires
+  if(state.manualMood){
+    const ageHrs=(Date.now()-(state.manualMoodT||0))/3600000;
+    if(ageHrs<4)return state.manualMood;
+    delete state.manualMood; delete state.manualMoodT; saveAll();
+  }
   const avg=petAvg();
   if(avg<40)return "hungry";
   if(avg>=75)return "happy";
-  if(avg>=45)return "bored"; // mid-range — wants something to do
+  if(avg>=45)return "bored";
   return "idle";
 }
 // Care-aware companion message — nudges toward whatever the pet needs most.
@@ -2025,7 +2033,7 @@ function renderToday(v){
       <button class="mood-btn${_m==="sleep"?" sel":""}" onclick="switchCharMood('sleep')">😴 Sleep</button>
     </div>`:""}
     <div class="char-mini-stats">${stats.map(s=>`<div class="char-mini-stat"><span>${s[1]}</span><div class="char-mini-bar"><i style="width:${Math.round(state.pet[s[0]])}%;background:${s[2]}"></i></div></div>`).join("")}</div>
-    <button class="char-care-ghost" data-care="1">Care for ${nm}</button>
+    <button class="char-care-ghost${PET_STATS.some(k=>state.pet[k]<40)?" needs-care":""}" data-care="1">${PET_STATS.some(k=>state.pet[k]<40)?"⚠️ ":""}Care for ${nm}</button>
     ${_isVid?`<button onclick="showKnockPopup()" style="background:none;border:none;font-size:.72rem;color:var(--muted);cursor:pointer;padding:2px 8px;font-family:inherit">🚪 test knock</button>`:""}
   </div>`})()}
   <div class="chat-thread">
@@ -2102,7 +2110,7 @@ function renderToday(v){
     const lbl=document.querySelector("[data-mood-lbl]");
     if(lbl)lbl.textContent=MOOD_STATUS_MAP[m]||"";
     document.querySelectorAll(".mood-btn").forEach(b=>b.classList.toggle("sel",b.textContent.toLowerCase().includes(m)));
-    state.manualMood=m; saveAll();
+    state.manualMood=m; state.manualMoodT=Date.now(); saveAll();
     clearTimeout(window._sleepLoopTimer);
     if(m==="sleep" && ci.type!=="video"){
       const ss=ci.webp;
