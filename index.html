@@ -1367,7 +1367,8 @@ async function syncEventsToWorker(){
     body:JSON.stringify({userId:getPushUserId(),events:state.events,tzOffset:new Date().getTimezoneOffset()})}).catch(()=>{});
 }
 
-const K={age:"lifemanual.age",done:"lifemanual.done",daily:"lifemanual.daily",streak:"lifemanual.streak",xp:"lifemanual.xp",theme:"lifemanual.theme",fs:"lifemanual.fontsize",history:"lifemanual.history",name:"lifemanual.name",goal:"lifemanual.goal",events:"lifemanual.events",character:"lifemanual.character",interests:"lifemanual.interests",lifeStage:"lifemanual.lifestage",coins:"lifemanual.coins",unlocked:"lifemanual.unlocked",gender:"lifemanual.gender",pet:"lifemanual.pet"};
+const K={age:"lifemanual.age",done:"lifemanual.done",daily:"lifemanual.daily",streak:"lifemanual.streak",xp:"lifemanual.xp",theme:"lifemanual.theme",fs:"lifemanual.fontsize",history:"lifemanual.history",name:"lifemanual.name",goal:"lifemanual.goal",events:"lifemanual.events",character:"lifemanual.character",interests:"lifemanual.interests",lifeStage:"lifemanual.lifestage",coins:"lifemanual.coins",unlocked:"lifemanual.unlocked",gender:"lifemanual.gender",pet:"lifemanual.pet",themes:"lifemanual.themes"};
+const THEME_PRICES={dark:0,light:0,kawaii:50,ocean:50,forest:50,galaxy:50};
 // Coin cost to unlock each guide. Barney (bear) is free — everyone starts with him.
 const CHAR_COST={bear:0, beaver:150, wolf:150, lion:150, elephant:150, panda:100, capybara:100, cat:100, bunny:100, dolphin:100, fox:100, eagle:100, tiger:100, raccoon:100, penguin:75, owl:75, ant:75, deer:75, turtle:75};
 function charCost(id){return CHAR_COST[id]==null?100:CHAR_COST[id];}
@@ -1381,6 +1382,7 @@ let state={
   xp:parseInt(localStorage.getItem(K.xp))||0,
   coins:parseInt(localStorage.getItem(K.coins))||0,
   unlocked:JSON.parse(localStorage.getItem(K.unlocked)||'["bear"]'),
+  unlockedThemes:JSON.parse(localStorage.getItem(K.themes)||'["dark","light"]'),
   history:JSON.parse(localStorage.getItem(K.history)||"{}"),
   events:JSON.parse(localStorage.getItem("lifemanual.events")||"[]"),
   character:localStorage.getItem("lifemanual.character")||"",
@@ -1587,6 +1589,7 @@ function saveAll(){
   localStorage.setItem(K.xp,state.xp);
   localStorage.setItem(K.coins,state.coins);
   localStorage.setItem(K.unlocked,JSON.stringify(state.unlocked||["bear"]));
+  localStorage.setItem(K.themes,JSON.stringify(state.unlockedThemes||["dark","light"]));
   if(state.gender)localStorage.setItem(K.gender,state.gender);
   if(state.pet)localStorage.setItem(K.pet,JSON.stringify(state.pet));
   localStorage.setItem(K.history,JSON.stringify(state.history));
@@ -2264,7 +2267,33 @@ function applyTheme(t){
 }
 function nextTheme(){const order=["dark","light","kawaii","ocean","forest","galaxy"];const cur=getTheme();return order[(order.indexOf(cur)+1)%order.length];}
 const THEME_LABELS={"dark":"🌙 Dark","light":"☀️ Bright","kawaii":"🌸 Kawaii","ocean":"🌊 Ocean","forest":"🌲 Forest","galaxy":"🌌 Galaxy"};
-window.pickTheme=function(t){applyTheme(t);document.querySelectorAll(".theme-card").forEach(c=>c.classList.toggle("sel",c.dataset.theme===t));};
+let _pendingTheme=null,_pendingThemeTm=null;
+window.pickTheme=function(t){
+  const unlocked=state.unlockedThemes||["dark","light"];
+  if(unlocked.includes(t)){
+    applyTheme(t);
+    document.querySelectorAll(".theme-card").forEach(c=>c.classList.toggle("sel",c.dataset.theme===t));
+    _pendingTheme=null;
+    return;
+  }
+  const price=THEME_PRICES[t]||50;
+  if(_pendingTheme===t){
+    clearTimeout(_pendingThemeTm);
+    _pendingTheme=null;
+    if(state.coins<price){toast(`Not enough coins. Need ${price} 🪙, you have ${state.coins}.`);return;}
+    state.coins-=price;
+    state.unlockedThemes=[...unlocked,t];
+    saveAll();
+    applyTheme(t);
+    document.querySelectorAll(".theme-card").forEach(c=>c.classList.toggle("sel",c.dataset.theme===t));
+    toast(`🎨 ${THEME_LABELS[t]} unlocked!`);
+    render();
+  } else {
+    _pendingTheme=t;
+    toast(`Tap again to unlock ${THEME_LABELS[t]} for ${price} 🪙 coins`);
+    _pendingThemeTm=setTimeout(()=>{_pendingTheme=null;},4000);
+  }
+};
 
 function renderMore(v){
   const themeName=THEME_LABELS[getTheme()]||"🌙 Dark";
@@ -2273,7 +2302,7 @@ function renderMore(v){
     <div class="band-head"><h2>⚙️ Settings & tools</h2></div>
     <button class="more-btn" id="changeAge">🎂 Change my age <span style="color:var(--muted)">(currently ${state.age??"not set"})</span></button>
     <div class="band-head" style="margin-top:4px"><h2>🎨 Theme</h2></div>
-    <div class="theme-scroll">${["dark","light","kawaii","ocean","forest","galaxy"].map(t=>`<div class="theme-card${t===getTheme()?" sel":""}" data-theme="${t}" onclick="pickTheme('${t}')"><div class="theme-swatch theme-sw-${t}"></div>${{"dark":"🌙 Dark","light":"☀️ Bright","kawaii":"🌸 Kawaii","ocean":"🌊 Ocean","forest":"🌲 Forest","galaxy":"🌌 Galaxy"}[t]}</div>`).join("")}</div>
+    <div class="theme-scroll">${["dark","light","kawaii","ocean","forest","galaxy"].map(t=>{const owned=(state.unlockedThemes||["dark","light"]).includes(t);const price=THEME_PRICES[t]||50;return`<div class="theme-card${t===getTheme()?" sel":""}" data-theme="${t}" onclick="pickTheme('${t}')"><div class="theme-swatch theme-sw-${t}"></div>${{"dark":"🌙 Dark","light":"☀️ Bright","kawaii":"🌸 Kawaii","ocean":"🌊 Ocean","forest":"🌲 Forest","galaxy":"🌌 Galaxy"}[t]}${!owned?`<div style="font-size:.68rem;color:#fbbf24;font-weight:800;margin-top:3px">🔒 ${price}🪙</div>`:""}</div>`;}).join("")}</div>
     <button class="more-btn" id="fontBtn">🔠 Text size: <b>${({"":"Normal","fs-lg":"Large","fs-xl":"Extra large"})[localStorage.getItem(K.fs)||""]}</b> — tap to change</button>
     <div class="band-head" style="margin-top:18px"><h2>🔔 Lumi Reminders</h2></div>
     <div class="card">
@@ -3276,7 +3305,7 @@ function renderYou(v){
     <button class="more-btn" id="changeInterests">✨ My interests <span style="color:var(--muted);font-weight:400">${(state.interests&&state.interests.length)?"("+state.interests.map(id=>{const it=INTERESTS.find(x=>x.id===id);return it?it.label:id;}).join(", ")+")":"· tap to set"}</span></button>
     <button class="more-btn" id="changeAge">🎂 My age <span style="color:var(--muted);font-weight:400">(${state.age??"not set"})</span></button>
     <div class="band-head" style="margin-top:4px"><h2>🎨 Theme</h2></div>
-    <div class="theme-scroll">${["dark","light","kawaii","ocean","forest","galaxy"].map(t=>`<div class="theme-card${t===getTheme()?" sel":""}" data-theme="${t}" onclick="pickTheme('${t}')"><div class="theme-swatch theme-sw-${t}"></div>${{"dark":"🌙 Dark","light":"☀️ Bright","kawaii":"🌸 Kawaii","ocean":"🌊 Ocean","forest":"🌲 Forest","galaxy":"🌌 Galaxy"}[t]}</div>`).join("")}</div>
+    <div class="theme-scroll">${["dark","light","kawaii","ocean","forest","galaxy"].map(t=>{const owned=(state.unlockedThemes||["dark","light"]).includes(t);const price=THEME_PRICES[t]||50;return`<div class="theme-card${t===getTheme()?" sel":""}" data-theme="${t}" onclick="pickTheme('${t}')"><div class="theme-swatch theme-sw-${t}"></div>${{"dark":"🌙 Dark","light":"☀️ Bright","kawaii":"🌸 Kawaii","ocean":"🌊 Ocean","forest":"🌲 Forest","galaxy":"🌌 Galaxy"}[t]}${!owned?`<div style="font-size:.68rem;color:#fbbf24;font-weight:800;margin-top:3px">🔒 ${price}🪙</div>`:""}</div>`;}).join("")}</div>
     <button class="more-btn" id="fontBtn">🔠 Text size: <b>${({"":"Normal","fs-lg":"Large","fs-xl":"Extra large"})[localStorage.getItem(K.fs)||""]}</b></button>
 
     <button class="more-btn" id="goSchedule">🔔 Lumi reminders & schedule <span style="color:var(--muted);font-weight:400">${lcfg.on?"· on":"· off"} →</span></button>
