@@ -1461,6 +1461,7 @@ function petAvg(){ensurePet();return Math.round(PET_STATS.reduce((s,k)=>s+(state
 // Which mood clip to play, based on care stats (reuses the existing clips — simple movement).
 function barneyMood(){
   ensurePet();
+  if(state.manualMood)return state.manualMood;
   const p=state.pet;
   if(p.hunger<25)return "hungry";
   if(p.energy<25)return "sleep";
@@ -2101,6 +2102,7 @@ function renderToday(v){
     const lbl=document.querySelector("[data-mood-lbl]");
     if(lbl)lbl.textContent=MOOD_STATUS_MAP[m]||"";
     document.querySelectorAll(".mood-btn").forEach(b=>b.classList.toggle("sel",b.textContent.toLowerCase().includes(m)));
+    state.manualMood=m; saveAll();
     clearTimeout(window._sleepLoopTimer);
     if(m==="sleep" && ci.type!=="video"){
       const ss=ci.webp;
