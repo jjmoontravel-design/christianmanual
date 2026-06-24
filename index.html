@@ -1462,7 +1462,7 @@ async function syncEventsToWorker(){
 }
 
 const K={age:"lifemanual.age",done:"lifemanual.done",daily:"lifemanual.daily",streak:"lifemanual.streak",xp:"lifemanual.xp",theme:"lifemanual.theme",fs:"lifemanual.fontsize",history:"lifemanual.history",name:"lifemanual.name",goal:"lifemanual.goal",events:"lifemanual.events",character:"lifemanual.character",interests:"lifemanual.interests",lifeStage:"lifemanual.lifestage",coins:"lifemanual.coins",unlocked:"lifemanual.unlocked",gender:"lifemanual.gender",pet:"lifemanual.pet",themes:"lifemanual.themes"};
-const THEME_PRICES={dark:0,light:0,kawaii:50,ocean:50,forest:50,galaxy:50};
+const THEME_PRICES={dark:0,light:0,kawaii:0,ocean:0,forest:0,galaxy:0};
 // Coin cost to unlock each guide. Barney (bear) is free — everyone starts with him.
 const CHAR_COST={bear:0, beaver:150, wolf:150, lion:150, elephant:150, panda:100, capybara:100, cat:100, bunny:100, dolphin:100, fox:100, eagle:100, tiger:100, raccoon:100, penguin:75, owl:75, ant:75, deer:75, turtle:75};
 function charCost(id){return CHAR_COST[id]==null?100:CHAR_COST[id];}
@@ -1476,7 +1476,7 @@ let state={
   xp:parseInt(localStorage.getItem(K.xp))||0,
   coins:parseInt(localStorage.getItem(K.coins))||0,
   unlocked:JSON.parse(localStorage.getItem(K.unlocked)||'["bear"]'),
-  unlockedThemes:JSON.parse(localStorage.getItem(K.themes)||'["dark","light"]'),
+  unlockedThemes:["dark","light","kawaii","ocean","forest","galaxy"],
   history:JSON.parse(localStorage.getItem(K.history)||"{}"),
   events:JSON.parse(localStorage.getItem("lifemanual.events")||"[]"),
   character:localStorage.getItem("lifemanual.character")||"",
