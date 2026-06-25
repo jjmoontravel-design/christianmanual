@@ -1461,7 +1461,7 @@ async function syncEventsToWorker(){
     body:JSON.stringify({userId:getPushUserId(),events:state.events,tzOffset:new Date().getTimezoneOffset()})}).catch(()=>{});
 }
 
-const K={age:"lifemanual.age",done:"lifemanual.done",daily:"lifemanual.daily",streak:"lifemanual.streak",xp:"lifemanual.xp",theme:"lifemanual.theme",fs:"lifemanual.fontsize",history:"lifemanual.history",name:"lifemanual.name",goal:"lifemanual.goal",events:"lifemanual.events",character:"lifemanual.character",interests:"lifemanual.interests",lifeStage:"lifemanual.lifestage",coins:"lifemanual.coins",unlocked:"lifemanual.unlocked",gender:"lifemanual.gender",pet:"lifemanual.pet",themes:"lifemanual.themes"};
+const K={age:"lifemanual.age",done:"lifemanual.done",daily:"lifemanual.daily",streak:"lifemanual.streak",xp:"lifemanual.xp",theme:"lifemanual.theme",fs:"lifemanual.fontsize",history:"lifemanual.history",name:"lifemanual.name",goal:"lifemanual.goal",events:"lifemanual.events",character:"lifemanual.character",interests:"lifemanual.interests",lifeStage:"lifemanual.lifestage",coins:"lifemanual.coins",unlocked:"lifemanual.unlocked",gender:"lifemanual.gender",pet:"lifemanual.pet",themes:"lifemanual.themes",manualMood:"lifemanual.manualMood",manualMoodT:"lifemanual.manualMoodT"};
 const THEME_PRICES={dark:0,light:0,kawaii:0,ocean:0,forest:0,galaxy:0};
 // Coin cost to unlock each guide. Barney (bear) is free — everyone starts with him.
 const CHAR_COST={bear:0, beaver:150, wolf:150, lion:150, elephant:150, panda:100, capybara:100, cat:100, bunny:100, dolphin:100, fox:100, eagle:100, tiger:100, raccoon:100, penguin:75, owl:75, ant:75, deer:75, turtle:75};
@@ -1485,6 +1485,8 @@ let state={
   gender:localStorage.getItem("lifemanual.gender")||"",
   pet:JSON.parse(localStorage.getItem("lifemanual.pet")||"null"),
   lastSeen:parseInt(localStorage.getItem("lifemanual.lastSeen")||"0")||0,
+  manualMood:localStorage.getItem("lifemanual.manualMood")||"",
+  manualMoodT:parseInt(localStorage.getItem("lifemanual.manualMoodT")||"0")||0,
   tab:"today", search:"", bandFilter:null, libFilter:"vocab", journeyMode:"path"
 };
 BANDS.forEach(b=>b.skills.forEach((s,i)=>s.id=b.id+"-"+i));
@@ -1696,6 +1698,10 @@ function saveAll(){
   localStorage.setItem(K.history,JSON.stringify(state.history));
   localStorage.setItem(K.events,JSON.stringify(state.events));
   if(state.character)localStorage.setItem(K.character,state.character);
+  if(state.manualMood)localStorage.setItem(K.manualMood,state.manualMood);
+  else localStorage.removeItem(K.manualMood);
+  if(state.manualMoodT)localStorage.setItem(K.manualMoodT,state.manualMoodT);
+  else localStorage.removeItem(K.manualMoodT);
 }
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove("show"),2000);}
 function bandFor(age){if(age==null)return null;const a=Math.min(Math.max(age,6),80);return BANDS.find(b=>a>=b.min&&a<=b.max)||BANDS[BANDS.length-1];}
@@ -4122,6 +4128,8 @@ document.addEventListener("visibilitychange",()=>{
     setTimeout(maybeShowKnock, 800);
   }
 });
+// Also check knock on direct open (bookmark/homescreen tap doesn't always fire visibilitychange)
+setTimeout(maybeShowKnock, 1200);
 // iOS keyboard fix — keep chat overlay pinned above keyboard
 if(window.visualViewport){
   window.visualViewport.addEventListener("resize",()=>{
