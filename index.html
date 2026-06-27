@@ -1296,7 +1296,7 @@
   </div>
   <div class="lumi-speech" style="position:relative">
     <button class="lumi-close" onclick="hideLumi()">×</button>
-    <div class="lumi-name">Lumi · Life Manual</div>
+    <div class="lumi-name">Life Manual</div>
     <p id="lumi-text">Hey! Your daily upload is ready. ✨</p>
     <div class="lumi-btns">
       <button class="btn btn-got" onclick="lumiOpen()">Open lesson →</button>
@@ -2492,7 +2492,7 @@ function renderMore(v){
     <div class="card">
       <div class="section-note">Lumi will send you a chat reminder tied to that day's actual lesson — your skill, word, challenge, and more.</div>
       <label style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;font-weight:600">
-        Enable Lumi reminders
+        Enable daily reminders
         <input type="checkbox" id="lumiOn" ${lcfg.on?"checked":""} style="width:22px;height:22px;accent-color:#6366f1;cursor:pointer">
       </label>
       <div id="lumiTimes" style="${lcfg.on?"":"opacity:.45;pointer-events:none"}">
@@ -3319,10 +3319,10 @@ function renderSchedule(v){
       ${nextLabel?`<div style="margin-top:16px"><span class="next-pill">${nextLabel}</span></div>`:""}
     </div>
 
-    <div class="band-head"><h2>🔔 Lumi check-ins</h2></div>
+    <div class="band-head"><h2>🔔 Daily reminders</h2></div>
     <div class="card">
       <label style="display:flex;align-items:center;justify-content:space-between;font-weight:600;margin-bottom:${lcfg.on?"16px":"0"}">
-        <span>Let Lumi remind me</span>
+        <span>Remind me daily</span>
         <input type="checkbox" id="schLumiOn" ${lcfg.on?"checked":""} style="width:24px;height:24px;accent-color:#34d399;cursor:pointer">
       </label>
       <div id="schDetail" style="${lcfg.on?"":"display:none"}">
@@ -3345,7 +3345,7 @@ function renderSchedule(v){
       <div class="section-note" style="margin:${lcfg.on?"14px 0 0":"12px 0 0"}">Lumi's message is pulled from that day's real lesson. Install the app to your home screen and she can reach you even when it's closed.</div>
     </div>
 
-    <button class="more-btn" id="schPreview" style="text-align:center">👋 Preview a check-in from Lumi</button>
+    <button class="more-btn" id="schPreview" style="text-align:center">👋 Preview a reminder</button>
 
     <div class="ev-section-head" style="margin-top:22px">
       <div style="display:flex;align-items:center;gap:8px"><span class="ev-bank-count" style="font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;background:none;border:none;color:var(--muted);padding:0">📍 One-Time</span></div>
@@ -3363,7 +3363,6 @@ function renderSchedule(v){
     </div>
     <div id="ev-standing-card">${evStandingHTML()}</div>
     <div class="section-note" style="text-align:center;margin-top:4px">Tap 📅 on any event to add it to Google Calendar — works with Apple & Outlook too.</div>
-    <div style="text-align:center;margin-top:10px"><button onclick="testPush()" style="background:none;border:1px solid #a78bfa55;color:#a78bfa;border-radius:999px;padding:6px 18px;font-size:.82rem;cursor:pointer">Test notification 🔔</button></div>
     `;
 
   // Handlers
@@ -3515,7 +3514,7 @@ function renderYou(v){
     <div style="font-size:.74rem;color:var(--muted);padding:4px 2px 6px">One-time purchase · yours forever · all 4 premium themes</div>
     <button class="more-btn" id="fontBtn">🔠 Text size: <b>${({"":"Normal","fs-lg":"Large","fs-xl":"Extra large"})[localStorage.getItem(K.fs)||""]}</b></button>
 
-    <button class="more-btn" id="goSchedule">🔔 Lumi reminders & schedule <span style="color:var(--muted);font-weight:400">${lcfg.on?"· on":"· off"} →</span></button>
+    <button class="more-btn" id="goSchedule">🔔 Reminders & schedule <span style="color:var(--muted);font-weight:400">${lcfg.on?"· on":"· off"} →</span></button>
 
     <div class="band-head" style="margin-top:4px"><h2>💾 Data</h2></div>
     <button class="more-btn" id="exportBtn">💾 Back up my progress</button>
@@ -3637,7 +3636,7 @@ function showLumi(msg,targetTab){
   const face=el.querySelector(".lumi-face");
   if(face)face.innerHTML=charVideoHTML(c);
   const nm=el.querySelector(".lumi-name");
-  if(nm)nm.textContent=c.name+" · Life Manual";
+  if(nm)nm.textContent=c.name;
   document.getElementById("lumi-text").textContent=msg;
   el._tab=targetTab||"today";
   el.classList.remove("hidden");
