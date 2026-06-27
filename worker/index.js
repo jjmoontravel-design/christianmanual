@@ -354,10 +354,11 @@ export default {
       const { priceId, successUrl, cancelUrl, mode } = await request.json();
       if (!priceId || !successUrl) return json({ error: 'missing fields' }, 400);
       if (!env.STRIPE_SECRET_KEY) return json({ error: 'Stripe not configured' }, 500);
+      const stripeKey = env.STRIPE_SECRET_KEY.replace(/^﻿/, '').trim();
       const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+          Authorization: `Bearer ${stripeKey}`,
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
