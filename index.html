@@ -2075,9 +2075,19 @@ const FALLBACKS=[
   nm=>`I'm better with specifics! What's the actual thing on your mind? Money? Work? Health? Relationships? Just ask it straight and I've got you. 🎯`,
 ];
 
+const FREE_CHAT_LIMIT=10;
+function getChatCount(){const k="lm.chat."+todayKey();return parseInt(localStorage.getItem(k)||"0");}
+function bumpChatCount(){const k="lm.chat."+todayKey();localStorage.setItem(k,getChatCount()+1);}
+
 async function sendChat(){
   const box=document.getElementById("chatBox"); if(!box)return;
   const t=box.value.trim(); if(!t)return;
+  const used=getChatCount();
+  if(used>=FREE_CHAT_LIMIT){
+    toast("You've used all "+FREE_CHAT_LIMIT+" free chats today — come back tomorrow! 💜");
+    return;
+  }
+  bumpChatCount();
   const thread=document.getElementById("coThread"); if(!thread)return;
   const c=getChar(), nm=state.name||"friend";
   box.value="";
