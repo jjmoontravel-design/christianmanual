@@ -252,7 +252,12 @@
   .today-meta{font-size:.75rem;color:var(--muted);margin-top:2px}
   .today-progress-pill{background:var(--card2);border:1.5px solid var(--line);border-radius:999px;padding:5px 13px;font-weight:800;font-size:1rem;flex:none;white-space:nowrap}
   .today-progress-pill span{font-size:.8rem;color:var(--muted);font-weight:500}
-  .today-streak-row{font-size:.78rem;color:var(--muted);padding:0 4px 12px;letter-spacing:.02em}
+  .today-streak-row{font-size:.78rem;color:var(--muted);padding:0 4px 12px;letter-spacing:.02em;display:flex;align-items:center;gap:10px}
+  .today-coin-pill{background:#fbbf2418;color:#fbbf24;border:1px solid #fbbf2440;border-radius:999px;padding:3px 10px;font-weight:800;font-size:.8rem;transition:transform .25s,box-shadow .25s}
+  .today-coin-pill.pop{animation:coinPillPop .5s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes coinPillPop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+  .coin-earn-fly{position:fixed;pointer-events:none;z-index:9999;font-weight:900;font-size:1.1rem;color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,.6);animation:coinFly 1.1s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes coinFly{0%{opacity:0;transform:translateY(0) scale(.7)}15%{opacity:1;transform:translateY(-8px) scale(1.15)}80%{opacity:1;transform:translateY(-55px) scale(1)}100%{opacity:0;transform:translateY(-70px) scale(.85)}}
   /* FAB emoji face */
   .chat-fab-emoji{font-size:1.8rem;line-height:1;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
   .char-banner{border-radius:22px;padding:16px 14px;margin-bottom:10px;display:flex;align-items:center;gap:13px;position:relative;overflow:hidden}
@@ -1760,8 +1765,8 @@ function markGot(slot){
   const rect=card?card.getBoundingClientRect():null;
   if(card){card.classList.add("sweeping");setTimeout(()=>card.classList.remove("sweeping"),550);}
   state.daily.got[slot]=true;
-  // 1 coin per card. xp tracks lifetime coins earned (drives the operator level; never spent).
-  state.coins+=1; state.xp+=1;
+  // 2 coins per card (free tier). xp tracks lifetime coins earned (drives the operator level; never spent).
+  state.coins+=2; state.xp+=2;
   ensurePet(); state.pet.happy=Math.min(100,(state.pet.happy||0)+3); // lessons cheer your pet up
   if(slot==="skill"&&state.daily.skillId)state.done[state.daily.skillId]=true;
   const complete=gotCount()===activeSlots().length;
@@ -1777,15 +1782,32 @@ function markGot(slot){
     setMood("dance");          // guide dances when the day is complete
     setTimeout(showShareCard,2500); // share card after celebration settles
   }else{
-    toast("🪙 +1 coin — "+(activeSlots().length-gotCount())+" to go");
+    toast("🪙 +2 coins — "+(activeSlots().length-gotCount())+" to go");
     celebrate(12,30);          // each task: bubbles drifting + a few pops
     setMood("happy",1300);     // a happy bounce for each finished task
     // Offer notifications after first lesson tap
     if(gotCount()===1)setTimeout(showNotifBanner,1500);
   }
   saveAll();
-  if(rect){showMiniLumi(rect,complete);themeParticles(rect);}
+  if(rect){showMiniLumi(rect,complete);themeParticles(rect);showCoinEarn(rect);}
   setTimeout(()=>render(),420);
+}
+
+// ============ COIN EARN ANIMATION ============
+function showCoinEarn(rect){
+  const el=document.createElement("div");
+  el.className="coin-earn-fly";
+  el.textContent="+2 🪙";
+  const x=rect.left+rect.width/2-24;
+  const y=rect.top+rect.height/2-10;
+  el.style.cssText+=`left:${x}px;top:${y}px`;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1200);
+  // pulse the coin pill in the header
+  setTimeout(()=>{
+    const pill=document.getElementById("coinPill");
+    if(pill){pill.classList.remove("pop");void pill.offsetWidth;pill.classList.add("pop");}
+  },300);
 }
 
 // ============ MINI LUMI CHEER ============
@@ -2103,7 +2125,7 @@ function renderToday(v){
     </div>
     <div class="today-progress-pill">${n}<span>/${SLOTS.length}</span></div>
   </div>
-  <div class="today-streak-row">🔥 ${state.streak.n}-day streak &nbsp;·&nbsp; 🪙 ${state.coins} coins</div>
+  <div class="today-streak-row">🔥 ${state.streak.n}-day streak <span class="today-coin-pill" id="coinPill">🪙 ${state.coins}</span></div>
   ${(()=>{decayPet();const _m=barneyMood(),_c=gotCount(),_img=companionImg(_m),nm=getChar().name;
   const MOOD_STATUS={idle:"Just chillin' today",happy:"Feeling happy! 😊",bored:"Feeling bored… 🎮",hungry:"Getting hungry… 🍎",sleep:"Feeling sleepy 😴"};
   const awayMs=state.lastSeen?Date.now()-state.lastSeen:0;
