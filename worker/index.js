@@ -349,6 +349,30 @@ export default {
       return json({ ok: true, status });
     }
 
+    // ── POST /stripe/checkout — create a Stripe Checkout Session ──
+    if (url.pathname === '/stripe/checkout' && request.method === 'POST') {
+      const { priceId, successUrl, cancelUrl, mode } = await request.json();
+      if (!priceId || !successUrl) return json({ error: 'missing fields' }, 400);
+      if (!env.STRIPE_SECRET_KEY) return json({ error: 'Stripe not configured' }, 500);
+      const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          'line_items[0][price]': priceId,
+          'line_items[0][quantity]': '1',
+          mode: mode || 'payment',
+          success_url: successUrl,
+          cancel_url: cancelUrl || successUrl,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) return json({ error: data.error?.message || 'Stripe error' }, 500);
+      return json({ url: data.url });
+    }
+
     return new Response('Not found', { status: 404, headers: CORS });
     } catch(e) {
       return json({ error: String(e && e.message || e) }, 500);
