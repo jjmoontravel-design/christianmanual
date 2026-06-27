@@ -1538,7 +1538,7 @@ function feedOrder(){
 // ── Virtual pet: 4 care stats with real-time decay ──
 // Decay rates: hunger fastest (player notices), energy next, clean/happy slower
 const PET_STATS=["hunger","clean","happy","energy"];
-const PET_DECAY={hunger:7,energy:5,clean:3,happy:4}; // pts/hr — hungry after ~7h, sleepy after ~11h
+const PET_DECAY={hunger:4,energy:3,clean:1.5,happy:2}; // pts/hr — stays happy ~14h, critical after ~24h missed
 function ensurePet(){
   if(!state.pet||typeof state.pet!=="object")state.pet={hunger:80,clean:80,happy:80,energy:90,t:Date.now()};
 }
