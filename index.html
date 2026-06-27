@@ -230,6 +230,29 @@
   .notif-yes{background:var(--grad);color:#06121f;border:none;border-radius:999px;padding:14px 20px;font-size:.95rem;font-weight:800;cursor:pointer;font-family:inherit;width:100%}
   .notif-no{background:none;border:1px solid var(--line);border-radius:999px;padding:12px 20px;font-size:.85rem;color:var(--muted);cursor:pointer;font-family:inherit;width:100%}
 
+  /* ── UPGRADE MODAL ── */
+  .upgrade-backdrop{position:fixed;inset:0;z-index:250;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s}
+  .upgrade-backdrop.show{opacity:1;visibility:visible;pointer-events:auto}
+  .upgrade-sheet{background:var(--card);border-radius:28px 28px 0 0;padding:28px 24px 36px;width:100%;max-width:480px;transform:translateY(100%);transition:transform .4s cubic-bezier(.32,0,.15,1);box-shadow:0 -20px 60px rgba(0,0,0,.5)}
+  .upgrade-backdrop.show .upgrade-sheet{transform:translateY(0)}
+  .upgrade-handle{width:40px;height:4px;background:var(--line);border-radius:999px;margin:0 auto 20px}
+  .upgrade-icon{font-size:2.8rem;text-align:center;margin-bottom:10px}
+  .upgrade-title{font-size:1.3rem;font-weight:800;text-align:center;margin-bottom:6px}
+  .upgrade-sub{font-size:.88rem;color:var(--muted);text-align:center;line-height:1.55;margin-bottom:20px}
+  .upgrade-perks{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+  .upgrade-perk{display:flex;align-items:center;gap:12px;font-size:.92rem}
+  .upgrade-perk-icon{font-size:1.3rem;flex:none}
+  .upgrade-btn{display:block;width:100%;border:none;border-radius:999px;padding:16px;font-size:1rem;font-weight:800;cursor:pointer;background:var(--grad);color:#06121f;font-family:inherit;box-shadow:0 6px 24px rgba(99,102,241,.4);margin-bottom:10px}
+  .upgrade-btn-later{display:block;width:100%;border:none;background:none;color:var(--muted);font-size:.88rem;cursor:pointer;font-family:inherit;padding:8px}
+  /* ── LOCKED CARD PREVIEW ── */
+  .locked-preview{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--card);border:1px solid var(--line);border-radius:18px;margin-left:38px;opacity:.55;cursor:pointer;transition:opacity .2s}
+  .locked-preview:hover{opacity:.75}
+  .locked-preview-icon{font-size:1.5rem;flex:none}
+  .locked-preview-body{flex:1;min-width:0}
+  .locked-preview-title{font-weight:800;font-size:.92rem}
+  .locked-preview-sub{font-size:.78rem;color:var(--muted);margin-top:2px}
+  .locked-preview-lock{font-size:1.1rem;flex:none;color:var(--muted)}
+
   /* ── ALARM POPUP ── */
   .alarm-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s}
   .alarm-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
@@ -2183,7 +2206,25 @@ function renderToday(v){
   cards.challenge=moduleBubble("challenge",`<div class="title">${d.challenge.c}</div><div class="hint">${d.challenge.y}</div>`);
   feedOrder().forEach(slot=>{if(cards[slot])html+=cards[slot];});
   if(done)html+=`<div class="msg guide"><div class="msg-face">${gFace}</div>
-    <div class="bubble guide celebrate"><div class="title">🎉 All ${activeSlots().length} done!</div>🪙 ${activeSlots().length} coins earned today.${state.streak.n===7?" 🔓 5 cards unlocked starting tomorrow!":state.streak.n===14?" 🔓 All 7 cards unlocked starting tomorrow!":""} A fresh upload lands at midnight. See you tomorrow ✨</div></div>`;
+    <div class="bubble guide celebrate"><div class="title">🎉 All ${activeSlots().length} done!</div>🪙 ${activeSlots().length*2} coins earned today.${state.streak.n===7?" 🔓 5 cards unlocked starting tomorrow!":state.streak.n===14?" 🔓 All 7 cards unlocked starting tomorrow!":""} A fresh upload lands at midnight. See you tomorrow ✨</div></div>`;
+  // Locked card previews for free users (streak < 7 shows 3 cards; tease the rest)
+  const LOCKED_PREVIEWS=[
+    {icon:"💰",title:"Money & Finance",sub:"Saving, budgeting, and building wealth"},
+    {icon:"🫀",title:"Body & Health",sub:"Quick habits that add up over time"},
+    {icon:"🧠",title:"Mind & Calm",sub:"Mental strength and emotional skills"},
+    {icon:"🌍",title:"World & Culture",sub:"Vocabulary, news, and big ideas"}
+  ];
+  if((state.streak?.n||0)<7){
+    html+=`<div style="margin:10px 0 4px 38px;font-size:.74rem;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;font-weight:700">🔒 More cards — keep your streak going</div>`;
+    LOCKED_PREVIEWS.forEach(p=>{
+      html+=`<div class="locked-preview" onclick="showUpgrade()">
+        <div class="locked-preview-icon">${p.icon}</div>
+        <div class="locked-preview-body"><div class="locked-preview-title">${p.title}</div><div class="locked-preview-sub">${p.sub}</div></div>
+        <div class="locked-preview-lock">🔒</div>
+      </div>`;
+    });
+    html+=`<div style="text-align:center;margin:10px 0 4px;font-size:.74rem;color:var(--muted)">Unlock all 7 at day 7 streak — or <b style="color:#a78bfa;cursor:pointer" onclick="showUpgrade()">go Premium</b> for instant access</div>`;
+  }
   html+=`</div>`;
   v.innerHTML=html;
   applyMood();
@@ -2388,6 +2429,8 @@ function renderProgress(v){
     <div class="section-note" style="text-align:center">Complete all 7 daily modules to grow your streak. Skills from any age count — it's never too late.</div>`;
 }
 
+function showUpgrade(){document.getElementById("upgradeModal").classList.add("show");}
+function hideUpgrade(){document.getElementById("upgradeModal").classList.remove("show");}
 function unlockAllThemes(){
   // Stripe payment not yet wired — placeholder
   toast("💳 One-time purchase coming soon! Earn coins in the meantime 🪙");
@@ -4213,6 +4256,24 @@ if(window.visualViewport){
 </div>
 
 <!-- ── NOTIFICATION PERMISSION MODAL ── -->
+<div class="upgrade-backdrop" id="upgradeModal" onclick="if(event.target===this)hideUpgrade()">
+  <div class="upgrade-sheet">
+    <div class="upgrade-handle"></div>
+    <div class="upgrade-icon">⚡</div>
+    <div class="upgrade-title">Unlock all 7 daily cards</div>
+    <div class="upgrade-sub">Free users unlock more cards as their streak grows. Go Premium to get everything from day one.</div>
+    <div class="upgrade-perks">
+      <div class="upgrade-perk"><div class="upgrade-perk-icon">📚</div><div>All 7 daily skill cards — every day</div></div>
+      <div class="upgrade-perk"><div class="upgrade-perk-icon">🐾</div><div>All 19 companions — switch anytime</div></div>
+      <div class="upgrade-perk"><div class="upgrade-perk-icon">💬</div><div>Unlimited AI chat with your guide</div></div>
+      <div class="upgrade-perk"><div class="upgrade-perk-icon">🗺️</div><div>Full Journey — all 118 life skills</div></div>
+      <div class="upgrade-perk"><div class="upgrade-perk-icon">🛡️</div><div>Streak shield — protect your streak once a week</div></div>
+    </div>
+    <button class="upgrade-btn" onclick="hideUpgrade();toast('Subscription coming soon! Keep earning coins in the meantime 🪙')">✨ Go Premium — $14.99/year</button>
+    <button class="upgrade-btn-later" onclick="hideUpgrade()">Keep earning my streak unlock</button>
+  </div>
+</div>
+
 <div class="notif-backdrop" id="notifBanner">
   <div class="notif-modal">
     <span class="notif-modal-icon" id="notifBannerFace">🔔</span>
