@@ -994,6 +994,10 @@
   .tw-band{position:absolute;top:44px;left:0;right:0;height:44px;background:linear-gradient(160deg,rgba(255,255,255,.13) 0%,rgba(99,102,241,.18) 50%,rgba(255,255,255,.07) 100%);border:1px solid rgba(255,255,255,.22);border-radius:10px;pointer-events:none;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);box-shadow:0 0 18px rgba(99,102,241,.35),inset 0 1px 0 rgba(255,255,255,.35),inset 0 -1px 0 rgba(99,102,241,.25)}
   .tw-band::after{content:"";position:absolute;top:0;left:12px;right:12px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.7) 40%,rgba(34,211,238,.5) 60%,transparent);border-radius:50%}
 </style>
+<script>
+!function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]);t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+" (stub)"},o="init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureFlagEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+posthog.init("phc_zuw2M9qfDmHNnMVGzB7Uk6XBCpdeqYiQ7UMXyZECXqGT",{api_host:"https://us.i.posthog.com",person_profiles:"identified_only"});
+</script>
 </head>
 <body>
 <canvas id="bg"></canvas>
@@ -1798,6 +1802,7 @@ function dailyContent(){
 function gotCount(){return activeSlots().filter(s=>state.daily.got[s]).length;}
 function markGot(slot){
   if(state.daily.got[slot])return;
+  posthog.capture("card_completed",{slot,streak:state.streak?.n||0,coins:state.coins});
   // Capture bubble rect before state change for the guide cheer position
   const card=document.querySelector(`.bubble[data-slot="${slot}"]`);
   const rect=card?card.getBoundingClientRect():null;
@@ -2457,6 +2462,7 @@ function renderProgress(v){
 function showUpgrade(){document.getElementById("upgradeModal").classList.add("show");}
 function hideUpgrade(){document.getElementById("upgradeModal").classList.remove("show");}
 async function stripeCheckout(priceId, mode, successParam){
+  posthog.capture("checkout_started",{product:successParam});
   toast("Opening secure checkout…");
   try{
     const res=await fetch(AI_WORKER_URL+"/stripe/checkout",{method:"POST",headers:{"Content-Type":"application/json"},
@@ -4217,10 +4223,12 @@ navigator.serviceWorker?.addEventListener("message",e=>{
   if(paid==="themes"){
     state.unlockedThemes=["dark","light","kawaii","ocean","forest","galaxy"];
     saveAll(); applyTheme(getTheme());
+    posthog.capture("purchase_completed",{product:"themes"});
     history.replaceState({},"",location.pathname);
     setTimeout(()=>toast("🎨 All themes unlocked! Thank you! 💜"),800);
   } else if(paid==="premium"){
     state.isPremium=true; saveAll();
+    posthog.capture("purchase_completed",{product:"premium"});
     history.replaceState({},"",location.pathname);
     setTimeout(()=>toast("⚡ Welcome to Premium! All features unlocked. 💜"),800);
   }
