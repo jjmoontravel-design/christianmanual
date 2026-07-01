@@ -1,0 +1,15 @@
+node_modules/
+package-lock.json
+_bear_in_idle/
+_bear_out_idle/
+_frames_idle/
+_png_bear-knock/
+frames_test/
+*.mp4.mp4
+*.webm.mp4
+_wave_frame_raw.png
+_wave_preview.png
+convert-*.js
+remove-bg.js
+test_script.js
+worker/
