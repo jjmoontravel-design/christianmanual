@@ -327,6 +327,35 @@
   .wall-submit-btn{width:100%;margin-top:14px;padding:14px;background:linear-gradient(135deg,#a78bfa,#6366f1);color:#fff;border:none;border-radius:14px;font-size:1rem;font-weight:800;cursor:pointer;transition:opacity .15s}
   .wall-submit-btn:disabled{opacity:.5;cursor:default}
   .wall-submit-msg{text-align:center;font-size:.88rem;margin-top:10px;min-height:20px}
+  /* The Egg card */
+  .egg-card{display:flex;align-items:center;gap:13px;padding:15px 18px;background:linear-gradient(135deg,rgba(56,189,248,.13),rgba(45,212,191,.06));border:1px solid rgba(56,189,248,.3);border-radius:20px;margin:6px 0 2px 38px;cursor:pointer;transition:transform .15s;-webkit-tap-highlight-color:transparent}
+  .egg-card:active{transform:scale(.97)}
+  .egg-card-icon{font-size:1.7rem;flex:none}
+  .egg-card-body{flex:1;min-width:0}
+  .egg-card-title{font-weight:800;font-size:.94rem;color:var(--ink)}
+  .egg-card-sub{font-size:.77rem;color:var(--muted);margin-top:2px}
+  .egg-card-arrow{font-size:1rem;color:var(--muted);flex:none}
+  .egg-progress-track{height:5px;border-radius:3px;background:var(--line);margin-top:7px;overflow:hidden}
+  .egg-progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#38bdf8,#2dd4bf);transition:width .3s}
+  /* Egg overlay */
+  .egg-overlay{position:fixed;inset:0;z-index:93;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .38s cubic-bezier(.32,0,.15,1);visibility:hidden;pointer-events:none;will-change:transform}
+  .egg-overlay.open{transform:translateY(0);visibility:visible;pointer-events:auto}
+  .egg-overlay-head{display:flex;align-items:center;justify-content:space-between;padding:18px 18px 0;flex:none}
+  .egg-overlay-title{font-weight:800;font-size:1.08rem}
+  .egg-close-btn{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);padding:4px 8px}
+  .egg-overlay-body{flex:1;overflow-y:auto;padding:10px 20px 30px;text-align:center}
+  .egg-big{font-size:5.5rem;line-height:1;margin:10px 0 6px;filter:drop-shadow(0 8px 20px rgba(56,189,248,.35))}
+  .egg-big.hatched{animation:eggPop .6s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes eggPop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+  .egg-status{font-weight:700;font-size:.98rem;color:var(--ink);margin-bottom:4px}
+  .egg-status-sub{font-size:.82rem;color:var(--muted);margin-bottom:16px}
+  .egg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px}
+  .egg-tile{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:14px;border:1.5px solid var(--line);background:var(--card2)}
+  .egg-tile-face{width:44px;height:44px;border-radius:50%;background:var(--card);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+  .egg-tile.locked .egg-tile-face{filter:grayscale(1) brightness(.5)}
+  .egg-tile-name{font-size:.68rem;font-weight:700;color:var(--ink);text-align:center}
+  .egg-tile.locked .egg-tile-name{color:var(--muted)}
+  .egg-reveal-name{font-size:1.3rem;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:2px}
   .pray-overlay{position:fixed;inset:0;z-index:90;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .38s cubic-bezier(.32,0,.15,1);visibility:hidden;pointer-events:none;will-change:transform}
   .pray-overlay.open{transform:translateY(0);visibility:visible;pointer-events:auto}
   .pray-overlay-head{display:flex;align-items:center;justify-content:space-between;padding:18px 18px 10px;border-bottom:1px solid var(--line)}
@@ -1513,6 +1542,74 @@ const THEME_PRICES={dark:0,light:0,kawaii:100,ocean:100,forest:100,galaxy:100};
 // Coin cost to unlock each guide. Barney (bear) is free — everyone starts with him.
 const CHAR_COST={bear:0, beaver:150, wolf:150, lion:150, elephant:150, panda:100, capybara:100, cat:100, bunny:100, dolphin:100, fox:100, eagle:100, tiger:100, raccoon:100, penguin:75, owl:75, ant:75, deer:75, turtle:75};
 function charCost(id){return CHAR_COST[id]==null?100:CHAR_COST[id];}
+// ─── The Egg — streak-gated companion unlocks ───────────────────────────────
+const EGG_HATCH_INTERVAL=7; // days per hatch cycle
+function nextHatchStreak(){
+  const found=(state.unlocked||["bear"]).length-1; // companions earned beyond the free starter
+  return (found+1)*EGG_HATCH_INTERVAL;
+}
+function eggProgress(){
+  const target=nextHatchStreak(), prev=target-EGG_HATCH_INTERVAL, n=state.streak?.n||0;
+  return Math.max(0,Math.min(1,(n-prev)/EGG_HATCH_INTERVAL));
+}
+function eggEmoji(){
+  const p=eggProgress();
+  if(p>=1)return "🐣";
+  if(p>=.66)return "🥚"; // deep crack — CSS/emoji has no crack variants, stage shown via progress bar
+  if(p>=.33)return "🥚";
+  return "🥚";
+}
+function checkEggHatch(){
+  const total=CHARACTERS.length;
+  if((state.unlocked||["bear"]).length>=total)return;
+  if((state.streak?.n||0)<nextHatchStreak())return;
+  const locked=CHARACTERS.filter(c=>!charUnlocked(c.id));
+  if(!locked.length)return;
+  const won=locked[Math.floor(Math.random()*locked.length)];
+  state.unlocked=(state.unlocked||["bear"]).concat(won.id);
+  saveAll();
+  setTimeout(()=>showEggHatchReveal(won),900);
+}
+function showEggHatchReveal(ch){
+  const el=document.createElement("div");
+  el.className="egg-overlay open";
+  el.innerHTML=`<div class="egg-overlay-head"><div class="egg-overlay-title">🎉 The Egg hatched!</div><button class="egg-close-btn" onclick="this.closest('.egg-overlay').remove()">✕</button></div>
+  <div class="egg-overlay-body">
+    <div class="egg-big hatched">🐣</div>
+    <div class="egg-reveal-name">${ch.name}</div>
+    <div class="egg-status-sub">${ch.pillar}</div>
+    <div class="egg-status" style="margin-top:14px">A new companion joined your journey!</div>
+    <button class="pet-care-btn" style="width:100%;max-width:280px;margin-top:18px" onclick="this.closest('.egg-overlay').remove();openStore()">Meet ${ch.name} →</button>
+  </div>`;
+  document.body.appendChild(el);
+  confetti();
+}
+function openEggOverlay(){
+  let ov=document.getElementById("eggOverlay");
+  if(!ov){ov=document.createElement("div");ov.id="eggOverlay";ov.className="egg-overlay";document.body.appendChild(ov);}
+  renderEggOverlay();
+  requestAnimationFrame(()=>ov.classList.add("open"));
+}
+function closeEggOverlay(){const ov=document.getElementById("eggOverlay");if(ov)ov.classList.remove("open");}
+function renderEggOverlay(){
+  const ov=document.getElementById("eggOverlay"); if(!ov)return;
+  const found=(state.unlocked||["bear"]).length-1, total=CHARACTERS.length-1;
+  const target=nextHatchStreak(), n=state.streak?.n||0, left=Math.max(0,target-n), pct=Math.round(eggProgress()*100);
+  ov.innerHTML=`<div class="egg-overlay-head"><div class="egg-overlay-title">🥚 The Egg</div><button class="egg-close-btn" onclick="closeEggOverlay()">✕</button></div>
+  <div class="egg-overlay-body">
+    <div class="egg-big">${found>=total?"🐣":"🥚"}</div>
+    <div class="egg-status">${found>=total?"All companions found!":left+" day"+(left===1?"":"s")+" to the next hatch"}</div>
+    <div class="egg-status-sub">${found} of ${total} companions unlocked · keep your daily streak going</div>
+    <div class="egg-progress-track" style="max-width:280px;margin:0 auto 20px"><div class="egg-progress-fill" style="width:${pct}%"></div></div>
+    <div class="egg-grid">${CHARACTERS.filter(c=>c.id!==((state.unlocked||["bear"])[0])).map(c=>{
+      const owned=charUnlocked(c.id);
+      return `<div class="egg-tile ${owned?"":"locked"}">
+        <div class="egg-tile-face">${owned?charFaceHTML(c):"❓"}</div>
+        <div class="egg-tile-name">${owned?c.name:"?"}</div>
+      </div>`;
+    }).join("")}</div>
+  </div>`;
+}
 let state={
   age:parseInt(localStorage.getItem(K.age))||null,
   name:localStorage.getItem(K.name)||"",
@@ -1826,6 +1923,7 @@ function markGot(slot){
     const y=yesterdayKey(),t=todayKey();
     if(state.streak.last!==t){state.streak.n=(state.streak.last===y)?state.streak.n+1:1;state.streak.last=t;}
     clearPetReminder();
+    checkEggHatch();
     toast("⚡ Daily Upload complete! 🔥 "+state.streak.n+"-day streak");
     confetti();
     if(window.meteorShower)window.meteorShower(24);
@@ -2548,6 +2646,20 @@ function renderToday(v){
     </div>
     <div class="wall-card-arrow">›</div>
   </div>`;
+  // The Egg card — companion unlock progress
+  {const found=(state.unlocked||["bear"]).length-1, total=CHARACTERS.length-1;
+  if(found<total){
+    const pct=Math.round(eggProgress()*100), left=Math.max(0,nextHatchStreak()-(state.streak?.n||0));
+    html+=`<div class="egg-card" onclick="openEggOverlay()">
+      <div class="egg-card-icon">${eggEmoji()}</div>
+      <div class="egg-card-body">
+        <div class="egg-card-title">The Egg</div>
+        <div class="egg-card-sub">${found} of ${total} companions found ${left>0?`· ${left} day${left===1?"":"s"} to next hatch`:"· hatching…"}</div>
+        <div class="egg-progress-track"><div class="egg-progress-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="egg-card-arrow">›</div>
+    </div>`;
+  }}
   // Build each card once, keyed by slot, then emit in the user's interest-led order.
   const cards={};
   if(d.foryou){
@@ -3125,7 +3237,7 @@ function obFinish(){
   if(ob.initial){
     const starter=d.character||((d.gender==="female")?"bunny":"bear");
     state.character=starter; localStorage.setItem(K.character,starter);
-    state.unlocked=CHARACTERS.map(c=>c.id);
+    state.unlocked=[starter];
   }
   state.interests=(d.interests||[]).slice(); localStorage.setItem(K.interests,JSON.stringify(state.interests));
   state.lifeStage=d.lifeStage||""; localStorage.setItem(K.lifeStage,state.lifeStage);
@@ -4071,7 +4183,7 @@ function lumiOnOpen(){
 let proactiveTimer=null;
 
 // ============ CHARACTER STORE ============
-function charUnlocked(id){return true;}
+function charUnlocked(id){return (state.unlocked||["bear"]).includes(id);}
 function openStore(){
   let ov=document.getElementById("storeOverlay");
   if(ov)ov.remove();
