@@ -195,6 +195,45 @@ challenge: [
 ]
 };
 
+// ── PRAISE SONGS — Song of the Day pool ─────────────────────────────────────
+const PRAISE_SONGS = [
+  {t:"Way Maker",a:"Sinach"},
+  {t:"Goodness of God",a:"Bethel Music"},
+  {t:"What a Beautiful Name",a:"Hillsong Worship"},
+  {t:"Oceans (Where Feet May Fail)",a:"Hillsong United"},
+  {t:"Reckless Love",a:"Cory Asbury"},
+  {t:"Build My Life",a:"Housefires"},
+  {t:"Living Hope",a:"Phil Wickham"},
+  {t:"Holy Spirit",a:"Francesca Battistelli"},
+  {t:"How Great Is Our God",a:"Chris Tomlin"},
+  {t:"10,000 Reasons (Bless the Lord)",a:"Matt Redman"},
+  {t:"Great Are You Lord",a:"All Sons & Daughters"},
+  {t:"King of My Heart",a:"Bethel Music"},
+  {t:"Do It Again",a:"Elevation Worship"},
+  {t:"Graves Into Gardens",a:"Elevation Worship"},
+  {t:"The Blessing",a:"Kari Jobe & Cody Carnes"},
+  {t:"Raise a Hallelujah",a:"Bethel Music"},
+  {t:"Surrounded (Fight My Battles)",a:"UPPERROOM"},
+  {t:"Ever Be",a:"Kalley Heiligenthal"},
+  {t:"Even So Come",a:"Kristian Stanfill"},
+  {t:"In Christ Alone",a:"Keith & Kristyn Getty"},
+  {t:"Amazing Grace (My Chains Are Gone)",a:"Chris Tomlin"},
+  {t:"O Come to the Altar",a:"Elevation Worship"},
+  {t:"Glorious Day",a:"Passion"},
+  {t:"God of Revival",a:"Brian & Jenn Johnson"},
+  {t:"Battle Belongs",a:"Phil Wickham"},
+  {t:"Firm Foundation (He Won't)",a:"Cody Carnes"},
+  {t:"Gratitude",a:"Brandon Lake"},
+  {t:"Holy Forever",a:"Chris Tomlin"},
+  {t:"Champion",a:"Bethel Music"},
+  {t:"See A Victory",a:"Elevation Worship"},
+  {t:"Canvas and Clay",a:"Pat Barrett"},
+  {t:"Your Presence Is Heaven",a:"Israel Houghton"},
+  {t:"Nobody Like You Lord",a:"Vertical Worship"},
+  {t:"Isaiah 6",a:"Phil Wickham"},
+  {t:"This Is Amazing Grace",a:"Phil Wickham"},
+];
+
 // ── PILLAR SKILLS — shown when user's character matches ─────────────────────
 const PILLAR_SKILLS = {
 

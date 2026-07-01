@@ -254,6 +254,13 @@
   .locked-preview-lock{font-size:1.1rem;flex:none;color:var(--muted)}
 
   /* ── PRAY WITH ME ── */
+  .song-card{display:flex;align-items:center;gap:13px;padding:15px 18px;background:linear-gradient(135deg,rgba(251,191,36,.13),rgba(245,158,11,.06));border:1px solid rgba(251,191,36,.35);border-radius:20px;margin:6px 0 2px 38px;cursor:pointer;transition:transform .15s;-webkit-tap-highlight-color:transparent}
+  .song-card:active{transform:scale(.97)}
+  .song-card-icon{font-size:1.7rem;flex:none}
+  .song-card-body{flex:1;min-width:0}
+  .song-card-title{font-weight:800;font-size:.94rem;color:var(--ink)}
+  .song-card-meta{font-size:.77rem;color:var(--muted);margin-top:2px}
+  .song-card-arrow{font-size:1rem;color:var(--muted);flex:none}
   .pray-card{display:flex;align-items:center;gap:13px;padding:15px 18px;background:linear-gradient(135deg,rgba(167,139,250,.13),rgba(99,102,241,.06));border:1px solid rgba(167,139,250,.28);border-radius:20px;margin:6px 0 2px 38px;cursor:pointer;transition:transform .15s,box-shadow .2s;-webkit-tap-highlight-color:transparent}
   .pray-card:active{transform:scale(.97)}
   .pray-card-icon{font-size:1.7rem;flex:none}
@@ -2034,6 +2041,10 @@ function bumpChatCount(){const k="lm.chat."+todayKey();localStorage.setItem(k,ge
 
 // ── PRAY WITH ME ──────────────────────────────────────────────────────────────
 let _prayUtterance=null;
+function openPraiseYouTube(title,artist){
+  const q=encodeURIComponent(title+' '+artist+' worship');
+  window.open('https://www.youtube.com/results?search_query='+q,'_blank');
+}
 function openPrayOverlay(){
   const el=document.getElementById("prayOverlay");
   if(!el)return;
@@ -2233,6 +2244,16 @@ function renderToday(v){
       <div class="bubble guide">${done
         ?`All ${activeSlots().length} done today${state.name?", "+state.name:""}! 🔥 That's a ${state.streak.n}-day streak.`
         :`${state.name?state.name+", ":""}${left} lesson${left>1?"s":""} left today. Tap <b>Got it</b> as you go! 💜`}</div></div>`;
+  // Song of the day card
+  {const song=PRAISE_SONGS[dayIndex()%PRAISE_SONGS.length];
+  html+=`<div class="song-card" onclick="openPraiseYouTube(${JSON.stringify(song.t)},${JSON.stringify(song.a)})">
+    <div class="song-card-icon">🎵</div>
+    <div class="song-card-body">
+      <div class="song-card-title">${song.t}</div>
+      <div class="song-card-meta">${song.a} · Tap to worship</div>
+    </div>
+    <div class="song-card-arrow">›</div>
+  </div>`;}
   // Pray with me card
   html+=`<div class="pray-card" onclick="openPrayOverlay()">
     <div class="pray-card-icon">🙏</div>
