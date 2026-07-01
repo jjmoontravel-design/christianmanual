@@ -2572,7 +2572,7 @@ function renderToday(v){
   }
   cards.vocab=moduleBubble("vocab",`<div class="word">${d.vocab.w}</div>
     <div class="bodytext">${d.vocab.d}</div><div class="ex">"${d.vocab.x}"</div>
-    <button class="verse-speak-btn" id="verseSpeakBtn" onclick="toggleVerseSpeak('${(d.vocab.d+' … '+d.vocab.x).replace(/'/g,"\\'")}')">🔊 Hear this verse</button>`);
+    <button class="verse-speak-btn" id="verseSpeakBtn" onclick="toggleVerseSpeak(this.dataset.v)" data-v="${(d.vocab.d+' … '+d.vocab.x).replace(/"/g,'&quot;')}">🔊 Hear this verse</button>`);
   cards.body=moduleBubble("body",`<div class="bodytext">${d.body.f}</div>
     <div class="hint"><b>Do this:</b> ${d.body.a}</div>`);
   cards.money=moduleBubble("money",`<div class="title">${d.money.h}</div><div class="bodytext">${d.money.d}</div>`);
