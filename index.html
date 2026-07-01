@@ -2245,7 +2245,7 @@ function renderToday(v){
         ?`All ${activeSlots().length} done today${state.name?", "+state.name:""}! 🔥 That's a ${state.streak.n}-day streak.`
         :`${state.name?state.name+", ":""}${left} lesson${left>1?"s":""} left today. Tap <b>Got it</b> as you go! 💜`}</div></div>`;
   // Song of the day card
-  {const song=PRAISE_SONGS[dayIndex()%PRAISE_SONGS.length];
+  {const song=PRAISE_SONGS[dayNum()%PRAISE_SONGS.length];
   html+=`<div class="song-card" onclick="openPraiseYouTube(${JSON.stringify(song.t)},${JSON.stringify(song.a)})">
     <div class="song-card-icon">🎵</div>
     <div class="song-card-body">
