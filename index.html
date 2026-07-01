@@ -2155,9 +2155,15 @@ function nextSleepPassage(){
   renderSleepBody();
 }
 let _verseUtterance=null;
+function _pickCalm(){
+  const v=window.speechSynthesis.getVoices();
+  return v.find(x=>/samantha|karen|victoria|moira|tessa/i.test(x.name)&&/en/i.test(x.lang))
+    ||v.find(x=>/en/i.test(x.lang)&&x.name.toLowerCase().includes("female"))
+    ||v.find(x=>/en/i.test(x.lang))||null;
+}
 function toggleVerseSpeak(text){
   const btn=document.getElementById("verseSpeakBtn");
-  if(_verseUtterance&&window.speechSynthesis.speaking){
+  if(window.speechSynthesis.speaking){
     window.speechSynthesis.cancel();
     _verseUtterance=null;
     if(btn){btn.textContent="🔊 Hear this verse";btn.classList.remove("playing");}
@@ -2165,15 +2171,13 @@ function toggleVerseSpeak(text){
   }
   const u=new SpeechSynthesisUtterance(text);
   u.rate=0.85; u.pitch=1.0;
-  const voices=window.speechSynthesis.getVoices();
-  const calm=voices.find(v=>/samantha|karen|victoria|moira|tessa/i.test(v.name)&&/en/i.test(v.lang))
-    ||voices.find(v=>/en/i.test(v.lang)&&v.name.toLowerCase().includes("female"))
-    ||voices.find(v=>/en/i.test(v.lang));
-  if(calm)u.voice=calm;
   u.onend=()=>{_verseUtterance=null;if(btn){btn.textContent="🔊 Hear this verse";btn.classList.remove("playing");}};
   _verseUtterance=u;
   if(btn){btn.textContent="■ Stop";btn.classList.add("playing");}
-  window.speechSynthesis.speak(u);
+  // Voices may not be loaded on first call — wait for them if needed
+  const doSpeak=()=>{const c=_pickCalm();if(c)u.voice=c;window.speechSynthesis.speak(u);};
+  if(window.speechSynthesis.getVoices().length>0){doSpeak();}
+  else{window.speechSynthesis.addEventListener('voiceschanged',doSpeak,{once:true});}
 }
 // ─── Prayer Wall ────────────────────────────────────────────────────────────
 const WORKER_URL='https://throbbing-bush-2964.jjmoontravel.workers.dev';
