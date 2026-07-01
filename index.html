@@ -2302,7 +2302,10 @@ async function sayAmen(id){
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function openPraiseYouTube(title,artist){
   const q=encodeURIComponent(title+' '+artist+' worship');
-  window.open('https://www.youtube.com/results?search_query='+q,'_blank');
+  const a=document.createElement('a');
+  a.href='https://www.youtube.com/results?search_query='+q;
+  a.target='_blank';a.rel='noopener';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
 }
 function openPrayOverlay(){
   const el=document.getElementById("prayOverlay");
