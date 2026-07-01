@@ -3954,7 +3954,7 @@ function renderCoThread(){
     const nm=state.name||"friend";
     thread.innerHTML=`<div class="chat-day">Today · ${new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})}</div>
       <div class="msg guide"><div class="msg-face">${gFace}</div>
-      <div class="bubble guide">Hey ${nm}! ${c.emoji} I'm here whenever you need me. Ask me anything about life — money, jobs, health, relationships, cooking… whatever's on your mind. 💜</div></div>`;
+      <div class="bubble guide">Hey${nm!=="friend"?" "+nm:""}! 👋 I'm ${c.name}. God's got something good for you today. Ask me anything — faith, prayer, the Bible, life stuff… I'm right here. 🌱</div></div>`;
     return;
   }
   let html=`<div class="chat-day">Today · ${new Date().toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})}</div>`;
