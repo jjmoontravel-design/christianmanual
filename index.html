@@ -284,6 +284,9 @@
   .pray-result{background:var(--card);border:1px solid rgba(167,139,250,.3);border-radius:20px;padding:20px;display:none;flex-direction:column;gap:14px}
   .pray-result.show{display:flex}
   .pray-result-text{font-size:.97rem;line-height:1.7;color:var(--ink);white-space:pre-wrap}
+  .verse-speak-btn{display:inline-flex;align-items:center;gap:7px;border:none;border-radius:999px;padding:9px 18px;font-size:.82rem;font-weight:700;cursor:pointer;background:var(--card2);border:1.5px solid rgba(167,139,250,.35);color:var(--ink);font-family:inherit;transition:background .2s,transform .15s;margin-top:10px;-webkit-tap-highlight-color:transparent}
+  .verse-speak-btn:active{transform:scale(.96)}
+  .verse-speak-btn.playing{background:rgba(167,139,250,.18);border-color:var(--glow)}
   .pray-voice-btn{display:flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:999px;padding:12px 22px;font-size:.92rem;font-weight:700;cursor:pointer;background:var(--card2);border:1.5px solid rgba(167,139,250,.4);color:var(--ink);font-family:inherit;transition:background .2s,transform .15s}
   .pray-voice-btn:active{transform:scale(.96)}
   .pray-voice-btn.playing{background:rgba(167,139,250,.18);border-color:var(--glow)}
@@ -2041,6 +2044,27 @@ function bumpChatCount(){const k="lm.chat."+todayKey();localStorage.setItem(k,ge
 
 // ── PRAY WITH ME ──────────────────────────────────────────────────────────────
 let _prayUtterance=null;
+let _verseUtterance=null;
+function toggleVerseSpeak(text){
+  const btn=document.getElementById("verseSpeakBtn");
+  if(_verseUtterance&&window.speechSynthesis.speaking){
+    window.speechSynthesis.cancel();
+    _verseUtterance=null;
+    if(btn){btn.textContent="🔊 Hear this verse";btn.classList.remove("playing");}
+    return;
+  }
+  const u=new SpeechSynthesisUtterance(text);
+  u.rate=0.85; u.pitch=1.0;
+  const voices=window.speechSynthesis.getVoices();
+  const calm=voices.find(v=>/samantha|karen|victoria|moira|tessa/i.test(v.name)&&/en/i.test(v.lang))
+    ||voices.find(v=>/en/i.test(v.lang)&&v.name.toLowerCase().includes("female"))
+    ||voices.find(v=>/en/i.test(v.lang));
+  if(calm)u.voice=calm;
+  u.onend=()=>{_verseUtterance=null;if(btn){btn.textContent="🔊 Hear this verse";btn.classList.remove("playing");}};
+  _verseUtterance=u;
+  if(btn){btn.textContent="■ Stop";btn.classList.add("playing");}
+  window.speechSynthesis.speak(u);
+}
 function openPraiseYouTube(title,artist){
   const q=encodeURIComponent(title+' '+artist+' worship');
   window.open('https://www.youtube.com/results?search_query='+q,'_blank');
@@ -2287,7 +2311,7 @@ function renderToday(v){
   }
   cards.vocab=moduleBubble("vocab",`<div class="word">${d.vocab.w}</div>
     <div class="bodytext">${d.vocab.d}</div><div class="ex">"${d.vocab.x}"</div>
-    <div class="hint">Use it once in a real sentence today and it's yours forever.</div>`);
+    <button class="verse-speak-btn" id="verseSpeakBtn" onclick="toggleVerseSpeak(${JSON.stringify(d.vocab.d+' … '+d.vocab.x)})">🔊 Hear this verse</button>`);
   cards.body=moduleBubble("body",`<div class="bodytext">${d.body.f}</div>
     <div class="hint"><b>Do this:</b> ${d.body.a}</div>`);
   cards.money=moduleBubble("money",`<div class="title">${d.money.h}</div><div class="bodytext">${d.money.d}</div>`);
