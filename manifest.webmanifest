@@ -1,7 +1,7 @@
-{
-  "id": "/lifemanual/",
-  "name": "Life Manual",
-  "short_name": "Life Manual",
+﻿{
+  "id": "/christianmanual/",
+  "name": "Christian Manual",
+  "short_name": "Christian Manual",
   "description": "Your daily life upgrade — one skill, one word, one money tip, one challenge every day. Pick an animal companion who walks with you.",
   "start_url": "./",
   "scope": "./",
@@ -21,7 +21,7 @@
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Life Manual home screen"
+      "label": "Christian Manual home screen"
     }
   ]
 }

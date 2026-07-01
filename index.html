@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-visual">
 <meta name="theme-color" content="#0a0e1a">
-<title>Life Manual — Your daily life upgrade</title>
+<title>Christian Manual — Your daily life upgrade</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -1300,7 +1300,7 @@ posthog.init("phc_zuw2M9qfDmHNnMVGzB7Uk6XBCpdeqYiQ7UMXyZECXqGT",{api_host:"https
   </div>
   <div class="lumi-speech" style="position:relative">
     <button class="lumi-close" onclick="hideLumi()">×</button>
-    <div class="lumi-name">Life Manual</div>
+    <div class="lumi-name">Christian Manual</div>
     <p id="lumi-text">Hey! Your daily upload is ready. ✨</p>
     <div class="lumi-btns">
       <button class="btn btn-got" onclick="lumiOpen()">Open lesson →</button>
@@ -1338,7 +1338,7 @@ const AI_WORKER_URL = "https://throbbing-bush-2964.jjmoontravel.workers.dev";
 const STRIPE_PK = "pk_live_51TmxxER5RlVZYcW10tLmEv6pzWsQximyKe6ROcdq0PF8fBBrtbGUFmIpYEOMkpK8pRo6B7QMsryW3u5xcBkxlFZc00rnGtugKN";
 const PRICE_PREMIUM = "price_1Tn0TmR5RlVZYcW1v5ZS4ejO";
 const PRICE_THEMES  = "price_1Tn0eGR5RlVZYcW1UE989LaV";
-const APP_URL = "https://jjmoontravel-design.github.io/lifemanual/";
+const APP_URL = "https://jjmoontravel-design.github.io/christianmanual/";
 const VAPID_PUBLIC_KEY = "BOonl0SFTb0Wy2YWBuqznpmhQloG-u2ovo_uNDZPPXGpjPga1pP_Dm9LUeLJ3jJpz6xTyM_UWcnWtx-9A0BqjcI";
 
 // ── Push notification helpers ──────────────────────────────────────────────
@@ -1374,7 +1374,7 @@ async function testPush(){
     toast("Push not supported in this browser.");return;
   }
   if(("Notification" in window)&&Notification.permission==="denied"){
-    toast("Notifications blocked — go to iPhone Settings → Life Manual → Notifications → Allow.");return;
+    toast("Notifications blocked — go to iPhone Settings → Christian Manual → Notifications → Allow.");return;
   }
   toast("Refreshing subscription…");
   try{
@@ -1411,7 +1411,7 @@ async function syncScheduleToWorker(){
     body:JSON.stringify({userId:getPushUserId(),schedule:cfg,tzOffset:new Date().getTimezoneOffset()})}).catch(()=>{});
 }
 
-const K={age:"lifemanual.age",done:"lifemanual.done",daily:"lifemanual.daily",streak:"lifemanual.streak",xp:"lifemanual.xp",theme:"lifemanual.theme",fs:"lifemanual.fontsize",history:"lifemanual.history",name:"lifemanual.name",goal:"lifemanual.goal",events:"lifemanual.events",character:"lifemanual.character",interests:"lifemanual.interests",lifeStage:"lifemanual.lifestage",coins:"lifemanual.coins",unlocked:"lifemanual.unlocked",gender:"lifemanual.gender",pet:"lifemanual.pet",themes:"lifemanual.themes",manualMood:"lifemanual.manualMood",manualMoodT:"lifemanual.manualMoodT",premium:"lifemanual.premium"};
+const K={age:"christianmanual.age",done:"christianmanual.done",daily:"christianmanual.daily",streak:"christianmanual.streak",xp:"christianmanual.xp",theme:"christianmanual.theme",fs:"christianmanual.fontsize",history:"christianmanual.history",name:"christianmanual.name",goal:"christianmanual.goal",events:"christianmanual.events",character:"christianmanual.character",interests:"christianmanual.interests",lifeStage:"christianmanual.lifestage",coins:"christianmanual.coins",unlocked:"christianmanual.unlocked",gender:"christianmanual.gender",pet:"christianmanual.pet",themes:"christianmanual.themes",manualMood:"christianmanual.manualMood",manualMoodT:"christianmanual.manualMoodT",premium:"christianmanual.premium"};
 const THEME_PRICES={dark:0,light:0,kawaii:100,ocean:100,forest:100,galaxy:100};
 // Coin cost to unlock each guide. Barney (bear) is free — everyone starts with him.
 const CHAR_COST={bear:0, beaver:150, wolf:150, lion:150, elephant:150, panda:100, capybara:100, cat:100, bunny:100, dolphin:100, fox:100, eagle:100, tiger:100, raccoon:100, penguin:75, owl:75, ant:75, deer:75, turtle:75};
@@ -1429,15 +1429,15 @@ let state={
   unlocked:JSON.parse(localStorage.getItem(K.unlocked)||'["bear"]'),
   unlockedThemes:JSON.parse(localStorage.getItem(K.themes)||'["dark","light"]'),
   history:JSON.parse(localStorage.getItem(K.history)||"{}"),
-  events:JSON.parse(localStorage.getItem("lifemanual.events")||"[]"),
-  character:localStorage.getItem("lifemanual.character")||"",
-  interests:JSON.parse(localStorage.getItem("lifemanual.interests")||"[]"),
-  lifeStage:localStorage.getItem("lifemanual.lifestage")||"",
-  gender:localStorage.getItem("lifemanual.gender")||"",
-  pet:JSON.parse(localStorage.getItem("lifemanual.pet")||"null"),
-  lastSeen:parseInt(localStorage.getItem("lifemanual.lastSeen")||"0")||0,
-  manualMood:localStorage.getItem("lifemanual.manualMood")||"",
-  manualMoodT:parseInt(localStorage.getItem("lifemanual.manualMoodT")||"0")||0,
+  events:JSON.parse(localStorage.getItem("christianmanual.events")||"[]"),
+  character:localStorage.getItem("christianmanual.character")||"",
+  interests:JSON.parse(localStorage.getItem("christianmanual.interests")||"[]"),
+  lifeStage:localStorage.getItem("christianmanual.lifestage")||"",
+  gender:localStorage.getItem("christianmanual.gender")||"",
+  pet:JSON.parse(localStorage.getItem("christianmanual.pet")||"null"),
+  lastSeen:parseInt(localStorage.getItem("christianmanual.lastSeen")||"0")||0,
+  manualMood:localStorage.getItem("christianmanual.manualMood")||"",
+  manualMoodT:parseInt(localStorage.getItem("christianmanual.manualMoodT")||"0")||0,
   tab:"today", search:"", bandFilter:null, libFilter:"vocab", journeyMode:"path"
 };
 BANDS.forEach(b=>b.skills.forEach((s,i)=>s.id=b.id+"-"+i));
@@ -2459,7 +2459,7 @@ function renderMore(v){
     <div id="ioArea"></div>
     <button class="more-btn danger" id="resetBtn">🗑️ Erase all my progress</button>
     <div class="card" style="color:var(--muted);font-size:.88rem">
-      <b style="color:var(--ink)">About Life Manual 2.0</b><br>
+      <b style="color:var(--ink)">About Christian Manual 2.0</b><br>
       Built for everyone who didn't have a parent or role model to teach them — the kids who grew up without guidance, the parents whose own parents passed too early, everyone who learned life by trial and error. Not anymore. One fresh knowledge pack every day, the full life-skills journey from age 1 to 80, and Life Guides for the moments nobody prepared you for. Everything stays on this device — no account, no tracking. Video lessons are being added skill by skill.<br><br>
       This app shares general life guidance, not medical, legal, or financial advice — for big decisions, talk to a professional (they still exist in 2150).
     </div>`;
@@ -2481,7 +2481,7 @@ function renderMore(v){
       if(d.daily)state.daily=d.daily;
       localStorage.setItem(K.age,state.age);saveAll();
       toast("✓ Progress restored!");render();
-    }catch(e){toast("That doesn't look like a Life Manual backup.");}};
+    }catch(e){toast("That doesn't look like a Christian Manual backup.");}};
   };
   $("#resetBtn").onclick=()=>{if(confirm("Erase ALL progress, XP, streaks, and your age? This can't be undone.")){
     Object.values(K).forEach(k=>localStorage.removeItem(k));
@@ -2571,7 +2571,7 @@ function renderOnboard(){
   const back=ob.step>0?`<button class="btn btn-ghost" id="ob-back">← Back</button>`:"";
   if(ob.step===0){
     b.innerHTML=`<div class="ob-emoji">📖</div>
-      <h2>Welcome to Life Manual.</h2>
+      <h2>Welcome to Christian Manual.</h2>
       <p>One small lesson a day — the stuff nobody sat you down and taught. A companion who keeps you on track. Let's set up <b>your</b> manual together. Takes 30 seconds.</p>
       <div class="ob-nav"><button class="btn btn-got" id="ob-next" style="flex:1;justify-content:center">Let's go →</button></div>`;
   }else if(ob.step===1){
@@ -2916,7 +2916,7 @@ function gcalUrl(ev){
   let url="https://calendar.google.com/calendar/render?action=TEMPLATE"
     +"&text="+encodeURIComponent(ev.emoji+" "+ev.title)
     +"&dates="+fmt(start)+"/"+fmt(end)
-    +"&details="+encodeURIComponent("Added from Life Manual 🏮");
+    +"&details="+encodeURIComponent("Added from Christian Manual 🏮");
   if(ev.repeat==="daily")url+="&recur="+encodeURIComponent("RRULE:FREQ=DAILY");
   else if(ev.repeat==="weekly")url+="&recur="+encodeURIComponent("RRULE:FREQ=WEEKLY");
   else if(ev.repeat==="monthly")url+="&recur="+encodeURIComponent("RRULE:FREQ=MONTHLY");
@@ -3466,7 +3466,7 @@ function renderYou(v){
     <div id="ioArea"></div>
     <button class="more-btn danger" id="resetBtn">🗑️ Erase all progress</button>
     <div class="card" style="color:var(--muted);font-size:.86rem;margin-top:4px;line-height:1.6">
-      <b style="color:var(--ink)">About Life Manual 2.0</b><br>
+      <b style="color:var(--ink)">About Christian Manual 2.0</b><br>
       Built for everyone who didn't have a parent or role model — the people who learned life by trial and error. Not anymore. No account, no tracking. Everything stays on this device.<br><br>
       <span style="font-size:.78rem">General life guidance only — not medical, legal, or financial advice.</span>
     </div>
@@ -3495,7 +3495,7 @@ function renderYou(v){
       if(d.streak)state.streak=d.streak;
       if(d.daily)state.daily=d.daily;
       localStorage.setItem(K.age,state.age);saveAll();toast("✓ Progress restored!");render();
-    }catch(e){toast("That doesn't look like a Life Manual backup.");}};
+    }catch(e){toast("That doesn't look like a Christian Manual backup.");}};
   };
   $("#privacyBtn").onclick=()=>openLegal("privacy");
   $("#termsBtn").onclick=()=>openLegal("terms");
@@ -3515,28 +3515,28 @@ function openLegal(type){
     title.textContent="🔒 Privacy Policy";
     body.innerHTML=`
       <p><b>Last updated: June 20, 2026</b></p>
-      <p>Life Manual ("the app") is a free progressive web app designed to help people learn everyday life skills. We take your privacy seriously.</p>
+      <p>Christian Manual ("the app") is a free progressive web app designed to help people learn everyday life skills. We take your privacy seriously.</p>
       <h3 style="margin:14px 0 6px;font-size:1rem">What data we collect</h3>
-      <p><b>Nothing.</b> Life Manual does not collect, store, or transmit any personal information. There are no accounts, no sign-ups, and no servers storing your data.</p>
+      <p><b>Nothing.</b> Christian Manual does not collect, store, or transmit any personal information. There are no accounts, no sign-ups, and no servers storing your data.</p>
       <h3 style="margin:14px 0 6px;font-size:1rem">Where your data lives</h3>
       <p>All your progress, age, streak, coins, and settings are saved <b>only on your device</b> using your browser's local storage. We cannot see it, access it, or back it up.</p>
       <h3 style="margin:14px 0 6px;font-size:1rem">Tracking & analytics</h3>
       <p>We do not use cookies, tracking pixels, analytics tools, or any third-party data collection. No ads. No tracking. Period.</p>
       <h3 style="margin:14px 0 6px;font-size:1rem">Children's privacy</h3>
-      <p>Life Manual is designed to be safe for all ages, including children under 13. Because we collect zero data, there is nothing to protect — your child's information never leaves their device.</p>
+      <p>Christian Manual is designed to be safe for all ages, including children under 13. Because we collect zero data, there is nothing to protect — your child's information never leaves their device.</p>
       <h3 style="margin:14px 0 6px;font-size:1rem">Contact</h3>
       <p>Questions? Email us at <b>jjmoontravel@gmail.com</b></p>`;
   } else {
     title.textContent="📄 Terms of Service";
     body.innerHTML=`
       <p><b>Last updated: June 20, 2026</b></p>
-      <p>By using Life Manual, you agree to these terms. If you don't agree, please don't use the app.</p>
-      <h3 style="margin:14px 0 6px;font-size:1rem">What Life Manual is</h3>
-      <p>Life Manual is a free educational app providing general life skills guidance for everyday situations — things like cooking basics, managing money, social skills, and personal care.</p>
-      <h3 style="margin:14px 0 6px;font-size:1rem">What Life Manual is not</h3>
+      <p>By using Christian Manual, you agree to these terms. If you don't agree, please don't use the app.</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">What Christian Manual is</h3>
+      <p>Christian Manual is a free educational app providing general life skills guidance for everyday situations — things like cooking basics, managing money, social skills, and personal care.</p>
+      <h3 style="margin:14px 0 6px;font-size:1rem">What Christian Manual is not</h3>
       <p>The content in this app is <b>general information only</b>. It is not medical advice, legal advice, financial advice, or a substitute for professional help. Always consult a qualified professional for serious matters.</p>
       <h3 style="margin:14px 0 6px;font-size:1rem">Your use</h3>
-      <p>Life Manual is free to use for personal, non-commercial purposes. You may not copy, resell, or redistribute the app or its content without permission.</p>
+      <p>Christian Manual is free to use for personal, non-commercial purposes. You may not copy, resell, or redistribute the app or its content without permission.</p>
       <h3 style="margin:14px 0 6px;font-size:1rem">No warranty</h3>
       <p>The app is provided "as is." We do our best to keep content accurate and helpful, but we make no guarantees. Use your own judgment.</p>
       <h3 style="margin:14px 0 6px;font-size:1rem">Changes</h3>
@@ -3548,7 +3548,7 @@ function openLegal(type){
 }
 
 // ============ LUMI REMINDER ENGINE ============
-const LK="lifemanual.reminders";
+const LK="christianmanual.reminders";
 function getLumiCfg(){const c=JSON.parse(localStorage.getItem(LK)||'{"on":false,"morning":"08:00","evening":"20:00"}');if(!c.days)c.days=[0,1,2,3,4,5,6];return c;}
 function saveLumiCfg(cfg){localStorage.setItem(LK,JSON.stringify(cfg));}
 
@@ -3607,7 +3607,7 @@ function scheduleReminders(){
         const msg=lumiMsg(type);
         if("Notification" in window&&Notification.permission==="granted"){
           navigator.serviceWorker&&navigator.serviceWorker.ready.then(sw=>{
-            sw.showNotification("✨ Life Manual",{body:msg,icon:"icon-192.png",tag:"lumi-"+type});
+            sw.showNotification("✨ Christian Manual",{body:msg,icon:"icon-192.png",tag:"lumi-"+type});
           }).catch(()=>{});
         }
         showLumi(msg,"today");
@@ -3625,7 +3625,7 @@ function lumiOnOpen(){
     const[h,m]=t.split(":").map(Number);
     const fire=new Date(now.getFullYear(),now.getMonth(),now.getDate(),h,m,0);
     const diff=now-fire;
-    const shownKey="lifemanual.lumi."+todayKey()+"."+type;
+    const shownKey="christianmanual.lumi."+todayKey()+"."+type;
     if(diff>=0&&diff<1800000&&!localStorage.getItem(shownKey)){
       localStorage.setItem(shownKey,"1");
       setTimeout(()=>showLumi(lumiMsg(type),"today"),2000);
@@ -3872,12 +3872,12 @@ function schedulePetReminder(){
   else if(streak>=3)body=`Don't break your ${streak}-day streak! 🔥 ${c.name} is waiting.`;
   else body=`Your daily lesson is ready! ${c.name} wants to see you 💜`;
   const fireAt=Date.now()+4*60*60*1000;
-  navigator.serviceWorker.controller.postMessage({type:"SET_ALARM",id:"pet-reminder",fireAt,notifTitle:`📖 Life Manual`,body,tab:"today"});
+  navigator.serviceWorker.controller.postMessage({type:"SET_ALARM",id:"pet-reminder",fireAt,notifTitle:`📖 Christian Manual`,body,tab:"today"});
   // Also schedule streak-at-risk for 8pm if streak > 0
   if(streak>0){
     const now=new Date(), eod=new Date(); eod.setHours(20,0,0,0);
     if(eod.getTime()>now.getTime()+60000){
-      navigator.serviceWorker.controller.postMessage({type:"SET_ALARM",id:"streak-risk",fireAt:eod.getTime(),notifTitle:`🔥 Streak at risk!`,body:`${c.name} says: don't break your ${streak}-day streak! Open Life Manual now.`,tab:"today"});
+      navigator.serviceWorker.controller.postMessage({type:"SET_ALARM",id:"streak-risk",fireAt:eod.getTime(),notifTitle:`🔥 Streak at risk!`,body:`${c.name} says: don't break your ${streak}-day streak! Open Christian Manual now.`,tab:"today"});
     }
   }
 }
@@ -3907,7 +3907,7 @@ function showShareCard(){
     ctx.fillStyle="rgba(255,255,255,.7)";
     for(let i=0;i<80;i++){const x=rng()*W,y=rng()*680,r=rng()*2.2+.4;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
     // App name
-    ctx.font="bold 54px system-ui";ctx.fillStyle="rgba(255,255,255,.9)";ctx.textAlign="center";ctx.fillText("Life Manual",540,92);
+    ctx.font="bold 54px system-ui";ctx.fillStyle="rgba(255,255,255,.9)";ctx.textAlign="center";ctx.fillText("Christian Manual",540,92);
     // Divider line
     ctx.strokeStyle=_hexRgba(c.color||"#7c3aed",.4);ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(340,118);ctx.lineTo(740,118);ctx.stroke();
     // Character — circular clip
@@ -3932,7 +3932,7 @@ function showShareCard(){
     ctx.fillText("with "+c.name+" · "+c.pillar,540,900);
     // URL
     ctx.font="34px system-ui";ctx.fillStyle="rgba(255,255,255,.28)";
-    ctx.fillText("lifemanual.app",540,1046);
+    ctx.fillText("christianmanual.app",540,1046);
   }
 
   function showOverlay(){
@@ -3948,11 +3948,11 @@ function showShareCard(){
     shareBtn.textContent="📤 Share";
     shareBtn.onclick=async()=>{
       canvas.toBlob(async blob=>{
-        const file=new File([blob],"lifemanual-streak.png",{type:"image/png"});
+        const file=new File([blob],"christianmanual-streak.png",{type:"image/png"});
         if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-          try{await navigator.share({files:[file],title:"Life Manual",text:"🔥 "+streak+"-day streak with "+c.name+"! Daily life upgrades on Life Manual."});}
-          catch(e){if(e.name!=="AbortError"){const a=document.createElement("a");a.download="lifemanual-streak.png";a.href=canvas.toDataURL();a.click();}}
-        } else {const a=document.createElement("a");a.download="lifemanual-streak.png";a.href=canvas.toDataURL();a.click();}
+          try{await navigator.share({files:[file],title:"Christian Manual",text:"🔥 "+streak+"-day streak with "+c.name+"! Daily life upgrades on Christian Manual."});}
+          catch(e){if(e.name!=="AbortError"){const a=document.createElement("a");a.download="christianmanual-streak.png";a.href=canvas.toDataURL();a.click();}}
+        } else {const a=document.createElement("a");a.download="christianmanual-streak.png";a.href=canvas.toDataURL();a.click();}
       },"image/png");
     };
     const skip=document.createElement("button");
@@ -4032,7 +4032,7 @@ function showNotifBanner(){
         toast("🔔 Done! I'll remind you every day. 💜");
         await subscribePush();
         navigator.serviceWorker&&navigator.serviceWorker.ready.then(sw=>{
-          sw.showNotification("✨ Life Manual",{
+          sw.showNotification("✨ Christian Manual",{
             body:`Hey${state.name?" "+state.name:""}! Your daily upload is waiting. 💜`,
             icon:"icon-192.png",tag:"lm-welcome",requireInteraction:false
           });
@@ -4165,7 +4165,7 @@ setTimeout(initFAB, 0);
 document.addEventListener("visibilitychange",()=>{
   if(document.hidden){
     state.lastSeen=Date.now();
-    localStorage.setItem("lifemanual.lastSeen",state.lastSeen);
+    localStorage.setItem("christianmanual.lastSeen",state.lastSeen);
     schedulePetReminder();
   } else {
     clearPetReminder();
@@ -4205,7 +4205,7 @@ if(window.visualViewport){
     <div class="chat-face" id="coFace" style="width:44px;height:44px;flex:none;border:2px solid rgba(167,139,250,.5)"></div>
     <div style="flex:1;min-width:0">
       <div class="co-hname" id="coName">—<span class="chat-dot"></span></div>
-      <div class="co-hrole" id="coRole">Life Manual</div>
+      <div class="co-hrole" id="coRole">Christian Manual</div>
     </div>
   </div>
   <div class="co-scroll" id="coScroll">
