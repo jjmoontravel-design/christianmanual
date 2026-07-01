@@ -269,6 +269,26 @@
   .pray-card-sub{font-size:.77rem;color:var(--muted);margin-top:2px}
   .pray-card-arrow{font-size:1rem;color:var(--muted);flex:none}
   /* prayer overlay */
+  .sleep-card{display:flex;align-items:center;gap:13px;padding:15px 18px;background:linear-gradient(135deg,rgba(30,41,59,.7),rgba(15,23,42,.5));border:1px solid rgba(99,102,241,.25);border-radius:20px;margin:6px 0 2px 38px;cursor:pointer;transition:transform .15s;-webkit-tap-highlight-color:transparent}
+  .sleep-card:active{transform:scale(.97)}
+  .sleep-card-icon{font-size:1.7rem;flex:none}
+  .sleep-card-body{flex:1;min-width:0}
+  .sleep-card-title{font-weight:800;font-size:.94rem;color:var(--ink)}
+  .sleep-card-sub{font-size:.77rem;color:var(--muted);margin-top:2px}
+  .sleep-card-arrow{font-size:1rem;color:var(--muted);flex:none}
+  .sleep-overlay{position:fixed;inset:0;z-index:91;background:#05080f;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .4s cubic-bezier(.32,0,.15,1);visibility:hidden;pointer-events:none;will-change:transform}
+  .sleep-overlay.open{transform:translateY(0);visibility:visible;pointer-events:auto}
+  .sleep-overlay-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px 10px;flex:none}
+  .sleep-overlay-title{font-size:1rem;font-weight:800;color:rgba(255,255,255,.5);letter-spacing:.04em}
+  .sleep-close-btn{background:rgba(255,255,255,.08);border:none;color:rgba(255,255,255,.5);font-size:1.1rem;width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .sleep-body{flex:1;overflow-y:auto;padding:10px 28px 40px;display:flex;flex-direction:column;gap:24px}
+  .sleep-ref{font-size:.78rem;font-weight:700;color:rgba(99,102,241,.8);letter-spacing:.08em;text-transform:uppercase}
+  .sleep-intro{font-size:.95rem;color:rgba(255,255,255,.45);line-height:1.6;font-style:italic}
+  .sleep-text{font-size:1.22rem;color:rgba(255,255,255,.88);line-height:2.0;font-weight:400;letter-spacing:.01em}
+  .sleep-controls{display:flex;gap:12px;flex-wrap:wrap;padding:0 28px 40px;flex:none}
+  .sleep-play-btn{flex:1;padding:14px;border:none;border-radius:16px;background:rgba(99,102,241,.25);border:1.5px solid rgba(99,102,241,.4);color:rgba(255,255,255,.9);font-size:.95rem;font-weight:700;font-family:inherit;cursor:pointer;transition:background .2s}
+  .sleep-play-btn.playing{background:rgba(99,102,241,.4)}
+  .sleep-next-btn{padding:14px 20px;border:none;border-radius:16px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);font-size:.85rem;font-weight:600;font-family:inherit;cursor:pointer}
   .pray-overlay{position:fixed;inset:0;z-index:90;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .38s cubic-bezier(.32,0,.15,1);visibility:hidden;pointer-events:none;will-change:transform}
   .pray-overlay.open{transform:translateY(0);visibility:visible;pointer-events:auto}
   .pray-overlay-head{display:flex;align-items:center;justify-content:space-between;padding:18px 18px 10px;border-bottom:1px solid var(--line)}
@@ -2044,6 +2064,58 @@ function bumpChatCount(){const k="lm.chat."+todayKey();localStorage.setItem(k,ge
 
 // ── PRAY WITH ME ──────────────────────────────────────────────────────────────
 let _prayUtterance=null;
+// ── SLEEP WITH SCRIPTURE ──────────────────────────────────────────────────────
+let _sleepIdx=dayNum()%SLEEP_PASSAGES.length;
+let _sleepUtterance=null;
+function renderSleepBody(){
+  const sp=SLEEP_PASSAGES[_sleepIdx];
+  document.getElementById("sleepBody").innerHTML=`
+    <div class="sleep-ref">${sp.t}</div>
+    <div class="sleep-intro">${sp.intro}</div>
+    <div class="sleep-text">${sp.text}</div>`;
+  const btn=document.getElementById("sleepPlayBtn");
+  if(btn)btn.textContent="▶ Read to me";
+  if(btn)btn.classList.remove("playing");
+}
+function openSleepOverlay(){
+  _sleepIdx=dayNum()%SLEEP_PASSAGES.length;
+  renderSleepBody();
+  document.getElementById("sleepOverlay").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function closeSleepOverlay(){
+  stopSleepReading();
+  document.getElementById("sleepOverlay").classList.remove("open");
+  document.body.style.overflow="";
+}
+function stopSleepReading(){
+  if(window.speechSynthesis)window.speechSynthesis.cancel();
+  _sleepUtterance=null;
+  const btn=document.getElementById("sleepPlayBtn");
+  if(btn){btn.textContent="▶ Read to me";btn.classList.remove("playing");}
+}
+function toggleSleepReading(){
+  if(_sleepUtterance&&window.speechSynthesis.speaking){stopSleepReading();return;}
+  const sp=SLEEP_PASSAGES[_sleepIdx];
+  const fullText=sp.intro+". … "+sp.text;
+  const u=new SpeechSynthesisUtterance(fullText);
+  u.rate=0.72; u.pitch=0.95;
+  const voices=window.speechSynthesis.getVoices();
+  const calm=voices.find(v=>/samantha|karen|victoria|moira|tessa/i.test(v.name)&&/en/i.test(v.lang))
+    ||voices.find(v=>/en/i.test(v.lang)&&v.name.toLowerCase().includes("female"))
+    ||voices.find(v=>/en/i.test(v.lang));
+  if(calm)u.voice=calm;
+  u.onend=()=>{_sleepUtterance=null;const b=document.getElementById("sleepPlayBtn");if(b){b.textContent="▶ Read again";b.classList.remove("playing");}};
+  _sleepUtterance=u;
+  const btn=document.getElementById("sleepPlayBtn");
+  if(btn){btn.textContent="■ Stop";btn.classList.add("playing");}
+  window.speechSynthesis.speak(u);
+}
+function nextSleepPassage(){
+  stopSleepReading();
+  _sleepIdx=(_sleepIdx+1)%SLEEP_PASSAGES.length;
+  renderSleepBody();
+}
 let _verseUtterance=null;
 function toggleVerseSpeak(text){
   const btn=document.getElementById("verseSpeakBtn");
@@ -2277,6 +2349,16 @@ function renderToday(v){
       <div class="song-card-meta">${song.a} · Tap to worship</div>
     </div>
     <div class="song-card-arrow">›</div>
+  </div>`;}
+  // Sleep with Scripture card
+  {const sp=SLEEP_PASSAGES[dayNum()%SLEEP_PASSAGES.length];
+  html+=`<div class="sleep-card" onclick="openSleepOverlay()">
+    <div class="sleep-card-icon">🌙</div>
+    <div class="sleep-card-body">
+      <div class="sleep-card-title">Sleep with Scripture</div>
+      <div class="sleep-card-sub">${sp.t} · Read aloud slowly as you rest</div>
+    </div>
+    <div class="sleep-card-arrow">›</div>
   </div>`;}
   // Pray with me card
   html+=`<div class="pray-card" onclick="openPrayOverlay()">
@@ -4440,6 +4522,17 @@ if(window.visualViewport){
   </div>
 </div>
 <!-- ── PRAY WITH ME OVERLAY ── -->
+<div class="sleep-overlay" id="sleepOverlay" role="dialog" aria-modal="true" aria-label="Sleep with Scripture">
+  <div class="sleep-overlay-head">
+    <div class="sleep-overlay-title">🌙 SLEEP WITH SCRIPTURE</div>
+    <button class="sleep-close-btn" onclick="closeSleepOverlay()">✕</button>
+  </div>
+  <div class="sleep-body" id="sleepBody"></div>
+  <div class="sleep-controls">
+    <button class="sleep-play-btn" id="sleepPlayBtn" onclick="toggleSleepReading()">▶ Read to me</button>
+    <button class="sleep-next-btn" onclick="nextSleepPassage()">Next passage ›</button>
+  </div>
+</div>
 <div class="pray-overlay" id="prayOverlay" role="dialog" aria-modal="true" aria-label="Pray with me">
   <div class="pray-overlay-head">
     <div class="pray-overlay-title">🙏 Pray with me</div>

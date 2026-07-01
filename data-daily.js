@@ -234,6 +234,54 @@ const PRAISE_SONGS = [
   {t:"This Is Amazing Grace",a:"Phil Wickham"},
 ];
 
+// ── SLEEP SCRIPTURE — nightly reading pool ───────────────────────────────────
+const SLEEP_PASSAGES = [
+  {t:"Psalm 23", intro:"Close your eyes. Breathe slowly. Let these ancient words settle over you like a blanket.",
+   text:"The Lord is my shepherd. I shall not want. He makes me lie down in green pastures. He leads me beside still waters. He restores my soul. He leads me in paths of righteousness for his name's sake. Even though I walk through the valley of the shadow of death, I will fear no evil, for you are with me. Your rod and your staff, they comfort me. You prepare a table before me in the presence of my enemies. You anoint my head with oil. My cup overflows. Surely goodness and mercy shall follow me all the days of my life, and I shall dwell in the house of the Lord forever."},
+
+  {t:"John 14:1–3", intro:"Jesus speaking. These words were meant for tired hearts.",
+   text:"Let not your hearts be troubled. Believe in God. Believe also in me. In my Father's house are many rooms. If it were not so, would I have told you that I go to prepare a place for you? And if I go and prepare a place for you, I will come again and will take you to myself, that where I am you may be also."},
+
+  {t:"Psalm 91", intro:"A shelter for the night. Read slowly. Let each line land.",
+   text:"He who dwells in the shelter of the Most High will abide in the shadow of the Almighty. I will say to the Lord, my refuge and my fortress, my God, in whom I trust. For he will deliver you from the snare of the fowler and from the deadly pestilence. He will cover you with his pinions, and under his wings you will find refuge. His faithfulness is a shield and buckler. You will not fear the terror of the night, nor the arrow that flies by day. For he will command his angels concerning you to guard you in all your ways."},
+
+  {t:"Romans 8:38–39", intro:"Nothing. Nothing at all. Let that sink in tonight.",
+   text:"For I am sure that neither death nor life, nor angels nor rulers, nor things present nor things to come, nor powers, nor height nor depth, nor anything else in all creation, will be able to separate us from the love of God in Christ Jesus our Lord."},
+
+  {t:"Psalm 121", intro:"Lift your eyes. Your help is already on the way.",
+   text:"I lift up my eyes to the hills. From where does my help come? My help comes from the Lord, who made heaven and earth. He will not let your foot be moved. He who keeps you will not slumber. Behold, he who keeps Israel will neither slumber nor sleep. The Lord is your keeper. The Lord is your shade on your right hand. The sun shall not strike you by day, nor the moon by night. The Lord will keep you from all evil. He will keep your life. The Lord will keep your going out and your coming in from this time forth and forevermore."},
+
+  {t:"Isaiah 43:1–3", intro:"God is calling you by name tonight. Listen.",
+   text:"But now thus says the Lord, he who created you, O Jacob, he who formed you, O Israel: Fear not, for I have redeemed you. I have called you by name, you are mine. When you pass through the waters, I will be with you. And through the rivers, they shall not overwhelm you. When you walk through fire you shall not be burned, and the flame shall not consume you. For I am the Lord your God, the Holy One of Israel, your Savior."},
+
+  {t:"Matthew 11:28–30", intro:"He already knows you're tired. This is His invitation.",
+   text:"Come to me, all who labor and are heavy laden, and I will give you rest. Take my yoke upon you, and learn from me, for I am gentle and lowly in heart, and you will find rest for your souls. For my yoke is easy, and my burden is light."},
+
+  {t:"Philippians 4:6–8", intro:"Trade your worry for peace. This is how.",
+   text:"Do not be anxious about anything, but in everything by prayer and supplication with thanksgiving let your requests be made known to God. And the peace of God, which surpasses all understanding, will guard your hearts and your minds in Christ Jesus. Finally, brothers, whatever is true, whatever is honorable, whatever is just, whatever is pure, whatever is lovely, whatever is commendable, if there is any excellence, if there is anything worthy of praise, think about these things."},
+
+  {t:"Psalm 46:1–3, 10", intro:"Be still. Just for a few minutes. Let God be God.",
+   text:"God is our refuge and strength, a very present help in trouble. Therefore we will not fear though the earth gives way, though the mountains be moved into the heart of the sea, though its waters roar and foam, though the mountains tremble at its swelling. Be still, and know that I am God. I will be exalted among the nations. I will be exalted in the earth."},
+
+  {t:"Isaiah 26:3", intro:"Perfect peace is available to you tonight. Here is the door.",
+   text:"You keep him in perfect peace whose mind is stayed on you, because he trusts in you. Trust in the Lord forever, for the Lord God is an everlasting rock."},
+
+  {t:"Psalm 4:7–8", intro:"This is one of the most peaceful verses in the whole Bible.",
+   text:"You have put more joy in my heart than they have when their grain and wine abound. In peace I will both lie down and sleep, for you alone, O Lord, make me dwell in safety."},
+
+  {t:"1 Peter 5:6–7", intro:"You don't have to carry tonight's worry. There's somewhere to put it.",
+   text:"Humble yourselves, therefore, under the mighty hand of God so that at the proper time he may exalt you, casting all your anxieties on him, because he cares for you."},
+
+  {t:"Psalm 139:1–5, 11–12", intro:"He sees you right now. Every part of you. And He's here.",
+   text:"O Lord, you have searched me and known me. You know when I sit down and when I rise up. You discern my thoughts from afar. You search out my path and my lying down and are acquainted with all my ways. Even before a word is on my tongue, behold, O Lord, you know it altogether. You hem me in, behind and before, and lay your hand upon me. If I say, surely the darkness shall cover me, and the light about me be night, even the darkness is not dark to you. The night is bright as the day, for darkness is as light with you."},
+
+  {t:"Zephaniah 3:17", intro:"God singing over you. That is what tonight's verse is about.",
+   text:"The Lord your God is in your midst, a mighty one who will save. He will rejoice over you with gladness. He will quiet you by his love. He will exult over you with loud singing."},
+
+  {t:"Psalm 62:1–2", intro:"Rest your soul in the one place it actually finds rest.",
+   text:"For God alone my soul waits in silence. From him comes my salvation. He alone is my rock and my salvation, my fortress. I shall not be greatly shaken."},
+];
+
 // ── PILLAR SKILLS — shown when user's character matches ─────────────────────
 const PILLAR_SKILLS = {
 
