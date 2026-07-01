@@ -1892,8 +1892,8 @@ function renderGuides(v){
     return;
   }
   v.innerHTML=`<div class="card hero"><div class="kicker">For the moments nobody prepared you for</div>
-      <div class="big">🧭 Life Guides</div>
-      <div class="sub">Some of us didn't have a parent or role model to teach us these things. That ends here. Pick what you're facing — no shame, no judgment, just the manual.</div></div>
+      <div class="big">🧭 Faith Guides</div>
+      <div class="sub">For the moments nobody prepared you for — spiritually. Pick what you're facing — no shame, no judgment, just the guide.</div></div>
     ${GUIDES.map(g=>`<div class="card skill" data-guide="${g.id}" style="cursor:pointer">
       <div class="top"><span class="emoji">${g.e}</span>
         <div><div class="t">${g.t}</div><div class="why">${g.tag}</div></div>
@@ -2029,10 +2029,10 @@ async function askAI(message){
 }
 
 const FALLBACKS=[
-  nm=>`Ask me something specific! 💡 Like "how do I save money," "I got fired," or "how do I cook chicken" — I've got real answers for hundreds of life topics.`,
-  nm=>`Try a specific question! I know about money, jobs, cooking, health, relationships, and loads more. What's actually going on? 💬`,
-  nm=>`Give me something to work with! Ask about a real situation — "how do I build credit," "I can't sleep," "my boss is awful" — and I'll help for real. 💜`,
-  nm=>`I'm better with specifics! What's the actual thing on your mind? Money? Work? Health? Relationships? Just ask it straight and I've got you. 🎯`,
+  nm=>`Ask me something specific! 💡 Like "how do I start praying," "I'm doubting God," or "where do I begin in the Bible" — I've got real answers. 🙏`,
+  nm=>`Try a specific question! I know about prayer, the Bible, faith doubts, forgiveness, church, and loads more. What's actually going on? 💬`,
+  nm=>`Give me something to work with! Ask about a real situation — "I feel far from God," "I can't forgive someone," "I don't know if I believe" — and I'll help for real. 💜`,
+  nm=>`I'm better with specifics! What's on your heart? Prayer? The Bible? Doubt? Relationships? Just ask it straight and I've got you. 🌱`,
 ];
 
 const FREE_CHAT_LIMIT=10;
