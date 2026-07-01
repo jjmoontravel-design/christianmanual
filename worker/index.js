@@ -403,6 +403,63 @@ Do NOT include any preamble, explanation, or commentary — output only the pray
       }
     }
 
+    // ── GET /prayer-wall — fetch latest community prayers ──
+    if (url.pathname === '/prayer-wall' && request.method === 'GET') {
+      const listRaw = await env.LM_KV.get('pw:list');
+      const ids = listRaw ? JSON.parse(listRaw) : [];
+      const prayers = (await Promise.all(ids.map(id => env.LM_KV.get('pw:prayer:' + id)))).filter(Boolean).map(r => JSON.parse(r));
+      return json({ prayers });
+    }
+
+    // ── POST /prayer-wall — submit a community prayer ──
+    if (url.pathname === '/prayer-wall' && request.method === 'POST') {
+      let body;
+      try { body = await request.json(); } catch { return json({ error: 'bad request' }, 400); }
+      const { text, name = 'Anonymous', deviceId } = body;
+      if (!text || !deviceId) return json({ error: 'missing fields' }, 400);
+      if (text.length > 220) return json({ error: 'too long' }, 400);
+      if (/https?:\/\//i.test(text)) return json({ error: 'no links allowed' }, 400);
+      // Rate limit: 3 prayers per deviceId per UTC day
+      const dateStr = new Date().toISOString().slice(0, 10);
+      const rateKey = `pw:rate:${deviceId}:${dateStr}`;
+      const countRaw = await env.LM_KV.get(rateKey);
+      const count = countRaw ? parseInt(countRaw) : 0;
+      if (count >= 3) return json({ error: 'limit reached', message: 'You\'ve shared 3 prayers today — come back tomorrow 🙏' }, 429);
+      // Store prayer
+      const id = Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+      const prayer = { id, text: text.trim().slice(0, 220), name: (name || 'Anonymous').trim().slice(0, 30), ts: Date.now(), amens: 0 };
+      await env.LM_KV.put('pw:prayer:' + id, JSON.stringify(prayer));
+      // Update list (newest first, max 60)
+      const listRaw = await env.LM_KV.get('pw:list');
+      const ids = listRaw ? JSON.parse(listRaw) : [];
+      ids.unshift(id);
+      if (ids.length > 60) ids.splice(60);
+      await env.LM_KV.put('pw:list', JSON.stringify(ids));
+      // Increment rate count (expire after 48h)
+      await env.LM_KV.put(rateKey, String(count + 1), { expirationTtl: 172800 });
+      return json({ ok: true, prayer });
+    }
+
+    // ── POST /prayer-wall/amen/:id — say amen to a prayer ──
+    if (url.pathname.startsWith('/prayer-wall/amen/') && request.method === 'POST') {
+      const prayerId = url.pathname.slice('/prayer-wall/amen/'.length);
+      let body;
+      try { body = await request.json(); } catch { return json({ error: 'bad request' }, 400); }
+      const { deviceId } = body;
+      if (!deviceId || !prayerId) return json({ error: 'missing fields' }, 400);
+      // One amen per user per prayer
+      const amenKey = `pw:amen:${deviceId}:${prayerId}`;
+      const already = await env.LM_KV.get(amenKey);
+      if (already) return json({ error: 'already', amens: null });
+      await env.LM_KV.put(amenKey, '1', { expirationTtl: 2592000 }); // 30 days
+      const raw = await env.LM_KV.get('pw:prayer:' + prayerId);
+      if (!raw) return json({ error: 'not found' }, 404);
+      const prayer = JSON.parse(raw);
+      prayer.amens = (prayer.amens || 0) + 1;
+      await env.LM_KV.put('pw:prayer:' + prayerId, JSON.stringify(prayer));
+      return json({ ok: true, amens: prayer.amens });
+    }
+
     return new Response('Not found', { status: 404, headers: CORS });
     } catch(e) {
       return json({ error: String(e && e.message || e) }, 500);

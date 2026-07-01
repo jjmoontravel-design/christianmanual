@@ -289,6 +289,44 @@
   .sleep-play-btn{flex:1;padding:14px;border:none;border-radius:16px;background:rgba(99,102,241,.25);border:1.5px solid rgba(99,102,241,.4);color:rgba(255,255,255,.9);font-size:.95rem;font-weight:700;font-family:inherit;cursor:pointer;transition:background .2s}
   .sleep-play-btn.playing{background:rgba(99,102,241,.4)}
   .sleep-next-btn{padding:14px 20px;border:none;border-radius:16px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);font-size:.85rem;font-weight:600;font-family:inherit;cursor:pointer}
+  /* Prayer Wall card */
+  .wall-card{display:flex;align-items:center;gap:13px;padding:15px 18px;background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(245,158,11,.06));border:1px solid rgba(251,191,36,.28);border-radius:20px;margin:6px 0 2px 38px;cursor:pointer;transition:transform .15s;-webkit-tap-highlight-color:transparent}
+  .wall-card:active{transform:scale(.97)}
+  .wall-card-icon{font-size:1.7rem;flex:none}
+  .wall-card-body{flex:1;min-width:0}
+  .wall-card-title{font-weight:800;font-size:.94rem;color:var(--ink)}
+  .wall-card-sub{font-size:.77rem;color:var(--muted);margin-top:2px}
+  .wall-card-arrow{font-size:1rem;color:var(--muted);flex:none}
+  /* Prayer Wall overlay */
+  .wall-overlay{position:fixed;inset:0;z-index:92;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .38s cubic-bezier(.32,0,.15,1);visibility:hidden;pointer-events:none;will-change:transform}
+  .wall-overlay.open{transform:translateY(0);visibility:visible;pointer-events:auto}
+  .wall-overlay-head{display:flex;align-items:center;justify-content:space-between;padding:18px 18px 0;border-bottom:1px solid var(--line);flex:none}
+  .wall-overlay-title{font-weight:800;font-size:1.08rem}
+  .wall-close-btn{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--muted);padding:4px 8px}
+  .wall-tabs{display:flex;gap:0;border-bottom:1px solid var(--line);flex:none}
+  .wall-tab{flex:1;padding:12px;text-align:center;font-size:.9rem;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;transition:color .15s,border-color .15s}
+  .wall-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .wall-body{flex:1;overflow-y:auto;padding:0 18px 24px}
+  /* Individual prayer cards on wall */
+  .wall-prayer{background:var(--card);border-radius:16px;padding:14px 16px;margin:12px 0;border:1px solid var(--line)}
+  .wall-prayer-name{font-weight:700;font-size:.82rem;color:var(--accent);margin-bottom:4px}
+  .wall-prayer-text{font-size:.93rem;line-height:1.5;color:var(--ink)}
+  .wall-prayer-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+  .wall-prayer-time{font-size:.75rem;color:var(--muted)}
+  .wall-amen-btn{background:none;border:1px solid var(--line);border-radius:20px;padding:4px 12px;font-size:.8rem;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;transition:background .15s,color .15s}
+  .wall-amen-btn.said{background:rgba(167,139,250,.15);border-color:rgba(167,139,250,.4);color:var(--accent)}
+  /* Submit form */
+  .wall-form{padding-top:16px}
+  .wall-form-label{font-weight:700;font-size:.88rem;color:var(--ink);margin-bottom:6px;display:block}
+  .wall-form-sub{font-size:.77rem;color:var(--muted);margin-bottom:14px}
+  .wall-form textarea{width:100%;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:.93rem;color:var(--ink);resize:none;height:110px;font-family:inherit;outline:none}
+  .wall-form textarea:focus{border-color:var(--accent)}
+  .wall-char-count{font-size:.75rem;color:var(--muted);text-align:right;margin-top:4px}
+  .wall-name-input{width:100%;box-sizing:border-box;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-size:.9rem;color:var(--ink);font-family:inherit;outline:none;margin-top:10px}
+  .wall-name-input:focus{border-color:var(--accent)}
+  .wall-submit-btn{width:100%;margin-top:14px;padding:14px;background:linear-gradient(135deg,#a78bfa,#6366f1);color:#fff;border:none;border-radius:14px;font-size:1rem;font-weight:800;cursor:pointer;transition:opacity .15s}
+  .wall-submit-btn:disabled{opacity:.5;cursor:default}
+  .wall-submit-msg{text-align:center;font-size:.88rem;margin-top:10px;min-height:20px}
   .pray-overlay{position:fixed;inset:0;z-index:90;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .38s cubic-bezier(.32,0,.15,1);visibility:hidden;pointer-events:none;will-change:transform}
   .pray-overlay.open{transform:translateY(0);visibility:visible;pointer-events:auto}
   .pray-overlay-head{display:flex;align-items:center;justify-content:space-between;padding:18px 18px 10px;border-bottom:1px solid var(--line)}
@@ -2137,6 +2175,131 @@ function toggleVerseSpeak(text){
   if(btn){btn.textContent="■ Stop";btn.classList.add("playing");}
   window.speechSynthesis.speak(u);
 }
+// ─── Prayer Wall ────────────────────────────────────────────────────────────
+const WORKER_URL='https://throbbing-bush-2964.jjmoontravel.workers.dev';
+let _wallTab='wall';
+let _wallPrayers=[];
+let _wallAmenedIds=new Set(JSON.parse(localStorage.getItem('rooted.amened')||'[]'));
+function _getDeviceId(){
+  let id=localStorage.getItem('rooted.deviceId');
+  if(!id){id=crypto.randomUUID();localStorage.setItem('rooted.deviceId',id);}
+  return id;
+}
+function _timeAgo(ts){
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60)return 'just now';
+  if(s<3600)return Math.floor(s/60)+'m ago';
+  if(s<86400)return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
+}
+async function openWallOverlay(){
+  document.getElementById('wallOverlay').classList.add('open');
+  switchWallTab('wall');
+}
+function closeWallOverlay(){
+  document.getElementById('wallOverlay').classList.remove('open');
+}
+function switchWallTab(tab){
+  _wallTab=tab;
+  document.getElementById('wallTabWall').classList.toggle('active',tab==='wall');
+  document.getElementById('wallTabShare').classList.toggle('active',tab==='share');
+  if(tab==='wall') renderWallList();
+  else renderWallForm();
+}
+async function renderWallList(){
+  const body=document.getElementById('wallBody');
+  body.innerHTML='<p style="text-align:center;color:var(--muted);padding:30px 0">Loading prayers…</p>';
+  try{
+    const res=await fetch(WORKER_URL+'/prayer-wall');
+    const data=await res.json();
+    _wallPrayers=data.prayers||[];
+  }catch(e){
+    body.innerHTML='<p style="text-align:center;color:var(--muted);padding:30px 0">Couldn\'t load prayers right now.</p>';
+    return;
+  }
+  if(!_wallPrayers.length){
+    body.innerHTML='<p style="text-align:center;color:var(--muted);padding:30px 0">No prayers yet — be the first to share one. ✝️</p>';
+    return;
+  }
+  body.innerHTML=_wallPrayers.map(p=>{
+    const said=_wallAmenedIds.has(p.id);
+    return `<div class="wall-prayer">
+      <div class="wall-prayer-name">${p.name||'Anonymous'}</div>
+      <div class="wall-prayer-text">${escHtml(p.text)}</div>
+      <div class="wall-prayer-footer">
+        <span class="wall-prayer-time">${_timeAgo(p.ts)}</span>
+        <button class="wall-amen-btn${said?' said':''}" id="amen-${p.id}" onclick="sayAmen('${p.id}')">🙏 ${p.amens||0}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderWallForm(){
+  const body=document.getElementById('wallBody');
+  body.innerHTML=`<div class="wall-form">
+    <label class="wall-form-label">What are you praying about?</label>
+    <p class="wall-form-sub">Your request will appear on the community wall for others to pray alongside you.</p>
+    <textarea id="wallText" placeholder="e.g. "Praying for my mum's health…"" maxlength="220" oninput="updateWallCount()"></textarea>
+    <div class="wall-char-count"><span id="wallCount">0</span>/220</div>
+    <input class="wall-name-input" id="wallName" type="text" placeholder="Your name (optional — leave blank to be Anonymous)" maxlength="30">
+    <button class="wall-submit-btn" id="wallSubmitBtn" onclick="submitWallPrayer()">Share with the community 🙏</button>
+    <div class="wall-submit-msg" id="wallSubmitMsg"></div>
+  </div>`;
+}
+function updateWallCount(){
+  const t=document.getElementById('wallText');
+  if(t)document.getElementById('wallCount').textContent=t.value.length;
+}
+async function submitWallPrayer(){
+  const text=(document.getElementById('wallText').value||'').trim();
+  const name=(document.getElementById('wallName').value||'').trim()||'Anonymous';
+  if(!text){document.getElementById('wallText').focus();return;}
+  const btn=document.getElementById('wallSubmitBtn');
+  const msg=document.getElementById('wallSubmitMsg');
+  btn.disabled=true;
+  btn.textContent='Sharing…';
+  try{
+    const res=await fetch(WORKER_URL+'/prayer-wall',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text,name,deviceId:_getDeviceId()})
+    });
+    const data=await res.json();
+    if(res.status===429){
+      msg.style.color='var(--muted)';
+      msg.textContent=data.message||'You\'ve shared 3 prayers today — come back tomorrow 🙏';
+      btn.disabled=false;btn.textContent='Share with the community 🙏';
+      return;
+    }
+    if(!res.ok)throw new Error(data.error||'error');
+    msg.style.color='#a78bfa';
+    msg.textContent='Your prayer is on the wall. 🙏 Others are praying alongside you.';
+    setTimeout(()=>{msg.textContent='';},4000);
+    btn.disabled=false;btn.textContent='Share with the community 🙏';
+    document.getElementById('wallText').value='';
+    document.getElementById('wallName').value='';
+    document.getElementById('wallCount').textContent='0';
+  }catch(e){
+    msg.style.color='var(--muted)';msg.textContent='Something went wrong. Please try again.';
+    btn.disabled=false;btn.textContent='Share with the community 🙏';
+  }
+}
+async function sayAmen(id){
+  const btn=document.getElementById('amen-'+id);
+  if(!btn||btn.classList.contains('said'))return;
+  btn.classList.add('said');
+  _wallAmenedIds.add(id);
+  localStorage.setItem('rooted.amened',JSON.stringify([..._wallAmenedIds]));
+  try{
+    const res=await fetch(WORKER_URL+'/prayer-wall/amen/'+id,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({deviceId:_getDeviceId()})
+    });
+    const data=await res.json();
+    if(data.amens!=null)btn.textContent='🙏 '+data.amens;
+  }catch(e){}
+}
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function openPraiseYouTube(title,artist){
   const q=encodeURIComponent(title+' '+artist+' worship');
   window.open('https://www.youtube.com/results?search_query='+q,'_blank');
@@ -2368,6 +2531,15 @@ function renderToday(v){
       <div class="pray-card-sub">Tell me what's on your heart — I'll pray it with you, out loud</div>
     </div>
     <div class="pray-card-arrow">›</div>
+  </div>`;
+  // Prayer Wall card
+  html+=`<div class="wall-card" onclick="openWallOverlay()">
+    <div class="wall-card-icon">✝️</div>
+    <div class="wall-card-body">
+      <div class="wall-card-title">Prayer Wall</div>
+      <div class="wall-card-sub">See what your community is praying for — and add your own</div>
+    </div>
+    <div class="wall-card-arrow">›</div>
   </div>`;
   // Build each card once, keyed by slot, then emit in the user's interest-led order.
   const cards={};
@@ -4533,6 +4705,18 @@ if(window.visualViewport){
     <button class="sleep-next-btn" onclick="nextSleepPassage()">Next passage ›</button>
   </div>
 </div>
+<div class="wall-overlay" id="wallOverlay" role="dialog" aria-modal="true" aria-label="Prayer Wall">
+  <div class="wall-overlay-head">
+    <div class="wall-overlay-title">✝️ Prayer Wall</div>
+    <button class="wall-close-btn" onclick="closeWallOverlay()">✕</button>
+  </div>
+  <div class="wall-tabs">
+    <div class="wall-tab active" id="wallTabWall" onclick="switchWallTab('wall')">🙏 Community</div>
+    <div class="wall-tab" id="wallTabShare" onclick="switchWallTab('share')">✏️ Share yours</div>
+  </div>
+  <div class="wall-body" id="wallBody"></div>
+</div>
+
 <div class="pray-overlay" id="prayOverlay" role="dialog" aria-modal="true" aria-label="Pray with me">
   <div class="pray-overlay-head">
     <div class="pray-overlay-title">🙏 Pray with me</div>
