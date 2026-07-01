@@ -1,8 +1,8 @@
-﻿{
+{
   "id": "/christianmanual/",
-  "name": "Christian Manual",
-  "short_name": "Christian Manual",
-  "description": "Your daily life upgrade — one skill, one word, one money tip, one challenge every day. Pick an animal companion who walks with you.",
+  "name": "Rooted",
+  "short_name": "Rooted",
+  "description": "Your daily faith upgrade — one skill, one verse, one challenge every day. Pick an animal companion who walks with you.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -21,7 +21,7 @@
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Christian Manual home screen"
+      "label": "Rooted home screen"
     }
   ]
 }
