@@ -1560,16 +1560,16 @@ const LIFE_STAGES=[
 ];
 // Each interest maps to one or more daily feed slots + a suggested guide.
 const INTERESTS=[
-  {id:"money",        emoji:"💰", label:"Money & saving",       slots:["money"],            guide:"beaver"},
-  {id:"cooking",      emoji:"🍳", label:"Cooking & food",       slots:["skill"],            guide:"panda"},
-  {id:"health",       emoji:"🫀", label:"Health & body",        slots:["body"],             guide:"wolf"},
-  {id:"career",       emoji:"💼", label:"Career & work",        slots:["world","skill"],    guide:"eagle"},
-  {id:"home",         emoji:"🏠", label:"Home & living",        slots:["skill"],            guide:"capybara"},
-  {id:"relationships",emoji:"❤️", label:"Relationships",        slots:["mind"],             guide:"dolphin"},
-  {id:"calm",         emoji:"🧠", label:"Mental health & calm", slots:["mind"],             guide:"cat"},
-  {id:"parenting",    emoji:"👶", label:"Teaching my kids",     slots:["skill"],            guide:"elephant"},
-  {id:"tech",         emoji:"📱", label:"Tech & digital",       slots:["world"],            guide:"raccoon"},
-  {id:"confidence",   emoji:"🦁", label:"Confidence",           slots:["challenge","mind"], guide:"lion"}
+  {id:"money",        emoji:"🙏", label:"Prayer & devotion",    slots:["mind"],             guide:"capybara"},
+  {id:"cooking",      emoji:"📖", label:"Bible study",          slots:["skill"],            guide:"owl"},
+  {id:"health",       emoji:"🎵", label:"Worship & music",      slots:["body"],             guide:"penguin"},
+  {id:"career",       emoji:"✝️", label:"Faith at work",        slots:["world","skill"],    guide:"eagle"},
+  {id:"home",         emoji:"❤️", label:"Family & faith",       slots:["skill"],            guide:"elephant"},
+  {id:"relationships",emoji:"🤝", label:"Serving others",       slots:["mind"],             guide:"dolphin"},
+  {id:"calm",         emoji:"🕊️", label:"Peace & mental health",slots:["mind"],             guide:"cat"},
+  {id:"parenting",    emoji:"💸", label:"Generosity & giving",  slots:["money"],            guide:"beaver"},
+  {id:"tech",         emoji:"📱", label:"Tech & digital life",  slots:["world"],            guide:"raccoon"},
+  {id:"confidence",   emoji:"🦁", label:"Courage & boldness",   slots:["challenge","mind"], guide:"lion"}
 ];
 // Daily feed order: lead with the slots tied to the user's ranked interests, then the rest.
 function feedOrder(){
@@ -2971,12 +2971,12 @@ document.addEventListener("click",e=>{
 });
 // ============ ONBOARDING INTERVIEW ============
 const GOALS=[
-  {k:"money",e:"💰",t:"Money & stability"},
-  {k:"confidence",e:"✨",t:"Confidence"},
-  {k:"health",e:"🫀",t:"Health & body"},
-  {k:"relationships",e:"💞",t:"Relationships"},
-  {k:"habits",e:"⚡",t:"Daily habits"},
-  {k:"healing",e:"🌧️",t:"Healing hard times"}
+  {k:"money",e:"🙏",t:"Deepen my prayer life"},
+  {k:"confidence",e:"✝️",t:"Grow in faith"},
+  {k:"health",e:"📖",t:"Know the Bible better"},
+  {k:"relationships",e:"❤️",t:"Love people well"},
+  {k:"habits",e:"⚡",t:"Build daily faith habits"},
+  {k:"healing",e:"🕊️",t:"Find peace & healing"}
 ];
 let ob={step:0,draft:{}};
 const OB_TOTAL=7;
