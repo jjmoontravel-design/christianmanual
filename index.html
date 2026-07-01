@@ -253,6 +253,35 @@
   .locked-preview-sub{font-size:.78rem;color:var(--muted);margin-top:2px}
   .locked-preview-lock{font-size:1.1rem;flex:none;color:var(--muted)}
 
+  /* ── PRAY WITH ME ── */
+  .pray-card{display:flex;align-items:center;gap:13px;padding:15px 18px;background:linear-gradient(135deg,rgba(167,139,250,.13),rgba(99,102,241,.06));border:1px solid rgba(167,139,250,.28);border-radius:20px;margin:6px 0 2px 38px;cursor:pointer;transition:transform .15s,box-shadow .2s;-webkit-tap-highlight-color:transparent}
+  .pray-card:active{transform:scale(.97)}
+  .pray-card-icon{font-size:1.7rem;flex:none}
+  .pray-card-body{flex:1;min-width:0}
+  .pray-card-title{font-weight:800;font-size:.94rem;color:var(--ink)}
+  .pray-card-sub{font-size:.77rem;color:var(--muted);margin-top:2px}
+  .pray-card-arrow{font-size:1rem;color:var(--muted);flex:none}
+  /* prayer overlay */
+  .pray-overlay{position:fixed;inset:0;z-index:90;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .38s cubic-bezier(.32,0,.15,1);visibility:hidden;pointer-events:none;will-change:transform}
+  .pray-overlay.open{transform:translateY(0);visibility:visible;pointer-events:auto}
+  .pray-overlay-head{display:flex;align-items:center;justify-content:space-between;padding:18px 18px 10px;border-bottom:1px solid var(--line)}
+  .pray-overlay-title{font-weight:800;font-size:1.08rem}
+  .pray-close-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--card2);color:var(--ink);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .pray-body{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px}
+  .pray-prompt{font-size:.9rem;color:var(--muted);line-height:1.5}
+  .pray-textarea{width:100%;min-height:110px;background:var(--card);border:1.5px solid var(--line);border-radius:16px;color:var(--ink);font-family:inherit;font-size:1rem;padding:14px 16px;resize:none;outline:none;box-sizing:border-box;line-height:1.5;transition:border-color .2s}
+  .pray-textarea:focus{border-color:var(--glow)}
+  .pray-submit-btn{width:100%;border:none;border-radius:999px;padding:15px;font-size:1rem;font-weight:800;cursor:pointer;background:var(--grad);color:#06121f;font-family:inherit;box-shadow:0 6px 24px rgba(99,102,241,.35);transition:transform .15s,box-shadow .2s,opacity .2s}
+  .pray-submit-btn:active{transform:scale(.96)}
+  .pray-submit-btn:disabled{opacity:.45;cursor:default;transform:none}
+  .pray-result{background:var(--card);border:1px solid rgba(167,139,250,.3);border-radius:20px;padding:20px;display:none;flex-direction:column;gap:14px}
+  .pray-result.show{display:flex}
+  .pray-result-text{font-size:.97rem;line-height:1.7;color:var(--ink);white-space:pre-wrap}
+  .pray-voice-btn{display:flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:999px;padding:12px 22px;font-size:.92rem;font-weight:700;cursor:pointer;background:var(--card2);border:1.5px solid rgba(167,139,250,.4);color:var(--ink);font-family:inherit;transition:background .2s,transform .15s}
+  .pray-voice-btn:active{transform:scale(.96)}
+  .pray-voice-btn.playing{background:rgba(167,139,250,.18);border-color:var(--glow)}
+  .pray-again-btn{font-size:.82rem;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline;padding:0;font-family:inherit}
+
   /* ── ALARM POPUP ── */
   .alarm-overlay{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s}
   .alarm-overlay.show{opacity:1;visibility:visible;pointer-events:auto}
@@ -2003,6 +2032,96 @@ const FREE_CHAT_LIMIT=10;
 function getChatCount(){const k="lm.chat."+todayKey();return parseInt(localStorage.getItem(k)||"0");}
 function bumpChatCount(){const k="lm.chat."+todayKey();localStorage.setItem(k,getChatCount()+1);}
 
+// ── PRAY WITH ME ──────────────────────────────────────────────────────────────
+let _prayUtterance=null;
+function openPrayOverlay(){
+  const el=document.getElementById("prayOverlay");
+  if(!el)return;
+  el.classList.add("open");
+  // reset to input state
+  document.getElementById("prayResult").classList.remove("show");
+  document.getElementById("prayInput").value="";
+  document.getElementById("praySubmitBtn").disabled=false;
+  document.getElementById("praySubmitBtn").textContent="🙏 Generate my prayer";
+  stopPrayerVoice();
+  setTimeout(()=>document.getElementById("prayInput").focus(),350);
+}
+function closePrayOverlay(){
+  stopPrayerVoice();
+  document.getElementById("prayOverlay").classList.remove("open");
+}
+async function submitPrayer(){
+  const input=document.getElementById("prayInput");
+  const text=(input.value||"").trim();
+  if(!text){input.focus();return;}
+  const btn=document.getElementById("praySubmitBtn");
+  btn.disabled=true;
+  btn.textContent="✨ Writing your prayer…";
+  stopPrayerVoice();
+  document.getElementById("prayResult").classList.remove("show");
+  try{
+    const res=await fetch(AI_WORKER_URL+"/prayer",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({text, name:state.name||"friend"})
+    });
+    const data=await res.json();
+    const prayer=data.prayer||"Lord, we bring these words to you and trust you hear every heart. Amen.";
+    document.getElementById("prayText").textContent=prayer;
+    document.getElementById("prayResult").classList.add("show");
+    document.getElementById("prayVoiceBtn").textContent="▶ Hear this prayer";
+    document.getElementById("prayVoiceBtn").classList.remove("playing");
+    btn.textContent="🙏 Generate my prayer";
+    btn.disabled=false;
+    // auto-scroll to result
+    document.getElementById("prayResult").scrollIntoView({behavior:"smooth",block:"start"});
+  }catch(e){
+    btn.textContent="🙏 Generate my prayer";
+    btn.disabled=false;
+    toast("Couldn't connect — check your internet and try again 🙏");
+  }
+}
+function stopPrayerVoice(){
+  if(_prayUtterance){window.speechSynthesis.cancel();_prayUtterance=null;}
+  const vBtn=document.getElementById("prayVoiceBtn");
+  if(vBtn){vBtn.textContent="▶ Hear this prayer";vBtn.classList.remove("playing");}
+}
+function togglePrayerVoice(){
+  if(_prayUtterance){stopPrayerVoice();return;}
+  const text=document.getElementById("prayText").textContent;
+  if(!text||!window.speechSynthesis)return;
+  // pick a calm voice — prefer a female English voice
+  const voices=window.speechSynthesis.getVoices();
+  let voice=voices.find(v=>v.lang.startsWith("en")&&/female|woman|samantha|karen|victoria|moira|tessa/i.test(v.name))
+    ||voices.find(v=>v.lang.startsWith("en"))
+    ||null;
+  _prayUtterance=new SpeechSynthesisUtterance(text);
+  if(voice)_prayUtterance.voice=voice;
+  _prayUtterance.rate=0.88;
+  _prayUtterance.pitch=1.0;
+  _prayUtterance.volume=1.0;
+  _prayUtterance.onend=()=>{
+    _prayUtterance=null;
+    const vBtn=document.getElementById("prayVoiceBtn");
+    if(vBtn){vBtn.textContent="▶ Hear this prayer";vBtn.classList.remove("playing");}
+  };
+  window.speechSynthesis.speak(_prayUtterance);
+  const vBtn=document.getElementById("prayVoiceBtn");
+  vBtn.textContent="⏸ Stop";
+  vBtn.classList.add("playing");
+}
+function prayAgain(){
+  stopPrayerVoice();
+  document.getElementById("prayResult").classList.remove("show");
+  document.getElementById("prayInput").value="";
+  document.getElementById("prayInput").focus();
+  document.getElementById("praySubmitBtn").disabled=false;
+  document.getElementById("praySubmitBtn").textContent="🙏 Generate my prayer";
+}
+// load voices early so they're ready when user taps
+if(window.speechSynthesis)window.speechSynthesis.getVoices();
+// ─────────────────────────────────────────────────────────────────────────────
+
 async function sendChat(){
   const box=document.getElementById("chatBox"); if(!box)return;
   const t=box.value.trim(); if(!t)return;
@@ -2114,6 +2233,15 @@ function renderToday(v){
       <div class="bubble guide">${done
         ?`All ${activeSlots().length} done today${state.name?", "+state.name:""}! 🔥 That's a ${state.streak.n}-day streak.`
         :`${state.name?state.name+", ":""}${left} lesson${left>1?"s":""} left today. Tap <b>Got it</b> as you go! 💜`}</div></div>`;
+  // Pray with me card
+  html+=`<div class="pray-card" onclick="openPrayOverlay()">
+    <div class="pray-card-icon">🙏</div>
+    <div class="pray-card-body">
+      <div class="pray-card-title">Pray with me</div>
+      <div class="pray-card-sub">Tell me what's on your heart — I'll pray it with you, out loud</div>
+    </div>
+    <div class="pray-card-arrow">›</div>
+  </div>`;
   // Build each card once, keyed by slot, then emit in the user's interest-led order.
   const cards={};
   if(d.foryou){
@@ -4263,6 +4391,23 @@ if(window.visualViewport){
     <div class="notif-modal-btns">
       <button class="notif-yes" id="notifYes">🔔 Yes, remind me!</button>
       <button class="notif-no" id="notifNo">No thanks, I'll check myself</button>
+    </div>
+  </div>
+</div>
+<!-- ── PRAY WITH ME OVERLAY ── -->
+<div class="pray-overlay" id="prayOverlay" role="dialog" aria-modal="true" aria-label="Pray with me">
+  <div class="pray-overlay-head">
+    <div class="pray-overlay-title">🙏 Pray with me</div>
+    <button class="pray-close-btn" onclick="closePrayOverlay()" aria-label="Close">✕</button>
+  </div>
+  <div class="pray-body" id="prayBody">
+    <div class="pray-prompt">What's on your heart today? Share anything — a worry, a person, gratitude, a hard situation. I'll pray it with you.</div>
+    <textarea class="pray-textarea" id="prayInput" placeholder="e.g. I'm anxious about a big decision at work and I don't know which way to go…" rows="5" maxlength="500"></textarea>
+    <button class="pray-submit-btn" id="praySubmitBtn" onclick="submitPrayer()">🙏 Generate my prayer</button>
+    <div class="pray-result" id="prayResult">
+      <div class="pray-result-text" id="prayText"></div>
+      <button class="pray-voice-btn" id="prayVoiceBtn" onclick="togglePrayerVoice()">▶ Hear this prayer</button>
+      <button class="pray-again-btn" onclick="prayAgain()">Pray about something else</button>
     </div>
   </div>
 </div>

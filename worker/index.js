@@ -374,6 +374,35 @@ export default {
       return json({ url: data.url });
     }
 
+    // ── POST /prayer — generate a personal prayer from user's heart ──
+    if (url.pathname === '/prayer' && request.method === 'POST') {
+      let body;
+      try { body = await request.json(); } catch { return json({ error: 'bad request' }, 400); }
+      const { text, name = 'friend' } = body;
+      if (!text) return json({ error: 'missing text' }, 400);
+      if (!env.AI) return json({ prayer: null, error: 'AI binding not configured' });
+      const system = `You are a compassionate Christian prayer minister. The user has shared what is on their heart. Write a warm, personal prayer addressed directly to God (use "Lord" or "Father" or "Heavenly Father"). The prayer should:
+- Be 100–150 words
+- Speak directly about what the user shared, using their specific words and concerns
+- Feel like a caring pastor praying alongside them, not a generic template
+- Include gratitude, honest expression of need, and trust in God
+- End with "In Jesus's name, Amen."
+- Be written in first-person plural ("we", "us") as if praying together
+Do NOT include any preamble, explanation, or commentary — output only the prayer itself.`;
+      try {
+        const aiRes = await env.AI.run('@cf/meta/llama-3.2-3b-instruct', {
+          messages: [
+            { role: 'system', content: system },
+            { role: 'user', content: `${name} has shared: "${text}"` }
+          ],
+          max_tokens: 300,
+        });
+        return json({ prayer: aiRes?.response ?? null });
+      } catch (e) {
+        return json({ prayer: null, error: String(e && e.message || e) });
+      }
+    }
+
     return new Response('Not found', { status: 404, headers: CORS });
     } catch(e) {
       return json({ error: String(e && e.message || e) }, 500);
