@@ -2564,7 +2564,7 @@ function renderToday(v){
     cards.skill=moduleBubble("skill",`<div class="title">${s.e} ${s.t}</div>
       <div class="bodytext">${s.why}</div>
       <ol>${s.steps.map(x=>`<li>${x}</li>`).join("")}</ol>
-      <div class="hint">From your life path (${d.skill.band.range}). Checking it here checks it in your Journey too.</div>`);
+      <div class="hint">From your faith path (${d.skill.band.range}). Checking it here checks it in your Journey too.</div>`);
   }
   cards.vocab=moduleBubble("vocab",`<div class="word">${d.vocab.w}</div>
     <div class="bodytext">${d.vocab.d}</div><div class="ex">"${d.vocab.x}"</div>
@@ -2794,7 +2794,7 @@ function renderProgress(v){
       ${lvl.next?`<div class="bar"><i style="width:${Math.round(lvl.into/lvl.next*100)}%"></i></div>
       <div class="sub">${lvl.into} / ${lvl.next} to ${LEVELS[lvl.lv+1]}</div>`:`<div class="sub">Maximum rank achieved. The manual bows to you.</div>`}
       <div class="statline"><span>🔥 <b>${state.streak.n}</b>-day streak</span><span>🪙 <b>${state.coins}</b> coins</span></div></div>
-    <div class="card"><div class="stat-row"><b>🗺️ Life Journey</b><span>${done}/${total} skills (${pct}%)</span></div>
+    <div class="card"><div class="stat-row"><b>🗺️ Faith Journey</b><span>${done}/${total} skills (${pct}%)</span></div>
       <div class="bar"><i style="width:${pct}%"></i></div></div>
     ${BANDS.map(b=>{const p=bandProgress(b);return`<div class="card"><div class="stat-row"><b>${b.range} · ${b.name}</b><span>${p.done}/${p.total}</span></div><div class="bar"><i style="width:${p.pct}%"></i></div></div>`;}).join("")}
     <div class="section-note" style="text-align:center">Complete all 7 daily modules to grow your streak. Skills from any age count — it's never too late.</div>`;
@@ -3867,7 +3867,7 @@ function renderYou(v){
       </div>
     </div>
 
-    <div class="band-head"><h2>🗺️ Life Journey</h2><span style="color:var(--muted);font-size:.85rem">${pct}% complete</span></div>
+    <div class="band-head"><h2>🗺️ Faith Journey</h2><span style="color:var(--muted);font-size:.85rem">${pct}% complete</span></div>
     <div class="card" style="padding:12px 16px">
       <div class="bar" style="margin:0 0 12px"><i style="width:${pct}%"></i></div>
       ${BANDS.map(b=>{const p=bandProgress(b);return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
@@ -4362,7 +4362,7 @@ function showShareCard(){
     ctx.fillText("with "+c.name+" · "+c.pillar,540,900);
     // URL
     ctx.font="34px system-ui";ctx.fillStyle="rgba(255,255,255,.28)";
-    ctx.fillText("christianmanual.app",540,1046);
+    ctx.fillText("rooted.app",540,1046);
   }
 
   function showOverlay(){
@@ -4378,11 +4378,11 @@ function showShareCard(){
     shareBtn.textContent="📤 Share";
     shareBtn.onclick=async()=>{
       canvas.toBlob(async blob=>{
-        const file=new File([blob],"christianmanual-streak.png",{type:"image/png"});
+        const file=new File([blob],"rooted-streak.png",{type:"image/png"});
         if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
           try{await navigator.share({files:[file],title:"Rooted",text:"🔥 "+streak+"-day streak with "+c.name+"! Daily life upgrades on Rooted."});}
-          catch(e){if(e.name!=="AbortError"){const a=document.createElement("a");a.download="christianmanual-streak.png";a.href=canvas.toDataURL();a.click();}}
-        } else {const a=document.createElement("a");a.download="christianmanual-streak.png";a.href=canvas.toDataURL();a.click();}
+          catch(e){if(e.name!=="AbortError"){const a=document.createElement("a");a.download="rooted-streak.png";a.href=canvas.toDataURL();a.click();}}
+        } else {const a=document.createElement("a");a.download="rooted-streak.png";a.href=canvas.toDataURL();a.click();}
       },"image/png");
     };
     const skip=document.createElement("button");
@@ -4677,7 +4677,7 @@ if(window.visualViewport){
       <div class="upgrade-perk"><div class="upgrade-perk-icon">📚</div><div>All 7 daily skill cards — every day</div></div>
       <div class="upgrade-perk"><div class="upgrade-perk-icon">🐾</div><div>All 19 companions — switch anytime</div></div>
       <div class="upgrade-perk"><div class="upgrade-perk-icon">💬</div><div>Unlimited AI chat with your guide</div></div>
-      <div class="upgrade-perk"><div class="upgrade-perk-icon">🗺️</div><div>Full Journey — all 118 life skills</div></div>
+      <div class="upgrade-perk"><div class="upgrade-perk-icon">🗺️</div><div>Full Journey — all 118 faith skills</div></div>
       <div class="upgrade-perk"><div class="upgrade-perk-icon">🛡️</div><div>Streak shield — protect your streak once a week</div></div>
     </div>
     <button class="upgrade-btn" onclick="hideUpgrade();stripeCheckout(PRICE_PREMIUM,'subscription','premium')">✨ Go Premium — $14.99/year</button>

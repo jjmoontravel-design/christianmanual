@@ -1,4 +1,4 @@
-// ─── Life Manual — Cloudflare Worker ──────────────────────────────────────
+// ─── Rooted — Cloudflare Worker ──────────────────────────────────────
 // Handles: AI chat proxy  +  Web Push notifications for scheduled events
 //
 // KV binding name : LM_KV
@@ -173,7 +173,7 @@ async function checkAlarms(env) {
               evening: "How'd today go? Check in with your guide 🌙",
             };
             await sendPush(data.subscription, {
-              title: `${emoji} Life Manual`,
+              title: `${emoji} Rooted`,
               body: msgs[type],
               icon: '/icon-192.png',
               data: { tab: 'today' },
@@ -341,7 +341,7 @@ export default {
       const data = JSON.parse(raw);
       if (!data.subscription) return json({ error: 'no subscription on file' }, 400);
       const status = await sendPush(data.subscription, {
-        title: '✅ Life Manual',
+        title: '✅ Rooted',
         body: 'Push notifications are working!',
         icon: '/icon-192.png',
         data: { tab: 'schedule' },
