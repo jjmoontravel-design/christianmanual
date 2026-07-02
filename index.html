@@ -2236,10 +2236,7 @@ function toggleSleepReading(){
   const fullText=sp.intro+". … "+sp.text;
   const u=new SpeechSynthesisUtterance(fullText);
   u.rate=0.72; u.pitch=0.95;
-  const voices=window.speechSynthesis.getVoices();
-  const calm=voices.find(v=>/samantha|karen|victoria|moira|tessa/i.test(v.name)&&/en/i.test(v.lang))
-    ||voices.find(v=>/en/i.test(v.lang)&&v.name.toLowerCase().includes("female"))
-    ||voices.find(v=>/en/i.test(v.lang));
+  const calm=_pickCalm();
   if(calm)u.voice=calm;
   u.onend=()=>{_sleepUtterance=null;const b=document.getElementById("sleepPlayBtn");if(b){b.textContent="▶ Read again";b.classList.remove("playing");}};
   _sleepUtterance=u;
@@ -2255,8 +2252,11 @@ function nextSleepPassage(){
 let _verseUtterance=null;
 function _pickCalm(){
   const v=window.speechSynthesis.getVoices();
-  return v.find(x=>/samantha|karen|victoria|moira|tessa/i.test(x.name)&&/en/i.test(x.lang))
-    ||v.find(x=>/en/i.test(x.lang)&&x.name.toLowerCase().includes("female"))
+  return v.find(x=>/aria|jenny|natural/i.test(x.name)&&/en/i.test(x.lang))       // Edge/Windows neural voices — best quality
+    ||v.find(x=>/samantha|karen|victoria|moira|tessa/i.test(x.name)&&/en/i.test(x.lang)) // Apple/iOS voices
+    ||v.find(x=>/google us english|google uk english female/i.test(x.name))     // Chrome's decent voices
+    ||v.find(x=>/en/i.test(x.lang)&&x.name.toLowerCase().includes("female")&&!/david|mark|zira/i.test(x.name)) // avoid old robotic desktop voices
+    ||v.find(x=>/en/i.test(x.lang)&&!/david|mark|zira/i.test(x.name))
     ||v.find(x=>/en/i.test(x.lang))||null;
 }
 function toggleVerseSpeak(text){
@@ -2466,10 +2466,7 @@ function togglePrayerVoice(){
   const text=document.getElementById("prayText").textContent;
   if(!text||!window.speechSynthesis)return;
   // pick a calm voice — prefer a female English voice
-  const voices=window.speechSynthesis.getVoices();
-  let voice=voices.find(v=>v.lang.startsWith("en")&&/female|woman|samantha|karen|victoria|moira|tessa/i.test(v.name))
-    ||voices.find(v=>v.lang.startsWith("en"))
-    ||null;
+  const voice=_pickCalm();
   _prayUtterance=new SpeechSynthesisUtterance(text);
   if(voice)_prayUtterance.voice=voice;
   _prayUtterance.rate=0.88;
