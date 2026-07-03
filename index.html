@@ -2240,24 +2240,35 @@ function closeSleepOverlay(){
   document.getElementById("sleepOverlay").classList.remove("open");
   document.body.style.overflow="";
 }
+let _sleepAudio=null;
 function stopSleepReading(){
+  if(_sleepAudio){_sleepAudio.pause();_sleepAudio=null;}
   if(window.speechSynthesis)window.speechSynthesis.cancel();
   _sleepUtterance=null;
   const btn=document.getElementById("sleepPlayBtn");
   if(btn){btn.textContent="▶ Read to me";btn.classList.remove("playing");}
 }
 function toggleSleepReading(){
-  if(_sleepUtterance&&window.speechSynthesis.speaking){stopSleepReading();return;}
+  if((_sleepAudio&&!_sleepAudio.paused)||(_sleepUtterance&&window.speechSynthesis.speaking)){stopSleepReading();return;}
+  const btn=document.getElementById("sleepPlayBtn");
+  const onDone=()=>{_sleepAudio=null;_sleepUtterance=null;if(btn){btn.textContent="▶ Read again";btn.classList.remove("playing");}};
+  if(btn){btn.textContent="■ Stop";btn.classList.add("playing");}
+  // Pre-generated natural-voice audio, same file every user hears — falls back to browser voice if it fails to load.
+  const audio=new Audio("audio-sleep/sleep-"+String(_sleepIdx).padStart(2,"0")+".mp3");
+  audio.onended=onDone;
+  audio.onerror=()=>{_sleepAudio=null;_speakSleepFallback(onDone,btn);};
+  _sleepAudio=audio;
+  audio.play().catch(()=>{_sleepAudio=null;_speakSleepFallback(onDone,btn);});
+}
+function _speakSleepFallback(onDone,btn){
   const sp=SLEEP_PASSAGES[_sleepIdx];
   const fullText=sp.intro+". … "+sp.text;
   const u=new SpeechSynthesisUtterance(fullText);
   u.rate=0.72; u.pitch=0.95;
   const calm=_pickCalm();
   if(calm)u.voice=calm;
-  u.onend=()=>{_sleepUtterance=null;const b=document.getElementById("sleepPlayBtn");if(b){b.textContent="▶ Read again";b.classList.remove("playing");}};
+  u.onend=onDone;
   _sleepUtterance=u;
-  const btn=document.getElementById("sleepPlayBtn");
-  if(btn){btn.textContent="■ Stop";btn.classList.add("playing");}
   window.speechSynthesis.speak(u);
 }
 function nextSleepPassage(){
@@ -2275,20 +2286,30 @@ function _pickCalm(){
     ||v.find(x=>/en/i.test(x.lang)&&!/david|mark|zira/i.test(x.name))
     ||v.find(x=>/en/i.test(x.lang))||null;
 }
-function toggleVerseSpeak(text){
+let _verseAudio=null;
+function toggleVerseSpeak(text,idx){
   const btn=document.getElementById("verseSpeakBtn");
-  if(window.speechSynthesis.speaking){
+  if((_verseAudio&&!_verseAudio.paused)||window.speechSynthesis.speaking){
+    if(_verseAudio){_verseAudio.pause();_verseAudio=null;}
     window.speechSynthesis.cancel();
     _verseUtterance=null;
     if(btn){btn.textContent="🔊 Hear this verse";btn.classList.remove("playing");}
     return;
   }
+  const onDone=()=>{_verseAudio=null;_verseUtterance=null;if(btn){btn.textContent="🔊 Hear this verse";btn.classList.remove("playing");}};
+  if(btn){btn.textContent="■ Stop";btn.classList.add("playing");}
+  // Pre-generated natural-voice audio, same file every user hears — falls back to browser voice if it fails to load.
+  const audio=new Audio("audio-verses/verse-"+String(idx).padStart(2,"0")+".mp3");
+  audio.onended=onDone;
+  audio.onerror=()=>{_verseAudio=null;_speakVerseFallback(text,onDone);};
+  _verseAudio=audio;
+  audio.play().catch(()=>{_verseAudio=null;_speakVerseFallback(text,onDone);});
+}
+function _speakVerseFallback(text,onDone){
   const u=new SpeechSynthesisUtterance(text);
   u.rate=0.85; u.pitch=1.0;
-  u.onend=()=>{_verseUtterance=null;if(btn){btn.textContent="🔊 Hear this verse";btn.classList.remove("playing");}};
+  u.onend=onDone;
   _verseUtterance=u;
-  if(btn){btn.textContent="■ Stop";btn.classList.add("playing");}
-  // Voices may not be loaded on first call — wait for them if needed
   const doSpeak=()=>{const c=_pickCalm();if(c)u.voice=c;window.speechSynthesis.speak(u);};
   if(window.speechSynthesis.getVoices().length>0){doSpeak();}
   else{window.speechSynthesis.addEventListener('voiceschanged',doSpeak,{once:true});}
@@ -2697,7 +2718,7 @@ function renderToday(v){
   }
   cards.vocab=moduleBubble("vocab",`<div class="word">${d.vocab.w}</div>
     <div class="bodytext">${d.vocab.d}</div><div class="ex">"${d.vocab.x}"</div>
-    <button class="verse-speak-btn" id="verseSpeakBtn" onclick="toggleVerseSpeak(this.dataset.v)" data-v="${(d.vocab.d+' … '+d.vocab.x).replace(/"/g,'&quot;')}">🔊 Hear this verse</button>`);
+    <button class="verse-speak-btn" id="verseSpeakBtn" onclick="toggleVerseSpeak(this.dataset.v,this.dataset.idx)" data-v="${(d.vocab.d+' … '+d.vocab.x).replace(/"/g,'&quot;')}" data-idx="${((dayNum()*7)%DAILY.vocab.length+DAILY.vocab.length)%DAILY.vocab.length}">🔊 Hear this verse</button>`);
   cards.body=moduleBubble("body",`<div class="bodytext">${d.body.f}</div>
     <div class="hint"><b>Do this:</b> ${d.body.a}</div>`);
   cards.money=moduleBubble("money",`<div class="title">${d.money.h}</div><div class="bodytext">${d.money.d}</div>`);
