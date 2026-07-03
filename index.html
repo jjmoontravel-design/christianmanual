@@ -1859,6 +1859,13 @@ function level(){const STEP=50;const lv=Math.min(Math.floor(state.xp/STEP),LEVEL
 // ============ DAILY ENGINE ============
 function todayKey(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function yesterdayKey(){const d=new Date();d.setDate(d.getDate()-1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function dayBeforeYesterdayKey(){const d=new Date();d.setDate(d.getDate()-2);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+// Premium streak shield: covers exactly one missed day, usable once per 7 days.
+function shieldAvailable(){
+  const last=localStorage.getItem("christianmanual.shield");
+  if(!last)return true;
+  return (new Date(todayKey())-new Date(last))/864e5>=7;
+}
 function dayNum(){const d=new Date();return Math.round((new Date(d.getFullYear(),d.getMonth(),d.getDate())-new Date(2026,0,1))/864e5);}
 function ensureDaily(){
   const key=todayKey();
@@ -1921,7 +1928,16 @@ function markGot(slot){
   state.history[todayKey()]=gotCount();
   if(complete){
     const y=yesterdayKey(),t=todayKey();
-    if(state.streak.last!==t){state.streak.n=(state.streak.last===y)?state.streak.n+1:1;state.streak.last=t;}
+    if(state.streak.last!==t){
+      if(state.streak.last===y){state.streak.n++;}
+      else if(isPremium()&&state.streak.last===dayBeforeYesterdayKey()&&shieldAvailable()){
+        state.streak.n++;
+        localStorage.setItem("christianmanual.shield",t);
+        setTimeout(()=>toast("🛡️ Streak shield used — your streak is safe!"),1500);
+      }
+      else{state.streak.n=1;}
+      state.streak.last=t;
+    }
     clearPetReminder();
     checkEggHatch();
     toast("⚡ Daily Upload complete! 🔥 "+state.streak.n+"-day streak");
@@ -2940,7 +2956,7 @@ const THEME_LABELS={"dark":"🌙 Dark","light":"☀️ Bright","kawaii":"🌸 Ka
 let _pendingTheme=null,_pendingThemeTm=null;
 window.pickTheme=function(t){
   const unlocked=state.unlockedThemes||["dark","light"];
-  if(unlocked.includes(t)){
+  if(isPremium()||unlocked.includes(t)){
     applyTheme(t);
     document.querySelectorAll(".theme-card").forEach(c=>c.classList.toggle("sel",c.dataset.theme===t));
     _pendingTheme=null;
@@ -4180,7 +4196,7 @@ function lumiOnOpen(){
 let proactiveTimer=null;
 
 // ============ CHARACTER STORE ============
-function charUnlocked(id){return (state.unlocked||["bear"]).includes(id);}
+function charUnlocked(id){return isPremium()||(state.unlocked||["bear"]).includes(id);}
 function openStore(){
   let ov=document.getElementById("storeOverlay");
   if(ov)ov.remove();
@@ -4790,7 +4806,7 @@ if(window.visualViewport){
       <div class="upgrade-perk"><div class="upgrade-perk-icon">📚</div><div>All 7 daily skill cards — every day</div></div>
       <div class="upgrade-perk"><div class="upgrade-perk-icon">🐾</div><div>All 19 companions — switch anytime</div></div>
       <div class="upgrade-perk"><div class="upgrade-perk-icon">💬</div><div>Unlimited AI chat with your guide</div></div>
-      <div class="upgrade-perk"><div class="upgrade-perk-icon">🗺️</div><div>Full Journey — all 118 faith skills</div></div>
+      <div class="upgrade-perk"><div class="upgrade-perk-icon">🎨</div><div>All 4 premium themes — Kawaii, Ocean, Forest, Galaxy</div></div>
       <div class="upgrade-perk"><div class="upgrade-perk-icon">🛡️</div><div>Streak shield — protect your streak once a week</div></div>
     </div>
     <button class="upgrade-btn" onclick="hideUpgrade();stripeCheckout(PRICE_PREMIUM,'subscription','premium')">✨ Go Premium — $14.99/year</button>
