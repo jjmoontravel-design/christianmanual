@@ -3284,7 +3284,7 @@ function obFinish(){
   state.gender=d.gender||""; localStorage.setItem(K.gender,state.gender);
   const ch=getChar();
   state.goal=ch.goal||""; localStorage.setItem(K.goal,state.goal);
-  if(d.age){state.age=d.age;localStorage.setItem(K.age,d.age);}
+  state.age=d.age||30; localStorage.setItem(K.age,state.age); // fallback so skipping age can't trap a user in an onboarding loop
   const cfg=getLumiCfg();
   cfg.on=!!d.remOn; cfg.morning=d.morning||"08:00"; cfg.evening=d.evening||"20:00";
   saveLumiCfg(cfg);
